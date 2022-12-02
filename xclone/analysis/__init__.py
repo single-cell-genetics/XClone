@@ -9,4 +9,6 @@ from .evaluation import Ground_truth_mtx_generate
 
 from .evaluation import get_confusion, get_confuse_mat_df
 
+from .evaluation import change_res_resolution
+
 from ._clustering import XClustering

@@ -244,7 +244,7 @@ def set_XXheatmap_args(legend_pos=2, legend_mode=1):
     paras['center'] = False
     paras['rasterized'] = True
     ## figure setting
-    paras['figsize'] = (12,8)
+    paras['figsize'] = (16,8)
 
     ## legend
     legend_paras = {}
