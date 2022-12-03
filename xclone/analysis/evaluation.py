@@ -2,6 +2,7 @@
 """
 import numpy as np
 import pandas as pd
+import anndata as ad
 
 def extract_Xdata(Xdata, use_cell_file, use_gene_file):
     """
@@ -92,3 +93,49 @@ def get_confuse_mat_df(confuse_mat,index_names, columns_names):
     import pandas as pd
     df = pd.DataFrame(confuse_mat, index = index_names, columns = columns_names)
     return df
+
+def change_res_resolution(Xdata, Xlayer, outlayer = "prob_merge", brk = "chr_arm"):
+    """
+    change result (probability) resolution, e.g., from gene to chr_arms or chrs.
+    For methods benchmarking.
+    """
+    merge_results = []
+    
+    brk_item = Xdata.var[brk].drop_duplicates(keep="first")
+    for brk_ in brk_item:
+        flag_= Xdata.var[brk] == brk_
+        tmp_res = np.median(Xdata.layers[Xlayer][:,flag_,:], axis = 1)
+        
+        ## normalized merged probability
+        # from sklearn.preprocessing import normalize
+        # tmp_res = normalize(tmp_res, norm="l1")
+        tmp_res = tmp_res/tmp_res.sum(axis = -1, keepdims = True)
+        
+        merge_results.append(np.expand_dims(tmp_res, axis = 1))
+    res_ = np.hstack(merge_results)
+    
+    # ## check res_
+    # print((abs(res_.sum(axis=-1) - 1) > 1e-15).sum())
+    
+    ## generate merge_Xdata var
+    merge_var1 = Xdata.var.copy()
+    merge_var1.drop_duplicates(brk, keep="first", inplace=True)
+    keep_cols = ["chr", "start", "stop", "arm", "chr_arm", "band"]
+    merge_var1 = merge_var1[keep_cols]
+    merge_var1.rename(columns={'stop': 'gene1_stop'}, inplace=True)
+
+    merge_var2 = Xdata.var.copy()
+    merge_var2.drop_duplicates(brk, keep="last", inplace=True)
+    keep_cols = ["chr", "start", "stop", "arm", "chr_arm", "band"]
+    merge_var2 = merge_var2[keep_cols]
+    merge_var2.rename(columns={'start': 'lastgene_start'}, inplace=True)
+    
+    merge_var = merge_var1.merge(merge_var2, left_on=brk, right_on=brk, suffixes=('_start', '_stop'))
+    merge_var.drop(columns=['chr_stop', 'arm_stop'], inplace  = True)
+    merge_var.rename(columns={'chr_start': 'chr', "arm_start": "arm"}, inplace=True)
+    ## generate new merged Xdata with the merge res in new layer
+    x_array = np.zeros((res_.shape[0], res_.shape[1]))
+    merge_Xdata = ad.AnnData(x_array, var = merge_var, obs = Xdata.obs.copy())
+    merge_Xdata.layers[outlayer] = res_
+    
+    return merge_Xdata
