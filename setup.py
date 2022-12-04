@@ -18,8 +18,8 @@ exec(open("./xclone/version.py").read())
 with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
-reqs = ['numpy<1.22,>=1.18', 'scipy', 'matplotlib', 'anndata<0.8',
-        'statsmodels', 'scanpy', 'h5py<3.0', 'palettable']
+reqs = ['numpy>=1.18', 'scipy', 'matplotlib', 'anndata',
+        'statsmodels', 'scanpy', 'h5py', 'palettable']
 
 # seaborn
 

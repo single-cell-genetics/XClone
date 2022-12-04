@@ -241,8 +241,8 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
         return GeneName_lst, GeneID_lst, GeneName_dict, GeneID_dict
     
     GeneName_lst, GeneID_lst, GeneName_dict, GeneID_dict = get_bin_genes(merge_var3, group_key = "bin_idx_cum")
-    merge_var["GeneName_lst"] = GeneName_lst
-    merge_var["GeneID_lst"] = GeneID_lst
+    merge_var["GeneName_lst"] = [",".join(x) for x in GeneName_lst]
+    merge_var["GeneID_lst"] = [",".join(x) for x in GeneID_lst]
 
 
     merge_var = merge_var[["chr", "start", "stop", "arm", "chr_arm", "band", "gene1_stop", 
