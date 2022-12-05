@@ -15,7 +15,7 @@ from ._data import xclonedata
 from ._data import extra_anno
 
 from ._data import check_RDR, check_BAF
-from ._data import check_RDR_BAF_cellorder
+from ._data import check_RDR_BAF_cellorder, check_data_combine
 
 
 # RDR
@@ -43,3 +43,5 @@ from ._utils import annotate_node
 from ._efficiency import efficiency_preview
 
 from ._Xdata_manipulation import Xdata_region_selection, Xdata_cell_selection
+
+from .xclone_preprocess_wrap import load_Xdata

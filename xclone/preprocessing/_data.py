@@ -54,7 +54,25 @@ def resort_mtx_bychr(mtx_file, features_file, assign_sort_index=None, out_file =
     sort the mtx as the assignned chromosome index.
     For thr output gene based mtx is not in order.
     
-    out_file: dir+"resort_matrix.mtx"
+    out_file: "resort_matrix.mtx"
+    
+    Example1:
+    import xclone
+    mtx_file = rdr_data_dir  + 'matrix.mtx'
+    features_file = rdr_data_dir + "features.tsv"
+    out_RDR_file = rdr_data_dir + "resort_matrix.mtx"
+    resort_mtx = xclone.pp.resort_mtx_bychr(mtx_file, features_file, out_file = out_RDR_file, keep_all=True)
+    
+    Example2:
+    --------
+    AD_file = baf_data_dir  + 'xcltk.AD.mtx'
+    DP_file = baf_data_dir  + 'xcltk.DP.mtx'
+    features_file = baf_data_dir  +  "xcltk.region.tsv"
+    out_AD_file =  baf_data_dir  + "resort_AD.mtx"
+    out_DP_file = baf_data_dir  +  "resort_DP.mtx"
+
+    resort_AD = xclone.pp.resort_mtx_bychr(AD_file, features_file, out_file = out_AD_file, keep_all=True)
+    resort_DP = xclone.pp.resort_mtx_bychr(DP_file, features_file, out_file = out_DP_file, keep_all=True)
     """
     sort_index=['1', '2','3', '4', '5', '6', '7', '8', '9','10', '11', '12', '13', '14', '15', '16', '17', '18', '19','20', '21', '22', 'X', 'Y']
     
@@ -132,10 +150,18 @@ def check_RDR_BAF_anno(BAF_barcodes_file, RDR_barcodes_file):
     if BAF_cell_num == RDR_cell_num:
         if (BAF_barcodes.index == RDR_barcodes.index).sum() == BAF_cell_num:
             print("[XClone cell anno checking]: RDR and BAF cell anno in the same order.")
+            success_flag = True
         else:
             print("[XClone cell anno checking]: RDR and BAF cell anno not matched. pls check!")
+            print("""[XClone data hint]: Pls resort RDR mtx in the same order with BAF barcodes 
+                by FUNC 'xclone.pp.resort_mtx_bycell'.""")
+            success_flag = False
     else:
         print("[XClone cell anno checking]: RDR and BAF cells number not matched! Pls check!")
+        print("""[XClone data hint]: Pls resort RDR mtx in the same order with BAF barcodes 
+                by FUNC 'xclone.pp.resort_mtx_bycell'.""")
+        success_flag = False
+    return success_flag
 
 
 def resort_mtx_bycell(BAF_barcodes_file, RDR_barcodes_file, RDR_mtx_file, out_mtx_file):
@@ -157,9 +183,10 @@ def resort_mtx_bycell(BAF_barcodes_file, RDR_barcodes_file, RDR_mtx_file, out_mt
     out_mtx = update_mtx.to_numpy().T.tocsr()
 
     if out_mtx_file == None:
-        print("please assign a file path for output")
+        print("[XClone warning] Please assign a file path for output.")
     else:
         sp.io.mmwrite(out_mtx_file, out_mtx)
+    print("[XClone warning] Need update RDR barcodes file after mtx resorting.")
     
     return out_mtx
 
@@ -228,7 +255,9 @@ def xclonedata(X, data_mode,
     X_adata.uns["data_mode"] = data_mode
     X_adata.uns["genome_mode"] = genome_mode
     if data_notes is None:
-        data_notes = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) 
+        data_notes = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    else:
+        data_notes = data_notes + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     X_adata.uns["data_notes"] = data_notes
     return X_adata
 
@@ -316,7 +345,7 @@ def check_RDR_BAF_cellorder(RDR_Xdata, BAF_Xdata):
     if RDR_cellnum == BAF_cellnum:
         check_ordernum = (RDR_Xdata.obs.index == BAF_Xdata.obs.index).sum()
         if RDR_cellnum == check_ordernum:
-            print("[XClone data checking]: RDR and BAF in same cell order")
+            print("[XClone data checking]: RDR and BAF in same cell order.")
             success_flag = True
         else:
             print("[XClone data checking]: RDR and BAF in different cell order! Pls check!")
@@ -337,5 +366,18 @@ def check_data_combine(RDR_Xdata, BAF_Xdata):
     Example:
     
     """
-
-    pass
+    ## check cell order
+    success_flag = check_RDR_BAF_cellorder(RDR_Xdata, BAF_Xdata)
+    ## check var
+    if success_flag:
+        ## check probability
+        if "posterior_mtx" in RDR_Xdata.layers.keys():
+            pass
+        else:
+            raise ValueError("[XClone data warning] No layer 'posterior_mtx' exists in RDR module.")
+        if "posterior_mtx" in BAF_Xdata.layers.keys():
+            pass
+        else:
+            raise ValueError("[XClone data warning] No layer 'posterior_mtx' exists in BAF module.")
+    else:
+        raise ValueError("[XClone data warning]-pls check cell order before combination step.")

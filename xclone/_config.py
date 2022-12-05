@@ -34,9 +34,49 @@ class Base_settings():
     def __init__(self):
         self.warninig_ignore = True
 
-class Preprocessing():
-    def __init__(self):
-        pass
+class PreprocessingConfig():
+    """
+    Xdata loading params.
+    """
+    def __init__(
+        self,
+        dataset_name = "XClone_scDATA",
+        module = "RDR",
+        cell_anno_file = None,
+        rdr_data_dir = None,
+        baf_data_dir = None):
+        
+        self.module = module
+        self.rdr_data_dir = rdr_data_dir
+        self.baf_data_dir = baf_data_dir
+        self.dataset_name = dataset_name
+
+        if self.module == "pre_check":
+            self.RDR_barcodes_file = self.rdr_data_dir + "barcodes.tsv"
+            self.BAF_barcodes_file = self.baf_data_dir + "xcltk.samples.tsv"
+        
+        if self.module == "RDR":
+            self.RDR_file = self.rdr_data_dir + "matrix.mtx"
+            self.mtx_barcodes_file = self.rdr_data_dir + "barcodes.tsv"
+            self.regions_anno_file = None
+            # self.regions_anno_file = self.rdr_data_dir + "features.tsv"
+            self.cell_anno_file = cell_anno_file
+            self.cell_anno_key = "cell_type"
+            self.genome_mode = "hg38_genes"
+
+        if self.module == "BAF":
+            self.AD_file = self.baf_data_dir + "xcltk.AD.mtx"
+            self.DP_file = self.baf_data_dir + "xcltk.DP.mtx"
+            self.mtx_barcodes_file = self.baf_data_dir + "xcltk.samples.tsv"
+            self.regions_anno_file = None
+            # self.regions_anno_file = self.baf_data_dir + "xcltk.region.tsv"
+            self.cell_anno_file = cell_anno_file
+            self.cell_anno_key = "cell_type"
+            self.genome_mode = "hg38_genes"
+
+        if self.module == "Combine":
+            self.RDR_adata_file = self.rdr_data_dir + "RDR_Xdata"
+            self.BAF_adata_file = self.baf_data_dir + "BAF_merge_Xdata" 
 
 class XCloneGeneral_config():
     def __init__(self):

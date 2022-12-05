@@ -12,4 +12,4 @@ from .model import phasing as phasing
 from .model import mixture as mixture
 
 from ._logging import get_logger
-from ._config import XCloneConfig, settings
+from ._config import PreprocessingConfig, XCloneConfig, settings
