@@ -162,7 +162,10 @@ def generate_emm_GT(Xdata,
 ## 1) strategy1: GMM mixture model, not good for sparse matrix.(log ratio)
 ## 2) strategy2: learn outliers (from log ratio) as init CNV states
 
-def guide_CNV_chrs(Xdata, Xlayer = "RDR_smooth", anno_key = "chr_arm"):
+def guide_CNV_chrs(Xdata, 
+                   Xlayer = "RDR_smooth", 
+                   anno_key = "chr_arm", 
+                   remove_XY = True):
     """
     Function:
     --------
@@ -178,13 +181,21 @@ def guide_CNV_chrs(Xdata, Xlayer = "RDR_smooth", anno_key = "chr_arm"):
     
     mtx_use = Xdata.layers[Xlayer]
     chr_use = Xdata.var[anno_key].unique()
-    
+
     chr_dict = {}
     for chr_ in chr_use:
         flag_ = Xdata.var[anno_key] == chr_
         avg_ = mtx_use[:, flag_].mean()
+        # avg_ = np.median(mtx_use[:, flag_])
         chr_dict[chr_] = avg_
-        
+    
+    # remove chrX+Y from the chr_dict if exists.
+    if remove_XY:
+        for chr_items in ['X', 'Y', 'Xp', 'Xq', 'Yp', 'Yq']:
+            try:
+                chr_dict.pop(chr_items)
+            except:
+                pass    
     
     sort_chr_dict = OrderedDict(sorted(chr_dict.items(), key=lambda t: t[1]))
     
@@ -203,7 +214,7 @@ def guide_CNV_chrs(Xdata, Xlayer = "RDR_smooth", anno_key = "chr_arm"):
     Xdata.uns["guide_CNV_chrs_use_anno_key"] = anno_key
     print("[XClone] RDR CNV states chrs guiding(copy loss, copy neutral, copy gain):", chr_lst)
     
-    return chr_lst, anno_key
+    return chr_lst
 
 def correct_guide_RDR_cnv(guide_cnv_ratio, threshold = 0.15):
     """

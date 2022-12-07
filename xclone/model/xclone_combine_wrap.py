@@ -30,11 +30,18 @@ def run_combine(RDR_Xdata,
 
     else:
         config = config_file
-
+    ## base settings
+    warninig_ignore = config.warninig_ignore
+    if warninig_ignore:
+        import warnings
+        warnings.filterwarnings('ignore')
+    ## general settings
     out_dir = config.outdir
     dataset_name = config.dataset_name
+    
     cell_anno_key = config.cell_anno_key
-
+    
+    ## plot settings
     xclone_plot = config.xclone_plot
     plot_cell_anno_key = config.plot_cell_anno_key
     merge_loss = config.merge_loss
@@ -45,7 +52,7 @@ def run_combine(RDR_Xdata,
         cwd = os.getcwd()
         out_dir = cwd + "/XCLONE_OUT/"
     
-    out_data_dir = str(out_dir) + "data/"
+    out_data_dir = str(out_dir) + "/data/"
     xclone.al.dir_make(out_data_dir)
 
 
@@ -110,7 +117,7 @@ def run_combine_plot(combine_Xdata,
         cwd = os.getcwd()
         out_dir = cwd + "/XCLONE_OUT/"
     
-    out_plot_dir = str(out_dir) + "plot/"
+    out_plot_dir = str(out_dir) + "/plot/"
     xclone.al.dir_make(out_plot_dir)
 
 

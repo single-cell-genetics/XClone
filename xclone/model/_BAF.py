@@ -28,6 +28,61 @@ from scipy.special import logsumexp
 from scipy.sparse import csr_matrix
 from scipy.special import logit, expit
 
+def extrme_count_capping(Xdata,
+                         quantile_pct = 0.99,
+                         verbose = False):
+    """
+    remove extreme counts influence.
+    """
+    ad_Counts = Xdata.layers["ad_bin1"].A.sum(axis=0)
+    dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
+    if verbose:
+        ## visualize counts distribution
+        import matplotlib.pylab as plt
+        plt.plot(ad_Counts)
+        plt.plot(dp_Counts)
+
+    cutoff_ = np.quantile(dp_Counts, quantile_pct)
+    flag_ = dp_Counts > cutoff_
+    ratio_replace = dp_Counts[flag_] / cutoff_
+
+    Xdata.layers["dp_bin_backup"] = Xdata.layers["dp_bin"].copy()
+    Xdata.layers["ad_bin1_backup"] = Xdata.layers["ad_bin1"].copy()
+    # mask to, and insert your replacement values:
+    Xdata.layers["dp_bin"][:, flag_] = np.ceil(Xdata.layers["dp_bin"][:, flag_]/ratio_replace)
+    Xdata.layers["ad_bin1"][:, flag_] = np.ceil(Xdata.layers["ad_bin1"][:, flag_]/ratio_replace)
+
+    if verbose:
+        ## update counts distribution
+        ad_Counts = Xdata.layers["ad_bin1"].A.sum(axis=0)
+        dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
+        plt.plot(ad_Counts)
+        plt.plot(dp_Counts)
+
+    return Xdata
+
+def concentration_mapping(Xdata, 
+                          concentration_lower = 30,
+                          concentration_uppper = 100):
+    """
+    Return bin specific concentration.
+    """
+    # ad_Counts = Xdata.layers["ad_bin1"].A.sum(axis=0)
+    dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
+    max_cnt = dp_Counts.max()
+    min_cnt = dp_Counts.min()
+    
+    
+    x_ = np.array([max_cnt, min_cnt])
+    y_ = np.array([concentration_lower, concentration_uppper])
+    
+    from scipy.stats import linregress
+    linear_res = linregress(x_, y_)
+    concentration = linear_res.slope * dp_Counts + linear_res.intercept
+    Xdata.var["concentration"] = concentration
+
+    return Xdata
+    
 
 def BAF_smoothing(Xdata, 
                   inlayer = "BAF_emm_prob_log",

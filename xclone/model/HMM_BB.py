@@ -158,10 +158,7 @@ def generate_bb_logprob(AD, DP,
     mu_ = np.expand_dims(np.ones(AD.shape), axis=2) * states
     
     if gene_specific:
-        if len(concentration) == AD.shape[1]:
-            pass
-        else:
-            raise ValueError("[XClone]-pls check gene-specific concentration")
+        print("[XClone hint] specific concentrations used.")
 
     # obs_ = np.repeat(AD, states.shape[-1]).reshape(AD.shape[0], -1, states.shape[-1])
     # _bb_total = np.repeat(DP, states.shape[-1]).reshape(DP.shape[0], -1, states.shape[-1])
@@ -245,14 +242,19 @@ def calculate_Xemm_prob_bb(Xdata,
 
     ## check the shape for the input
     if gene_specific == True:
-        concentration = Xdata.var["concentration"].values.reshape(1, -1, 1)
-        if len(concentration) != len(AD.shape[1]):
+        if len(Xdata.var["concentration"]) != AD.shape[1]:
             raise ValueError("[XClone]gene-speciific concentration doesn't match with the gene numbers! Pls check!")
+        concentration = Xdata.var["concentration"].values.reshape(1, -1, 1)
     elif concentration is None:
         concentration = 10
  
     ## calculate emm_prob_log
-    print("states used:", states)
+    if states.ndim == 1:
+        print("states used:", states)
+    else:
+        head, *tail = states
+        print("states used:", head)
+        print(".....")
     emm_prob_log = generate_bb_logprob( AD, DP,
                                         states = states,
                                         gene_specific = gene_specific,

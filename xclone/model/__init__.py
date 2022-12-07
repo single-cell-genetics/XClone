@@ -82,6 +82,8 @@ from .HMM_BB import calculate_Xemm_prob_bb
 from .HMM_BB import generate_bb_logprob
 from .HMM_BB import get_BAF_ref, gene_specific_BAF, specific_BAF
 
+from ._BAF import extrme_count_capping
+from ._BAF import concentration_mapping
 ## optimize BAF theoretical values
 from ._BAF import BAF_theoretical_value_optimization
 
@@ -107,10 +109,10 @@ from .XClone_combine import CNV_prob_merge_for_plot
 from ._denoise import denoise, denoise_gene_scale
 
 ## wrap
-from .xclone_rdr_wrap import load_RDR, preview_RDR
+from .xclone_rdr_wrap import preview_RDR
 from .xclone_rdr_wrap import run_RDR, run_RDR_plot
 
-from .xclone_baf_wrap import load_BAF, preview_BAF
+from .xclone_baf_wrap import preview_BAF
 from .xclone_baf_wrap import run_BAF, run_BAF_plot
 
 from .xclone_combine_wrap import run_combine, run_combine_plot

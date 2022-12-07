@@ -381,3 +381,11 @@ def check_data_combine(RDR_Xdata, BAF_Xdata):
             raise ValueError("[XClone data warning] No layer 'posterior_mtx' exists in BAF module.")
     else:
         raise ValueError("[XClone data warning]-pls check cell order before combination step.")
+
+def exclude_XY_adata(Xdata):
+    """
+    exclude XY in chromosome analysis.
+    """
+    flag_ = ~(Xdata.var["chr"].isin(["X", "Y"]))
+    print("[XClone] exclude chr X&Y in the analysis.")
+    return Xdata[:, flag_]

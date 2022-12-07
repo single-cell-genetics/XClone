@@ -12,13 +12,6 @@ import numpy as np
 from .._logging import get_logger
 from datetime import datetime, timezone
 
-def load_BAF(BAF_file, anno_file):
-    """
-    """
-    pass
-    # return BAF_adata
-
-
 def preview_BAF(BAF_adata,
                 cell_anno_key,
                 ref_celltype,
@@ -64,11 +57,16 @@ def run_BAF(BAF_adata,
 
     cell_anno_key = config.cell_anno_key
     ref_celltype = config.ref_celltype
+    exclude_XY = config.exclude_XY
     
     # BAF settings
     RDR_file = config.RDR_file
     theo_neutral_BAF = config.theo_neutral_BAF
-    WMA_window = config.WMA_window
+    WMA_window_size = config.WMA_window_size
+    gene_specific = config.gene_specific
+    concentration = config.concentration
+
+    extreme_count_cap = config.extreme_count_cap
 
     # HMM settings
     start_prob = config.start_prob
@@ -83,7 +81,7 @@ def run_BAF(BAF_adata,
     if out_dir is None:
         cwd = os.getcwd()
         out_dir = cwd + "/XCLONE_OUT/"
-    out_data_dir = str(out_dir) + "data/"
+    out_data_dir = str(out_dir) + "/data/"
     xclone.al.dir_make(out_data_dir)
     
     ### output before CNV calling
@@ -106,6 +104,9 @@ def run_BAF(BAF_adata,
 
     if run_verbose:
         print("[XClone BAF module running]************************")
+    
+    if exclude_XY:
+        BAF_adata = xclone.pp.exclude_XY_adata(BAF_adata)
     BAF_adata = xclone.pp.check_BAF(BAF_adata, cell_anno_key = cell_anno_key, verbose = verbose)
 
     RDR_adata = an.read_h5ad(RDR_final_file)
@@ -126,10 +127,18 @@ def run_BAF(BAF_adata,
                                                              bin_nproc=20)
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
 
-    BAF_adata.write(BAF_base_file)
-    merge_Xdata.write(BAF_merge_base_file)
+    # try:
+    #     BAF_adata.write(BAF_base_file)
+    #     merge_Xdata.write(BAF_merge_base_file)
+    # except Exception as e:
+    #     print("[XClone Warning]", e)
+    # else:
+    #     print("[XClone hint] BAF_base_file and merged_file saved in %s." %(out_data_dir))
+    
     ### check coverage for bins
     merge_Xdata.var[(merge_Xdata.layers["dp_bin"].A.sum(axis=0) == 0)]
+    if extreme_count_cap:
+        merge_Xdata = xclone.model.extrme_count_capping(merge_Xdata)
 
     merge_Xdata = xclone.pl.calculate_cell_BAF(merge_Xdata, 
                                                AD_key = "ad_bin1", DP_key = "dp_bin", BAF_key = "BAF")
@@ -149,21 +158,27 @@ def run_BAF(BAF_adata,
     merge_Xdata = xclone.model.WMA_smooth(merge_Xdata, 
                                           layer="BAF_phased_KNN", 
                                           out_layer='BAF_phased_KNN_WMA', 
-                                          window_size = WMA_window, 
+                                          window_size = WMA_window_size, 
                                           verbose=False)
     
     merge_Xdata = xclone.model.WMA_smooth(merge_Xdata, 
                                           layer="fill_BAF_phased", 
                                           out_layer='BAF_phased_WMA', 
-                                          window_size = WMA_window, 
+                                          window_size = WMA_window_size, 
                                           verbose=False)
     # merge_Xdata = xclone.model.KNN_smooth(merge_Xdata, 
     #                                       KNN_connect_use = "connectivities_expr", 
     #                                       layer="BAF_phased_WMA", 
     #                                       out_layer='BAF_phased_WMA_KNN')
+    ## after phasing & smoothing
+    try:
+        BAF_adata.write(BAF_base_file)
+        merge_Xdata.write(BAF_merge_base_file)
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] BAF_base_file and merged_file saved in %s." %(out_data_dir))
     
-    BAF_adata.write(BAF_base_file)
-    merge_Xdata.write(BAF_merge_base_file)
     ## HMM smoothing for CNV states calling
     CNV_states = xclone.model.get_CNV_states(merge_Xdata, Xlayer = "BAF_phased_WMA",
                    n_components = 3,
@@ -192,11 +207,17 @@ def run_BAF(BAF_adata,
         used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
                             theo_states= guide_theo_states, specific_BAF = "ref_BAF_phased")
 
+    if gene_specific:
+        concentration_lower = config.concentration_lower
+        concentration_upper = config.concentration_upper
+        merge_Xdata = xclone.model.concentration_mapping(merge_Xdata, concentration_lower, concentration_upper)
+
     merge_Xdata = xclone.model.calculate_Xemm_prob_bb(merge_Xdata, 
-                                                      AD_key = "ad_bin1_phased", DP_key = "dp_bin", 
-                                                      concentration = 100,
+                                                      AD_key = "ad_bin1_phased", DP_key = "dp_bin",
                                                       outlayer = "bin_phased_BAF_specific_center_emm_prob_log", 
-                                                      states = used_specific_states)
+                                                      states = used_specific_states,
+                                                      gene_specific = gene_specific, 
+                                                      concentration = concentration)
 
     merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
                                              inlayer = "bin_phased_BAF_specific_center_emm_prob_log",
@@ -213,7 +234,13 @@ def run_BAF(BAF_adata,
                                               emm_inlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN", 
                                               nproc = 80, 
                                               verbose = False)
-    merge_Xdata.write(BAF_final_file)
+    
+    try:
+        merge_Xdata.write(BAF_final_file)
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] BAF_final_file saved in %s." %(out_data_dir))
 
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time
@@ -237,7 +264,7 @@ def run_BAF_plot(merge_Xdata,
         cwd = os.getcwd()
         out_dir = cwd + "/XCLONE_OUT/"
     
-    out_plot_dir = str(out_dir) + "plot/"
+    out_plot_dir = str(out_dir) + "/plot/"
     xclone.al.dir_make(out_plot_dir)
 
     # fig_title = ""

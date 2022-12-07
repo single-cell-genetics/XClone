@@ -90,10 +90,10 @@ def correct_guide_BAF_cnv(guide_cnv_ratio, threshold = 0.1, theo_neutral = 0.5):
     states_num = len(guide_cnv_ratio)
     if states_num == 2:
         if abs(theo_neutral - guide_cnv_ratio[0]) < threshold:
-            guide_cnv_ratio[0] = 0.2
+            guide_cnv_ratio[0] = 0.3
             print("correct BAF CNV guiding copy loss-A ratio")
         if abs(guide_cnv_ratio[1] - theo_neutral) < threshold:
-            guide_cnv_ratio[1] = 0.8
+            guide_cnv_ratio[1] = 0.7
             print("correct RDR CNV guiding copy loss-B ratio")
     if states_num == 4:
         ## todo need correct again maybe.

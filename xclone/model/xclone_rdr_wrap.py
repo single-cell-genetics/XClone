@@ -11,16 +11,6 @@ import numpy as np
 from .._logging import get_logger
 from datetime import datetime, timezone
 
-def load_RDR(RDR_file, anno_file):
-    """
-    """
-    RDR_adata = xclone.pp.xclonedata(RDR_file, 'RDR', mtx_barcodes_file, genome_mode = "hg38_genes")
-    RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key = "cell", 
-    cell_anno_key = "cluster.pred", sep ="\t")
-
-    return RDR_adata
-
-
 def preview_RDR(RDR_adata,
                 cell_anno_key,):
     """
@@ -63,6 +53,11 @@ def run_RDR(RDR_adata,
     
     cell_anno_key = config.cell_anno_key
     ref_celltype = config.ref_celltype
+    exclude_XY = config.exclude_XY
+
+    # HMM settings
+    start_prob = config.start_prob
+    trans_t = config.trans_t
 
     # RDR settings
     filter_ref_ave = config.filter_ref_ave
@@ -73,6 +68,8 @@ def run_RDR(RDR_adata,
     dispersion_celltype = config.dispersion_celltype
     gene_exp_group = config.gene_exp_group
     guide_cnv_ratio = config.guide_cnv_ratio
+    ## smoothing settings
+    WMA_window_size = config.WMA_window_size
     # plot settings
     xclone_plot = config.xclone_plot
     plot_cell_anno_key = config.plot_cell_anno_key
@@ -81,7 +78,7 @@ def run_RDR(RDR_adata,
     if out_dir is None:
         cwd = os.getcwd()
         out_dir = cwd + "/XCLONE_OUT/"
-    out_data_dir = str(out_dir) + "data/"
+    out_data_dir = str(out_dir) + "/data/"
     xclone.al.dir_make(out_data_dir)
     
     ### output before CNV calling
@@ -98,6 +95,9 @@ def run_RDR(RDR_adata,
 
     if run_verbose:
         print("[XClone RDR module running]************************")
+    
+    if exclude_XY:
+        RDR_adata = xclone.pp.exclude_XY_adata(RDR_adata)
     ## RDR data preprocessing
     RDR_adata = xclone.pp.check_RDR(RDR_adata, 
     cell_anno_key = cell_anno_key, 
@@ -155,7 +155,7 @@ def run_RDR(RDR_adata,
                                                  NB_kwargs={'disp': False, 'skip_hessian': True},
                                                  verbose = False, model_results_path = None)
     xclone.model.check_dispersion(RDR_adata_REF, anno_key = "dispersion")
-    RDR_adata = xclone.model.map_var_info(RDR_adata, RDR_adata_REF, specific_celltype = "N")
+    RDR_adata = xclone.model.map_var_info(RDR_adata, RDR_adata_REF, specific_celltype = dispersion_celltype)
     RDR_adata = xclone.model.remove_genes(RDR_adata)
     RDR_adata = xclone.model.remove_genes(RDR_adata, mode="INF")
     RDR_adata = xclone.model.dispersion_clip(RDR_adata, qt_low = 0.03, qt_up =0.93,  
@@ -163,8 +163,13 @@ def run_RDR(RDR_adata,
     xclone.model.check_dispersion(RDR_adata, anno_key = "dispersion_capped")
     
     ## output before CNV calling, save data with fitted libratio and dispersion.
-    RDR_adata.write(RDR_base_file)
-    RDR_adata_bulk.write(RDR_bulk_file)
+    try:
+        RDR_adata.write(RDR_base_file)
+        RDR_adata_bulk.write(RDR_bulk_file)
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] RDR_base_file and bulk_file saved in %s." %(out_data_dir))
 
     RDR_adata = xclone.model.extra_preprocess(RDR_adata, cluster_key = cell_anno_key,
                                               ref_celltype = ref_celltype,
@@ -176,26 +181,40 @@ def run_RDR(RDR_adata,
                                                 outlayer = "RDR_smooth",
                                                 cell_anno_key = cell_anno_key,
                                                 ref_celltype = ref_celltype,
-                                                WMA_window_size = 40,
+                                                WMA_window_size = WMA_window_size,
                                                 KNN_sm = True,
                                                 KNN_connect_use = "connectivities")
     
     if guide_cnv_ratio is None:
-        guide_chr_lst, anno_key = xclone.model.guide_CNV_chrs(RDR_adata, 
-                                                              Xlayer = "RDR_smooth", 
-                                                              anno_key = "chr_arm")
+        chr_anno_key = config.guide_chr_anno_key
+        guide_chr_lst = xclone.model.guide_CNV_chrs(RDR_adata, 
+                                                    Xlayer = "RDR_smooth", 
+                                                    anno_key = chr_anno_key)
+        guide_qt_lst = config.guide_qt_lst
         guide_cnv_ratio = xclone.model.guide_CNV_states(RDR_adata, 
                                                         Xlayer = "RDR_smooth", 
                                                         chr_lst = guide_chr_lst, 
-                                                        anno_key = "chr_arm", 
-                                                        qt_lst = [0.00001, 0.96, 0.999], 
+                                                        anno_key = chr_anno_key, 
+                                                        qt_lst = guide_qt_lst, 
                                                         show_boxplot = False)
     RDR_adata = xclone.model.gene_exp_group(RDR_adata, n_group = gene_exp_group, verbose = verbose)
+    
+    t = trans_t
+    trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
     RDR_adata = xclone.model.CNV_optimazation(RDR_adata, init_state_ratio = guide_cnv_ratio,
                     max_iter=2,
-                    min_iter=1)
+                    min_iter=1,
+                    start_prob = start_prob,
+                    trans_prob = trans_prob,
+                    verbose = True)
     
-    RDR_adata.write(RDR_final_file)
+    ## output after CNV calling, save data with CNV posterior.
+    try:
+        RDR_adata.write(RDR_final_file)
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] RDR_final_file saved in %s." %(out_data_dir))
 
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time
@@ -220,7 +239,7 @@ def run_RDR_plot(RDR_adata,
         cwd = os.getcwd()
         out_dir = cwd + "/XCLONE_OUT/"
     
-    out_plot_dir = str(out_dir) + "plot/"
+    out_plot_dir = str(out_dir) + "/plot/"
     xclone.al.dir_make(out_plot_dir)
 
     # default:XClone

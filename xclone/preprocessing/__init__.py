@@ -13,7 +13,7 @@ from ._data import resort_mtx_bycell
 
 from ._data import xclonedata
 from ._data import extra_anno
-
+from ._data import exclude_XY_adata
 from ._data import check_RDR, check_BAF
 from ._data import check_RDR_BAF_cellorder, check_data_combine
 

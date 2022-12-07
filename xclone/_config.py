@@ -75,18 +75,20 @@ class PreprocessingConfig():
             self.genome_mode = "hg38_genes"
 
         if self.module == "Combine":
-            self.RDR_adata_file = self.rdr_data_dir + "RDR_Xdata"
-            self.BAF_adata_file = self.baf_data_dir + "BAF_merge_Xdata" 
+            self.RDR_adata_file = self.rdr_data_dir + "RDR_adata_KNN_HMM_post.h5ad"
+            self.BAF_adata_file = self.baf_data_dir + "BAF_merge_Xdata_KNN_HMM_post.h5ad"
 
 class XCloneGeneral_config():
     def __init__(self):
         self.cell_anno_key = "cell_type"
         self.ref_celltype = "N"
+        self.exclude_XY = False
 
 class RDR_General_config():
     def __init__(self):
         """
-        RDR params init.
+        RDR params init. 
+        default for 10X scRNA-seq data.
         """
         self.smart_transform = False
         self.filter_ref_ave = 0.5
@@ -96,24 +98,40 @@ class RDR_General_config():
         self.dispersion_celltype = None
         self.gene_exp_group = 1
         self.guide_cnv_ratio = None
+        self.guide_qt_lst = [0.00001, 0.96, 0.999]
+        self.guide_chr_anno_key = "chr_arm"
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
+        # Notes
+        # [0.00001, 0.96, 0.999]
+        # chr_arm
+        # [0.00001, 0.96, 0.99999]
+        # chr
+
+        self.WMA_window_size = 40
 
 
 class BAF_General_config():
     def __init__(self):
         """
         BAF params init.
+        default for 10X scRNA-seq data.
         """
         self.RDR_file = None
         self.theo_neutral_BAF = None
-        self.WMA_window = 101
+        self.WMA_window_size = 101
+        self.concentration = 100
+        self.gene_specific = False
+        self.concentration_lower = 30
+        self.concentration_upper = 100
 
 class Combine_General_config():
     def __init__(self):
         """
         Combination parmas init.
         """
+        ## combine performing
+
         ## combine plotting
         self.merge_loss = True
         self.merge_loh = True
@@ -126,7 +144,29 @@ class HMM_Configs():
         """
         self.start_prob = np.array([0.1, 0.8, 0.1])
         self.trans_t = 1e-6
-    
+
+class Smartseq_Config():
+    def __init__(
+        self,
+        module):
+        """
+        Smartseq specific config settings.
+        """
+        if module == "RDR":
+            self.smart_transform = True
+            self.filter_ref_ave = 1.8
+
+        if module == "BAF":
+            self.extreme_count_cap = False
+            self.gene_specific = True
+        
+        if module == "Combine":
+            pass
+        
+        self.exclude_XY = True
+
+## todo: denoise part
+
 class XCloneConfig():
     """\
     Config manager for xclone.
@@ -135,6 +175,7 @@ class XCloneConfig():
     def __init__(
         self,
         dataset_name: str = "XClone_scDATA",
+        set_smartseq: bool = False,
         module: str = "RDR",
         plot_suffix: str = "",
         file_format_data: str = "h5ad",
@@ -144,6 +185,7 @@ class XCloneConfig():
         _vector_friendly: bool = False
     ):
         self.dataset_name = dataset_name
+        self.set_smartseq = set_smartseq
         
         # module specific
         self.module = module
@@ -160,6 +202,9 @@ class XCloneConfig():
         Base_settings.__init__(self)
         XCloneGeneral_config.__init__(self)
         HMM_Configs.__init__(self)
+        
+        if self.set_smartseq:
+            Smartseq_Config.__init__(self, module)
 
         # other general config
         self.plot_suffix = plot_suffix
@@ -228,6 +273,14 @@ class XCloneConfig():
     def outdir(self, outdir: Union[str, Path]):
         _type_check(outdir, "outdir", (str, Path))
         self._outdir = Path(outdir)
+
+    def display(self):
+        """Display Configuration values."""
+        print("\nConfigurations:")
+        for a in dir(self):
+            if not a.startswith("__") and not callable(getattr(self, a)):
+                print("{:30} {}".format(a, getattr(self, a)))
+        print("\n")
 
     # --------------------------------------------------------------------------------
     # Plotting config settings
