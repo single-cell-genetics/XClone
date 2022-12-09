@@ -98,6 +98,7 @@ def run_RDR(RDR_adata,
     
     if exclude_XY:
         RDR_adata = xclone.pp.exclude_XY_adata(RDR_adata)
+        print("[XClone warning] RDR module excelude chr XY analysis.")
     ## RDR data preprocessing
     RDR_adata = xclone.pp.check_RDR(RDR_adata, 
     cell_anno_key = cell_anno_key, 

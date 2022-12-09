@@ -209,7 +209,7 @@ def guide_CNV_chrs(Xdata,
     
     chr_lst = [loss_, neutral_, gain_]
     
-    Xdata.uns["sort_chr_dict"] = sort_chr_dict
+    Xdata.uns["chr_dict"] = dict(sort_chr_dict)
     Xdata.uns["guide_CNV_chrs_use_layers"] = Xlayer
     Xdata.uns["guide_CNV_chrs_use_anno_key"] = anno_key
     print("[XClone] RDR CNV states chrs guiding(copy loss, copy neutral, copy gain):", chr_lst)

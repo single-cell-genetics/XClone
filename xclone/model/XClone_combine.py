@@ -12,7 +12,7 @@ import time
 from scipy.special import logsumexp
 from .utils import pairwise1
 from .base_utils import normalize
-from ..preprocessing._data import check_RDR_BAF_cellorder
+from ..preprocessing._data import check_RDR_BAF_cellorder, check_RDR_BAF_chrmapping
 from ..preprocessing._Xdata_manipulation import Xdata_cell_selection
 
 from ..plot.CNV_plot import remove_Xdata_layers
@@ -99,6 +99,12 @@ def gene_to_bin_mapping(Xdata,
     if fail_flag:
         print("[XClone-combination]gene to bin mapping:")
         raise ValueError("pls check input: cell orders of the two Xdata are not matched.")
+    ## check chr mapping
+    success_flag = check_RDR_BAF_chrmapping(RDR_merge_Xdata, BAF_merge_Xdata)
+    fail_flag = not success_flag
+    if fail_flag:
+        print("[XClone-combination] gene to bin mapping:")
+        raise ValueError("[XClone-combination] pls check input: chr nums of the two Xdata are not matched.")
     
     Xdata.var["gene_index"] = [int(x) for x in Xdata.var.index]
     BAF_merge_Xdata.var["brk_gene_index"] = [int(x) for x in BAF_merge_Xdata.var.index]
@@ -294,7 +300,13 @@ def bin_to_gene_mapping(BAF_merge_Xdata,
     fail_flag = not success_flag
     if fail_flag:
         print("[XClone-combination]gene to bin mapping:")
-        raise ValueError("pls check input: cell orders of the two Xdata are not matched.")
+        raise ValueError("[XClone-combination] pls check input: cell orders of the two Xdata are not matched.")
+    ## check chr mapping
+    success_flag = check_RDR_BAF_chrmapping(RDR_Xdata, BAF_merge_Xdata)
+    fail_flag = not success_flag
+    if fail_flag:
+        print("[XClone-combination]gene to bin mapping:")
+        raise ValueError("[XClone-combination] pls check input: chr nums of the two Xdata are not matched.")
 
     RDR_Xdata.var["gene_index"] = [int(x) for x in RDR_Xdata.var.index]
     BAF_merge_Xdata.var["brk_gene_index"] = [int(x) for x in BAF_merge_Xdata.var.index]
@@ -347,11 +359,15 @@ def bin_to_gene_mapping(BAF_merge_Xdata,
     extend_res = np.hstack(extend_results)
 
     RDR_Xdata.layers[extend_layer] = extend_res
+    # combined_Xdata = RDR_Xdata.copy()
+    # combined_Xdata.layers[extend_layer] = extend_res
+
     
     if return_prob == True:
         return extend_res
     else:
         return RDR_Xdata
+        # return combined_Xdata
 
 def BAF_extend(RDR_Xdata, BAF_merge_Xdata, 
                     extend_layer = "posterior_mtx_log",

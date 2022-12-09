@@ -389,3 +389,13 @@ def exclude_XY_adata(Xdata):
     flag_ = ~(Xdata.var["chr"].isin(["X", "Y"]))
     print("[XClone] exclude chr X&Y in the analysis.")
     return Xdata[:, flag_]
+
+def check_RDR_BAF_chrmapping(RDR_Xdata, BAF_Xdata):
+    """
+    mainly for chr mapping check.
+    """
+    rdr_chr = RDR_Xdata.var["chr"].drop_duplicates().reset_index(drop = True)
+    baf_chr = BAF_Xdata.var["chr"].drop_duplicates().reset_index(drop = True)
+    
+    success_flag = rdr_chr.equals(baf_chr)
+    return success_flag
