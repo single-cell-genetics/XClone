@@ -627,9 +627,9 @@ def remove_cells(Xdata, mode = "NaN"):
     
     Xdata = Xdata[~FLAG_, :]
     ## just observations have fitted model
-    update_model_lst = list_update(Xdata.uns["fit_lib_ratio_model"].copy(), ~FLAG_[1:])
+    # update_model_lst = list_update(Xdata.uns["fit_lib_ratio_model"].copy(), ~FLAG_[1:])
 
-    Xdata.uns["fit_lib_ratio_model"] = update_model_lst
+    # Xdata.uns["fit_lib_ratio_model"] = update_model_lst
 
     return Xdata
 
@@ -858,7 +858,7 @@ def libsize_select(Xdata, anno_key = "library_ratio", threshold = 10, verbose =T
     Xdata = Xdata[~FLAG_, :]
     
     ## just observations have fitted model  ~FLAG_[1:]
-    update_model_lst = list_update(Xdata.uns["fit_lib_ratio_model"].copy(), ~FLAG_[1:])
-    Xdata.uns["fit_lib_ratio_model"] = update_model_lst
+    # update_model_lst = list_update(Xdata.uns["fit_lib_ratio_model"].copy(), ~FLAG_[1:])
+    # Xdata.uns["fit_lib_ratio_model"] = update_model_lst
 
     return Xdata

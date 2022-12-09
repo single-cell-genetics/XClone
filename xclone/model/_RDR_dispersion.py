@@ -61,7 +61,8 @@ def Estimate_Dispersions(Xdata, sample_libsize = None, verbose=False,
     Example:
     --------
 
-    Estimate_Dispersions(Xdata, sample_libsize = None, verbose=True, model_results_path = "/storage/yhhuang/users/rthuang/xclone/testing/test_gx109_inferCNV_estDispersion.npy")
+    Estimate_Dispersions(Xdata, sample_libsize = None, verbose=True, 
+    model_results_path = "/storage/yhhuang/users/rthuang/xclone/testing/test_gx109_inferCNV_estDispersion.npy")
     
     test_a = np.load("/storage/yhhuang/users/rthuang/xclone/testing/test_gx109_inferCNV_estDispersion.npy", allow_pickle =True)
     """
@@ -93,7 +94,11 @@ def Estimate_Dispersions(Xdata, sample_libsize = None, verbose=False,
         feature_x = np.ones(cell_num)
 
         NB_glm = sm.discrete.discrete_model.NegativeBinomial(obs_y, feature_x, 
-                                                            loglike_method = 'nb2', exposure = sample_libsize, offset = None, missing = 'none', check_rank = True)
+                                                            loglike_method = 'nb2', 
+                                                            exposure = sample_libsize, 
+                                                            offset = None, 
+                                                            missing = 'none', 
+                                                            check_rank = True)
         NB_results = NB_glm.fit(**NB_kwargs)
         model_results.append(NB_results)
         
@@ -356,7 +361,6 @@ def dispersion_select(Xdata, anno_key = "dispersion", min_value = 0.01, max_valu
     FLAG_2 = select_array < min_
 
     if mode == "narrow":
-        # Xdata.var[anno_key+"back"] = Xdata.var[anno_key].copy() can not backup here
         Xdata.var[update_anno_key][FLAG_1] = max_
         Xdata.var[update_anno_key][FLAG_2] = min_
         if verbose:
@@ -371,7 +375,7 @@ def dispersion_select(Xdata, anno_key = "dispersion", min_value = 0.01, max_valu
         df_["final"] = df_[["max", "min"]].any(1)
         FLAG_ = df_["final"]
         Xdata = Xdata[:,~FLAG_]
-        update_model_lst = list_update(Xdata.uns["fit_Dispersions_model"].copy(), ~FLAG_)
-        Xdata.uns["fit_Dispersions_model"] = update_model_lst
+        # update_model_lst = list_update(Xdata.uns["fit_Dispersions_model"].copy(), ~FLAG_)
+        # Xdata.uns["fit_Dispersions_model"] = update_model_lst
 
     return Xdata

@@ -12,7 +12,6 @@ from .data_base_utils import mtx_bound
 from .data_base_utils import Xdata_mapping
 
 ## RDR module
-# update
 from ._RDR_libratio import total_count_ratio
 from ._RDR_libratio import optmize_libratio2, get_libsize2, libratio_elbo_func, libratio_elbo_fun
 
@@ -21,7 +20,6 @@ from ._RDR_libratio import extend_chr_index_to_singlecell
 from ._RDR_libratio import cell_filter_by_celltype
 from ._RDR_libratio import get_libsize
 
-# update
 from ._RDR_libratio import fit_lib_ratio, fit_lib_ratio_accelerate
 from ._RDR_libratio import remove_cells
 from ._RDR_libratio import check_libratio
@@ -50,8 +48,6 @@ from ._RDR_CNVratio import combine_BAF_emmprob
 from ._RDR_CNVratio import CNV_optimazation
 from ._RDR_CNVratio import CNV_optimazation2
 from .base_utils import cal_log_lik
-
-# from ._RDR_CNVratio import CNV_visualization
 
 ##debug
 from ._RDR_cnv import fit_CNV_ratio_update

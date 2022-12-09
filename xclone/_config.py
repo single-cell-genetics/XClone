@@ -122,7 +122,7 @@ class BAF_General_config():
         self.WMA_window_size = 101
         self.concentration = 100
         self.gene_specific = False
-        self.concentration_lower = 30
+        self.concentration_lower = 20
         self.concentration_upper = 100
 
 class Combine_General_config():

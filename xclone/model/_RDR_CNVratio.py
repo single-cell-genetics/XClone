@@ -792,35 +792,3 @@ def CNV_optimazation2(Xdata,
     update_Xdata.uns["CNV_ratio"] = CNV_ratio_dic
     update_Xdata.uns["Logliklihood"] = Logliklihood
     return update_Xdata
-
-## Visualization part in CNVratio estimation performance
-def CNV_visualization(update_Xdata, uns_key = "posterior_mtx", states_weight = np.array([1,2,3]), weights = True):
-    """
-    will be removed in this submodule.
-    have been removed to plot module.
-    default using .uns["posterior_mtx"] for visualization
-
-    deprecated:2022-07-28
-    """
-    from seaborn import palettes
-    # https://jiffyclub.github.io/palettable/
-    import palettable
-    import seaborn as sns
-    ## transfer data to anndata for visualization
-    res_cnv_ad, res_cnv_weights_ad1 = convert_res_ann(update_Xdata.uns[uns_key], update_Xdata, states_weight)
-    if weights:
-        center_value = 2.0
-        ## reorder the cells based on annotation
-        res_cnv_weights_ad1_re = reorder_data_by_cellanno(res_cnv_weights_ad1, cell_anno_key="cell_type")
-        # Xheatmap(res_cnv_weights_ad1_re, cell_anno_key = 'cell_type', center=True) ## error because True equals value 1
-        Xheatmap(res_cnv_weights_ad1_re, cell_anno_key = 'cell_type', center = center_value)
-    else:
-        # category visualization
-        center_value = float(len(states_weight)//2)
-        res_cnv_ad_re = reorder_data_by_cellanno(res_cnv_ad, cell_anno_key="cell_type")
-        Xheatmap(res_cnv_ad_re, cell_anno_key = 'cell_type', center=center_value, cmap = palettable.colorbrewer.diverging.PuOr_5.mpl_colors)
-        # Xheatmap(res_cnv_ad_re, cell_anno_key = 'cell_type', center=True, cmap = sns.color_palette("hls", 6))
-        # Xheatmap(res_cnv_ad_re, cell_anno_key = 'cell_type', center=True, cmap = sns.color_palette("Set2"))
-        # Xheatmap(res_cnv_ad_re, cell_anno_key = 'cell_type', center=True, cmap = palettable.colorbrewer.diverging.PiYG_5.mpl_colors)
-        # Xheatmap(res_cnv_ad_re, cell_anno_key = 'cell_type', center=True, cmap = palettable.cartocolors.diverging.ArmyRose_5.mpl_colors)
-        

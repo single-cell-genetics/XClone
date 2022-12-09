@@ -1,6 +1,12 @@
 Release History
 ===============
 
+Version 0.3.4
+-------------
+- remove deprecated funcs
+
+
+
 Version 0.3.3
 -------------
 - Add tutorials for data loadding

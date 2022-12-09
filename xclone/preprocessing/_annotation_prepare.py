@@ -1,4 +1,5 @@
-"""Base functions for XClone annotation data preprocessing
+"""Base functions for XClone annotation data 
+preprocessing/preparation.
 """
 
 # Author: Rongting Huang
