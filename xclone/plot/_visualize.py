@@ -6,8 +6,12 @@
 ## Part IV: Results Visualization
 import numpy as np
 import pandas as pd
+import anndata as ad
 
-def convert_res_to_ann(Xdata, res_prob_layer, weights = False, states_weight = np.array([1,2,3])):
+def convert_res_to_ann(Xdata, 
+                       res_prob_layer, 
+                       weights = False, 
+                       states_weight = np.array([1,2,3])):
     """
     Function: 
     Convert cell based res to anndata for visualization.

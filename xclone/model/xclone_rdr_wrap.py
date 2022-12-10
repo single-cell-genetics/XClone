@@ -257,12 +257,12 @@ def run_RDR_plot(RDR_adata,
     start_time = datetime.now(timezone.utc)
     
     
-    xclone.pl.smooth_visualization(RDR_adata, 
-                                   Xlayer = "RDR_smooth", 
-                                   cell_anno_key = plot_cell_anno_key,
-                                   vmin=-0.7, vmax=0.7, 
-                                   save_file = True, 
-                                   out_file = rdr_smooth_fig)
+    xclone.pl.RDR_smooth_visualization(RDR_adata, 
+                                       Xlayer = "RDR_smooth", 
+                                       cell_anno_key = plot_cell_anno_key,
+                                       vmin=-0.7, vmax=0.7, 
+                                       save_file = True, 
+                                       out_file = rdr_smooth_fig)
     
     xclone.pl.CNV_visualization(RDR_adata, 
                                 states_weight = np.array([1,2,3]), 

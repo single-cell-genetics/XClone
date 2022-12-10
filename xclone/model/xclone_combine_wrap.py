@@ -129,7 +129,7 @@ def run_combine_plot(combine_Xdata,
     start_time = datetime.now(timezone.utc)
 
     ## BASE PLOT
-    xclone.pl.CNV_visualization_combine(combine_Xdata, Xlayer = "prob1_merge", 
+    xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "prob1_merge", 
         cell_anno_key = plot_cell_anno_key,  save_file = True, out_file = combine_res_base_fig)
     
     ## SELECT PLOT
@@ -137,7 +137,7 @@ def run_combine_plot(combine_Xdata,
         if merge_loss:
             colorbar_ticks = [0.25,1,2,2.75]
             colorbar_label = ["copy loss","loh", "copy neutral", "copy gain"]
-            xclone.pl.CNV_visualization_combine(combine_Xdata, Xlayer = "plot_prob_merge1", 
+            xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge1", 
                                         cell_anno_key = plot_cell_anno_key, 
                                         color_map_name = "combine_cmap", 
                                         states_num = 4, 
@@ -148,7 +148,7 @@ def run_combine_plot(combine_Xdata,
         else:
             colorbar_ticks = [0,1,2,3,4]
             colorbar_label = ["copy lossA", "copy lossB", "LOH", "copy neutral", "copy gain"]
-            xclone.pl.CNV_visualization_combine(combine_Xdata, Xlayer = "plot_prob_merge2", 
+            xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge2", 
                                         cell_anno_key = plot_cell_anno_key, 
                                         color_map_name = "combine_cmap2", 
                                         states_num = 5,
@@ -159,7 +159,7 @@ def run_combine_plot(combine_Xdata,
     elif merge_loss:
         colorbar_ticks = [0,1,2,3,4]
         colorbar_label = ["copy loss","LOH-A", "LOH-B",  "copy neutral", "copy gain"]
-        xclone.pl.CNV_visualization_combine(combine_Xdata, Xlayer = "plot_prob_merge4", 
+        xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge4", 
                                         cell_anno_key = plot_cell_anno_key, 
                                         color_map_name = "combine_cmap4", 
                                         states_num = 5,
@@ -171,7 +171,7 @@ def run_combine_plot(combine_Xdata,
     else:
         colorbar_ticks = [0,1,2,3,4,5]
         colorbar_label = ["copy lossA", "copy lossB","LOH-A", "LOH-B", "copy neutral", "copy gain"]
-        xclone.pl.CNV_visualization_combine(combine_Xdata, Xlayer = "plot_prob_merge3", 
+        xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge3", 
                                         cell_anno_key = plot_cell_anno_key, 
                                         color_map_name = "combine_cmap3", 
                                         states_num = 6,

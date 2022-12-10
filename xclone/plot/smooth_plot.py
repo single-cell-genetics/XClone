@@ -12,10 +12,21 @@ from ._base_xanndata import Xheatmap, XXheatmap
 ## Visualization part in smoothing performance
 
 def smooth_visualization(Xdata, cell_anno_key = "cell_type", 
-                         Xlayer = "RDR_smooth",vmin=-0.7, vmax=0.7, **kwargs):
+                         Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, **kwargs):
+    """
+    RENAME TO `RDR_smooth_visualization`.
+    """
+    re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key = cell_anno_key)
+    Xheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
+            vmin=vmin, vmax=vmax,
+            colorbar_ticks = [vmin, 0, vmax], 
+            colorbar_label = ["copy loss",  "copy neutral",  "copy gain"], **kwargs)
+
+def RDR_smooth_visualization(Xdata, cell_anno_key = "cell_type", 
+                             Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, **kwargs):
     """
     """
-    re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key =cell_anno_key)
+    re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key = cell_anno_key)
     Xheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
             vmin=vmin, vmax=vmax,
             colorbar_ticks = [vmin, 0, vmax], 

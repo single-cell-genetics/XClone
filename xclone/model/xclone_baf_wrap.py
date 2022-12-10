@@ -282,7 +282,7 @@ def run_BAF_plot(merge_Xdata,
                                        colorbar_name = "BAF",
                                        save_file = True, 
                                        out_file = baf_smooth_fig)
-    xclone.pl.CNV_visualization2(merge_Xdata, weights = False, 
+    xclone.pl.BAF_CNV_visualization(merge_Xdata, weights = False, 
                                  cell_anno_key = plot_cell_anno_key, 
                                  save_file = True, 
                                  out_file = baf_final_fig)

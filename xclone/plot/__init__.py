@@ -37,13 +37,18 @@ from ._explore import visualize_prob, compare_prob
 from ._explore import visualize_count
 
 ## smoothing plotting
-from .smooth_plot import smooth_visualization, BAF_smooth_visualization
+from .smooth_plot import smooth_visualization, RDR_smooth_visualization, BAF_smooth_visualization
 from .smooth_plot import smooth_visualization2, smooth_visualization3
 
 ## CNV plotting
-from .CNV_plot import CNV_visualization, CNV_visualization_complex
-from .CNV_plot import CNV_visualization2, CNV_visualization2_complex
-from .CNV_plot import CNV_combine_visualization, CNV_combine_visualization_complex
-from .CNV_plot import CNV_LOH_visualization
+### update
+from .CNV_plot import CNV_visualization, Complex_CNV_visualization
+from .CNV_plot import BAF_CNV_visualization, Complex_BAF_CNV_visualization
+from .CNV_plot import Combine_CNV_visualization, Complex_Combine_CNV_visualization
 
-from .CNV_plot import CNV_visualization_combine, complex_CNV_visualization_combine
+# from .CNV_plot import CNV_visualization, CNV_visualization_complex
+# from .CNV_plot import CNV_visualization2, CNV_visualization2_complex
+# from .CNV_plot import CNV_visualization_combine, complex_CNV_visualization_combine
+
+# from .CNV_plot import CNV_combine_visualization, CNV_combine_visualization_complex
+# from .CNV_plot import CNV_LOH_visualization
