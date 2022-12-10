@@ -67,6 +67,7 @@ def run_RDR(RDR_adata,
     remove_marker = config.remove_marker
     dispersion_celltype = config.dispersion_celltype
     gene_exp_group = config.gene_exp_group
+    gene_exp_ref_log = config.gene_exp_ref_log
     guide_cnv_ratio = config.guide_cnv_ratio
     ## smoothing settings
     WMA_window_size = config.WMA_window_size
@@ -198,7 +199,10 @@ def run_RDR(RDR_adata,
                                                         anno_key = chr_anno_key, 
                                                         qt_lst = guide_qt_lst, 
                                                         show_boxplot = False)
-    RDR_adata = xclone.model.gene_exp_group(RDR_adata, n_group = gene_exp_group, verbose = verbose)
+    RDR_adata = xclone.model.gene_exp_group(RDR_adata, 
+                                            n_group = gene_exp_group,
+                                            ref_log =  gene_exp_ref_log,
+                                            verbose = verbose)
     
     t = trans_t
     trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])

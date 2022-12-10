@@ -97,16 +97,15 @@ class RDR_General_config():
         self.remove_marker = True
         self.dispersion_celltype = None
         self.gene_exp_group = 1
+        # active when exp_group larger than 2
+        self.gene_exp_ref_log = True
         self.guide_cnv_ratio = None
-        self.guide_qt_lst = [0.00001, 0.96, 0.999]
         self.guide_chr_anno_key = "chr_arm"
+        self.guide_qt_lst = [0.00001, 0.96, 0.99999]
+        # self.guide_chr_anno_key = "chr"
+        # self.guide_qt_lst = [0.00001, 0.96, 0.999]
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
-        # Notes
-        # [0.00001, 0.96, 0.999]
-        # chr_arm
-        # [0.00001, 0.96, 0.99999]
-        # chr
 
         self.WMA_window_size = 40
 

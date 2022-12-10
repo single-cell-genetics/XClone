@@ -454,3 +454,136 @@ def fit_CNV_ratio_test(Xdata, init_prob, hard_assign = False, n_sample_cells = 1
 
     return CNV_ratio, model_results
     # return Xdata
+
+## from RDR_CNVratio.
+def CNV_optimazation2(Xdata, 
+                    init_state_ratio = np.array([0.5, 1.0, 1.5]), 
+                    max_iter=20, 
+                    min_iter=3, 
+                    epsilon_conv=1e-2, 
+                    verbose=True,  
+                    nproc = 1,
+                    log_save = False, 
+                    **kwargs):
+    """
+    Function:(todo func)
+    iterations of fit_CNV_ratio, the loglikelihood can be used to determine the terminations.
+
+    step1: get the emm_prob_log
+    step2: get the posterior_mtx_log
+    step3: calculate the log liklihood
+    step4: determine the terminations
+
+    # init_CNV_ratio = np.array([[0.5,1.0,1.5],
+    #                  [0.5,1.0,1.5],
+    #                  [0.5,1.0,1.5],
+    #                  [0.5,1.0,1.5],
+    #                  [0.5,1.0,1.5]])
+
+    Parameters:
+    ----------
+    Xdata: anndata.
+    init_prob:
+
+    **kwargs: parameters for fit_CNV_ratio.
+
+    Return:
+    ------
+    
+    Example:
+    -------
+
+    """
+    ## time stamp
+    start_time_ = datetime.datetime.now()
+
+    CNV_state_num = len(init_state_ratio)
+
+    try:
+        gene_group_num = len(Xdata.uns["group_genes"]) # len(ref_obs_ad1.uns["group_genes"])
+    except:
+        raise ValueError("[XClone] Xdata do not contain group genes! Pls check and do preprocessing!")
+
+    ## initalization
+    ### CNV ratio init for different gene groups
+    CNV_ratio_dic = {}
+    CNV_ratio_dic[str(0)] = np.tile(init_state_ratio, gene_group_num).reshape(-1, CNV_state_num)
+    ### likelihood init
+    Logliklihood = np.zeros(max_iter)
+
+    # iteration
+    for it in range(max_iter):
+        if verbose == True:
+            print("[XClone] CNV_optimazation iteration: ", it+1)
+
+        if it == 0: # init round
+            # specific_states = xclone.model.gene_specific_states(ref_obs_ad2_test, init_CNV_ratio)
+            specific_states = gene_specific_states(Xdata, CNV_ratio_dic[str(0)])
+            emm_prob_log = calculate_Xemm_prob2(Xdata, 
+                                            states = specific_states,
+                                            gene_specific = True, overdispersion = Xdata.var["dispersion"],
+                                            ref_normalization_term = 1,
+                                            obs_normalization_term = Xdata.obs["library_ratio"][1:])
+        else:
+            ## params setting and fit_CNV_ratio
+            fit_cnv_params = {}
+            fit_cnv_params['Xdata'] = Xdata
+            fit_cnv_params['init_prob'] = normalize(np.exp(emm_prob_log))
+            fit_cnv_params['random_seed'] = 2
+            fit_cnv_params['verbose'] = verbose
+            fit_cnv_params['feature_X'] = Xdata.uns["NMF_pred_obs"]
+
+
+            fit_cnv_params.update(**kwargs)
+            # CNV_ratio,  model_results = xclone.model.fit_CNV_ratio(ref_obs_ad2_test, xclone.model.normalize(np.exp(emm_prob_log)), 
+            # n_sample_cells = 10, dispersion_set = None, random_seed = 2, verbose=True)
+            # CNV_ratio, model_results = fit_CNV_ratio(**fit_cnv_params)
+            CNV_ratio, ref_bio_ratio, model_results = fit_CNV_ratio(**fit_cnv_params)
+
+            ## check CNV ratio
+            CNV_ratio_update  = check_CNV_ratio(CNV_ratio, CNV_ratio_dic[str(it-1)])
+            CNV_ratio_dic[str(it)] = CNV_ratio_update
+
+            specific_states = gene_specific_states(Xdata, CNV_ratio_update)
+            emm_prob_log = calculate_Xemm_prob2(Xdata, 
+                                            states = specific_states,
+                                            gene_specific = True, overdispersion = Xdata.var["dispersion"],
+                                            ref_normalization_term = 1,
+                                            obs_normalization_term = Xdata.obs["library_ratio"][1:])
+
+        ### posterior_mtx_log
+        update_Xdata = XHMM_smoothing(Xdata, emm_prob_log = emm_prob_log, nproc = nproc)
+
+        if log_save == True:
+            CNV_visualization(update_Xdata)
+
+        # check emm_prob_log and res_log shape.
+        _logLik = cal_log_lik(update_Xdata.uns["emm_prob_log"], update_Xdata.uns["posterior_mtx_log"])
+        # _logLik = cal_log_lik(emm_prob_log, posterior_mtx_log)
+        Logliklihood[it] = _logLik
+
+        if it > min_iter:
+            if Logliklihood[it] < Logliklihood[it - 1]:
+                if verbose:
+                    print("[XClone] Warning: Lower bound decreases!\n")
+            elif it == max_iter - 1:
+                if verbose:
+                    print("[XClone] Warning: CNV ration optimization did not converge!\n")
+                    print("[XClone] Notes: try to increase the max_iter: ", max_iter, "!\n")
+            elif Logliklihood[it] - Logliklihood[it - 1] < epsilon_conv:
+                break
+    Logliklihood = Logliklihood[:it+1]
+
+    if verbose == True:
+        print("iteration_end_round: ", it+1)
+        print("Logliklihood: ", Logliklihood)
+    
+    ## time stamp
+    end_time_ = datetime.datetime.now()
+    time_used = end_time_ - start_time_
+    print("Time used", time_used.seconds, "seconds")
+    
+    ## Results
+    update_Xdata.uns["CNV_ratio"] = CNV_ratio_dic
+    update_Xdata.uns["Logliklihood"] = Logliklihood
+    return update_Xdata
