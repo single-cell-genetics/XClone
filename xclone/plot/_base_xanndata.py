@@ -1,4 +1,5 @@
-"""[XClone] Base plotting functions for AnnData.
+"""[XClone] 
+Base heatmap plotting functions for XClone CNV calling.
 """
 # Author: Rongting Huang
 # rthuang@connect.hku.hk

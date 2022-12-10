@@ -5,6 +5,7 @@
 # Date: 2021/03/15
 # update: 2022/04/21
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 

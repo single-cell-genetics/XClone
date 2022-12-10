@@ -10,6 +10,7 @@ def denoise(Xdata, Xlayer,
             gmm_comp = 3,
             out_layer = "denoised_prob"):
     """
+    deprecated.
     
     """
     import numpy as np

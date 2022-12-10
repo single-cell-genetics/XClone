@@ -1,4 +1,10 @@
-## manhattan plot for BAF
+"""[XClone] 
+Base manhattan plotting functions for XClone BAF analysis.
+"""
+
+# Author: Rongting Huang
+# rthuang@connect.hku.hk
+
 ### update from https://github.com/Rongtingting/limix-plot
 ### [orogin: https://github.com/limix/limix-plot]
 ###======================================== manhattan plot for BAF[start]

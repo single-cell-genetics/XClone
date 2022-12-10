@@ -5,7 +5,7 @@ include some relative analysis
 # Date: 2021/07/24
 # update: 2021/07/24
 
-
+import numpy as np
 
 def base_heatmap(
     Xdata: AnnData,
@@ -13,23 +13,6 @@ def base_heatmap(
     """
     Function: base Heatmap for XClone confusion matrix visualization.
     maybe not for anndata
-    """
-    pass
-
-def set_plt_style(args):
-    """
-    """
-    plt.style.use('ggplot')
-    sns.set_style("whitegrid")
-    #plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["axes.grid"] = True
-    plt.rcParams["axes.edgecolor"] = "k"
-    plt.rcParams["axes.linewidth"]  = 1.5
-
-
-
-def set_plt_subplots():
-    """
     """
     pass
 
@@ -202,15 +185,17 @@ def confuse_heatmap(confuse_mat_df, cmap = "Blues", version1 = True, version2 =T
                     plot_ylabel = None, plt_title = None, save_file_name = None):
     """
     Function:
+    ---------
     confusion matrix heatmap
     confuse_mat_df: count- confusion matrix in pd.DataFrame
     
-    Example：            
-    confuse_mat, ids1_uniq, ids2_uniq = get_confusion(CopyKAT_lst, expression_lst)
-    confuse_mat_df = get_confuse_mat_df(confuse_mat,
+    Example:
+    --------           
+    >>> confuse_mat, ids1_uniq, ids2_uniq = get_confusion(CopyKAT_lst, expression_lst)
+    >>> confuse_mat_df = get_confuse_mat_df(confuse_mat,
                                         index_names=["cloneA", "cloneB","Normal"],
                                         clolums_names=["cloneA", "cloneB","Normal"])
-    confuse_heatmap(confuse_mat_df,  
+    >>> confuse_heatmap(confuse_mat_df,  
                     plot_xlabel = "CopyKAT",
                     plot_ylabel = "Ground Truth", 
                     plt_title = "Concordance in subclone identification", 
@@ -255,10 +240,10 @@ def confuse_heatmap(confuse_mat_df, cmap = "Blues", version1 = True, version2 =T
         if plt.title is None:
             pass
         else:
-            plt.title(plt_title, fontsize = 18) #plt.title('Concordance in subclone identification', fontsize = 18)
+            plt.title(plt_title, fontsize = 18) 
+            #plt.title('Concordance in subclone identification', fontsize = 18)
         if save_file_name is None:
             pass
         else:
-            plt.savefig(save_file_name, dpi=300, bbox_inches='tight') 
-             #plt.savefig('CopyKAT_vs_Groudtruth.pdf', dpi=300, bbox_inches='tight')
+            plt.savefig(save_file_name, dpi=300, bbox_inches='tight')
               

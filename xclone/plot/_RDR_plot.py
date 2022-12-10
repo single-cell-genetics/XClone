@@ -1,51 +1,9 @@
-"""Base functions for XClone RDR plotting
+"""Base functions for XClone RDR plotting.
 """
 
 # Author: Rongting Huang
 # Date: 2021/07/22
 # update: 2021/12/16
-
-## reorder anndata before heatmap plotting
-def reorder_function():
-    """
-    """
-    pass
-
-## setting
-
-## base plot
-
-# def visual_RDR():
-#     """
-#     """
-#     pass
-
-# ## bulk plot setting
-
-
-
-
-# ## update from _base_xanndata
-# def Xcns():
-#     """
-#     ## based on Xheatmap or XXheatmap--
-#     copy number profile.
-#     update from Xheatmap to use different data(BAF/RDR)
-#     and add some finner information
-#     """
-#     pass
-
-# def Xcns_addref(
-#     Xdata: AnnData,
-#     ref_Xdata: AnnData,
-#     Xlayer = None,
-#     ref_Xlayer = None):
-#     """
-#     add subplot Xheatmap for ref dataset, like inferCNV
-
-#     """
-#     pass
-
 
 ##==============================
 ## color
@@ -338,53 +296,3 @@ def X_hist_multiplots_CHR(X_data, bins_num = 50, cmap_name = 'viridis',
         plt.savefig(save_fig)
     else:
         plt.show()
-
-# boxplot
-import pandas as pd
-import seaborn as sns
-
-
-def X_box_base(Xdata):
-    """
-    Function:
-    
-    
-    Parameters:
-    ----------
-    
-    Return:
-    ------
-    
-    Example:
-    -------
-    REF:
-    ----
-    import pandas as pd
-    import numpy as np
-    from matplotlib import pyplot as plt
-    import seaborn as sns
-
-    np.random.seed(44)
-    # DATAFRAMES WITH TRIAL COLUMN ASSIGNED
-    df1 = pd.DataFrame(np.random.randn(5,5), columns=list(range(1,6))).assign(Trial=1)
-    df2 = pd.DataFrame(np.random.randn(5,5), columns=list(range(1,6))).assign(Trial=2)
-    df3 = pd.DataFrame(np.random.randn(5,5), columns=list(range(1,6))).assign(Trial=3)
-
-    cdf = pd.concat([df1, df2, df3])                                # CONCATENATE
-    mdf = pd.melt(cdf, id_vars=['Trial'], var_name=['Number'])      # MELT
-
-    print(mdf.head())
-    #    Trial Number     value
-    # 0      1      1 -0.750615
-    # 1      1      1 -1.715070
-    # 2      1      1 -0.963404
-    # 3      1      1  0.360856
-    # 4      1      1 -1.190504
-
-    ax = sns.boxplot(x="Trial", y="value", hue="Number", data=mdf)  # RUN PLOT   
-    plt.show()
-
-    plt.clf()
-    plt.close()
-    """
-    pass

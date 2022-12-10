@@ -1,18 +1,13 @@
 """Base functions for XClone RDR plotting
-data preprocessing
+data preprocessing for **visualization** and *analysis*.
 """
 
 # Author: Rongting Huang
 # Date: 2021/12/17
-# update: 2021/12/17
+# update: 2022/12/10
 
-## preprocessing for **visualization** and *analysis*
+## obs[‘viz_index’] = index ## Todo1: improve efficiency.
 
-# like convert data into anndata format for visualization
-## obs[‘viz_index’] = index
-
-import numpy as np
-import pandas as pd
 import anndata as ad
 
 def reorder_data_by_cellanno(Xdata, cell_anno_key):

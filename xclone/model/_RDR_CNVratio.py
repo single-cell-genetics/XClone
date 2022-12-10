@@ -532,24 +532,25 @@ def combine_BAF_emmprob(Xdata, BAF_Xdata):
     return Xdata
 
 def CNV_optimazation(Xdata,
-                    dispersion_key = "dispersion_capped",
-                    init_state_ratio = np.array([0.5, 1.0, 1.5]), 
-                    max_iter=20, 
-                    min_iter=3, 
-                    epsilon_conv=1e-2, 
-                    verbose= True,
-                    fitCNV_verbose = False,
-                    HMM_verbose = False,
-                    start_prob = None,
-                    trans_prob = None,
-                    combine_BAF = False,
-                    states_weight = np.array([1,2,3]),
-                    weights= True,
-                    nproc = 1,
-                    log_save = False, 
-                    **kwargs):
+                     dispersion_key = "dispersion_capped",
+                     init_state_ratio = np.array([0.5, 1.0, 1.5]), 
+                     max_iter=20, 
+                     min_iter=3, 
+                     epsilon_conv=1e-2, 
+                     verbose= True,
+                     fitCNV_verbose = False,
+                     HMM_verbose = False,
+                     start_prob = None,
+                     trans_prob = None,
+                     combine_BAF = False,
+                     states_weight = np.array([1,2,3]),
+                     weights= True,
+                     nproc = 1,
+                     log_save = False, 
+                     **kwargs):
     """
-    Function:(todo func)
+    Function:
+    ---------
     iterations of fit_CNV_ratio, the loglikelihood can be used to determine the terminations.
 
     step1: get the emm_prob_log
@@ -557,11 +558,6 @@ def CNV_optimazation(Xdata,
     step3: calculate the log liklihood
     step4: determine the terminations
 
-    # init_CNV_ratio = np.array([[0.5,1.0,1.5],
-    #                  [0.5,1.0,1.5],
-    #                  [0.5,1.0,1.5],
-    #                  [0.5,1.0,1.5],
-    #                  [0.5,1.0,1.5]])
 
     Parameters:
     ----------

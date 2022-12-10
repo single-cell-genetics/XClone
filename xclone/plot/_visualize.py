@@ -41,41 +41,6 @@ def convert_res_to_ann(Xdata, res_prob_layer, weights = False, states_weight = n
 
         return res_cnv_ad 
 
-def convert_res_ann(res_prob, obs_Xdata, states_weight = np.array([1,2,3])):
-    """
-    deprecated 2022-06-27
-    Function: 
-    Convert cell based res to anndata for visualization.
-    Check nan value.
-    todo: 1) why -1 for visualization (center?)
-          2）change legend for copy states
-    Parameters:
-    ----------
-    res: np.array. same order with Xdata.X
-    Xdata: anndata. Provide the annotation.
-    Return:
-    ------
-    
-    Example:
-    -------
-    """
-    res_cnv = np.argmax(res_prob, axis=-1)
-    res_cnv_ad = obs_Xdata.copy()
-    # res_cnv_ad.X = res_cnv.copy() - 1
-    res_cnv_ad.X = res_cnv.copy()
-
-    res_cnv_weights = (res_prob * states_weight).sum(axis=-1)
-
-    res_cnv_weights_ad = obs_Xdata.copy()
-    res_cnv_weights_ad.X = res_cnv_weights.copy()
-
-    res_cnv_weights_ad1 = obs_Xdata.copy()
-    # res_cnv_weights_ad1.X = res_cnv_weights.copy() - 1
-    res_cnv_weights_ad1.X = res_cnv_weights.copy()
-
-    # return res_cnv_weights_ad, res_cnv_weights_ad1
-    return res_cnv_ad, res_cnv_weights_ad1
-
 def convert_res_visual(res_dict, ref_obs_ad, states_weight = np.array([1,2,3]), states_K=3, obs_names_make_unique=False):
     """
     Convert cell based res to anndata for visualization.
@@ -205,19 +170,7 @@ def normalization_emm_log(emm_prob_log):
     emm_log_normalization = emm_prob_log - logsumexp(emm_prob_log, axis=2, keepdims=True)
     return emm_log_normalization
 
-# def normalization_emm(emm_prob):
-#     """
-#     will raise value error-deprecated
-#     """
-#     normalization_emm = emm_prob  / emm_prob.sum(axis=2, keepdims=True)
-#     return normalization_emm
-
 ## Part V: Results Analysis
-
-
-
-
-
 def transform_dic_to_array(emm_prob_log_dic, res_log_dict):
     """
     add newaxis
