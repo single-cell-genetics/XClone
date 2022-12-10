@@ -43,8 +43,8 @@ def process_bin(idx, AD, DP):
     RV_bin['Z'] = Z
     RV_bin['flip'] = is_flip
     RV_bin["AD_phased"] = AD_phased
-    RV_bin['ad_bin'] = ad_sum[0, :]
-    RV_bin['ad_bin1'] = ad_sum1[0, :]
+    RV_bin['ad_bin_softcnt'] = ad_sum[0, :]
+    RV_bin['ad_bin'] = ad_sum1[0, :]
     RV_bin['dp_bin'] = dp_sum[0, :]
     RV_bin['theta_bin'] = np.array(thetas)[:, 0]
     RV_bin['logLik'] = _logLik_new
@@ -101,16 +101,16 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
     for i, RV_bin in zip(range(len(result)), result):
         if i == 0:
             AD_phased = RV_bin["AD_phased"]
+            ad_bin_softcnt = RV_bin["ad_bin_softcnt"]
             ad_bin = RV_bin["ad_bin"]
-            ad_bin1 = RV_bin["ad_bin1"]
             dp_bin = RV_bin["dp_bin"]
             theta_bin = RV_bin["theta_bin"]
             bin_idx = RV_bin["bin_idx"]
             bin_idx_lst = RV_bin["bin_idx_lst"]
         else:
             AD_phased = np.vstack((AD_phased, RV_bin["AD_phased"]))
+            ad_bin_softcnt = np.vstack((ad_bin_softcnt, RV_bin["ad_bin_softcnt"]))
             ad_bin = np.vstack((ad_bin, RV_bin["ad_bin"]))
-            ad_bin1 = np.vstack((ad_bin1, RV_bin["ad_bin1"]))
             dp_bin = np.vstack((dp_bin, RV_bin["dp_bin"]))
             theta_bin = np.vstack((theta_bin, RV_bin["theta_bin"]))
             bin_idx = np.append(bin_idx, RV_bin["bin_idx"])
@@ -121,8 +121,8 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
     RV_region["AD_phased"] = AD_phased
 
     RV_region["bin_idx"] = bin_idx
+    RV_region["ad_bin_softcnt"] = ad_bin_softcnt
     RV_region["ad_bin"] = ad_bin
-    RV_region["ad_bin1"] = ad_bin1
     RV_region["dp_bin"] = dp_bin
     RV_region["theta_bin"] = theta_bin
     
@@ -177,8 +177,8 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
             theta_bin = RV_region["theta_bin"]
             bin_idx = RV_region["bin_idx"]
             bin_idx_lst = RV_region["bin_idx_lst"]
+            ad_bin_softcnt = RV_region["ad_bin_softcnt"]
             ad_bin = RV_region["ad_bin"]
-            ad_bin1 = RV_region["ad_bin1"]
             dp_bin = RV_region["dp_bin"]
 
         else:
@@ -187,8 +187,8 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
             theta_bin = np.vstack((theta_bin, RV_region["theta_bin"]))
             bin_idx = np.append(bin_idx, RV_region["bin_idx"])
             bin_idx_lst = np.append(bin_idx_lst, RV_region["bin_idx_lst"])
+            ad_bin_softcnt = np.vstack((ad_bin_softcnt, RV_region["ad_bin_softcnt"]))
             ad_bin = np.vstack((ad_bin, RV_region["ad_bin"]))
-            ad_bin1 = np.vstack((ad_bin1, RV_region["ad_bin1"]))
             dp_bin = np.vstack((dp_bin, RV_region["dp_bin"]))
          
     end_t = datetime.datetime.now()
@@ -204,8 +204,8 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
 
     ##check theta_bin reuslts first and there are nan value
     ## save for visualization
+    ad_bin_softcnt = sparse.csr_matrix(ad_bin_softcnt)
     ad_bin = sparse.csr_matrix(ad_bin)
-    ad_bin1 = sparse.csr_matrix(ad_bin1)
     dp_bin = sparse.csr_matrix(dp_bin)
 
     ## generate merge_Xdata var
@@ -258,9 +258,9 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
     merge_Xdata.uns["GeneID_lst"] = GeneID_dict
 
     ## soft phasing
-    merge_Xdata.layers["ad_bin"] = ad_bin.T
+    merge_Xdata.layers["ad_bin_softcnt"] = ad_bin_softcnt.T
     ## hard phasing
-    merge_Xdata.layers["ad_bin1"] = ad_bin1.T
+    merge_Xdata.layers["ad_bin"] = ad_bin.T
     merge_Xdata.layers["dp_bin"] = dp_bin.T
 
     merge_Xdata.uns["local_phasing_key"] = region_key
@@ -337,22 +337,22 @@ def BAF_Global_phasing(Xdata, bin_Xdata):
 
 
     ## apply global phasing method on AD_phased bins
+    ad_bin_softcnt = bin_Xdata.layers["ad_bin_softcnt"]
     ad_bin = bin_Xdata.layers["ad_bin"]
-    ad_bin1 = bin_Xdata.layers["ad_bin1"]
     dp_bin = bin_Xdata.layers["dp_bin"]
     
+    bd_bin_softcnt = dp_bin - ad_bin_softcnt
+    ad_bin_softcnt_phased = ad_bin_softcnt + 0
+    ad_bin_softcnt_phased[: , is_flips] = bd_bin_softcnt[:, is_flips] + 0
+
     bd_bin = dp_bin - ad_bin
     ad_bin_phased = ad_bin + 0
     ad_bin_phased[: , is_flips] = bd_bin[:, is_flips] + 0
 
-    bd_bin1 = dp_bin - ad_bin1
-    ad_bin1_phased = ad_bin1 + 0
-    ad_bin1_phased[: , is_flips] = bd_bin1[:, is_flips] + 0
-
+    bin_Xdata.layers["ad_bin_softcnt_phased"] = ad_bin_softcnt_phased
+    ## the ad_bin_softcnt_phased is weighted counts(bin counts is weighted)(soft phasing)
     bin_Xdata.layers["ad_bin_phased"] = ad_bin_phased
-    ## the ap_bin_phased is weighted counts(bin counts is weighted)(soft phasing)
-    bin_Xdata.layers["ad_bin1_phased"] = ad_bin1_phased
-    ## ad_bin1_phased is hard phasing counts.
+    ## ad_bin_phased is hard phasing counts.
 
     end_t = datetime.datetime.now()
     elapsed_sec = (end_t - start_t).total_seconds()

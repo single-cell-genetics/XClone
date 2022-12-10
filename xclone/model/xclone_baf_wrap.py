@@ -142,9 +142,9 @@ def run_BAF(BAF_adata,
         merge_Xdata = xclone.model.extrme_count_capping(merge_Xdata)
 
     merge_Xdata = xclone.pl.calculate_cell_BAF(merge_Xdata, 
-                                               AD_key = "ad_bin1", DP_key = "dp_bin", BAF_key = "BAF")
+                                               AD_key = "ad_bin", DP_key = "dp_bin", BAF_key = "BAF")
     merge_Xdata = xclone.pl.calculate_cell_BAF(merge_Xdata, 
-                                               AD_key = "ad_bin1_phased", DP_key = "dp_bin", BAF_key = "BAF_phased")
+                                               AD_key = "ad_bin_phased", DP_key = "dp_bin", BAF_key = "BAF_phased")
     xclone.model.BAF_fillna(merge_Xdata, Xlayer = "BAF_phased", out_layer = "fill_BAF_phased")
 
     ## smoothing
@@ -214,7 +214,7 @@ def run_BAF(BAF_adata,
         merge_Xdata = xclone.model.concentration_mapping(merge_Xdata, concentration_lower, concentration_upper)
 
     merge_Xdata = xclone.model.calculate_Xemm_prob_bb(merge_Xdata, 
-                                                      AD_key = "ad_bin1_phased", DP_key = "dp_bin",
+                                                      AD_key = "ad_bin_phased", DP_key = "dp_bin",
                                                       outlayer = "bin_phased_BAF_specific_center_emm_prob_log", 
                                                       states = used_specific_states,
                                                       gene_specific = gene_specific, 

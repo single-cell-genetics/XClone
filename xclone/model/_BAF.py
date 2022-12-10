@@ -34,7 +34,7 @@ def extrme_count_capping(Xdata,
     """
     remove extreme counts influence.
     """
-    ad_Counts = Xdata.layers["ad_bin1"].A.sum(axis=0)
+    ad_Counts = Xdata.layers["ad_bin"].A.sum(axis=0)
     dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
     if verbose:
         ## visualize counts distribution
@@ -47,14 +47,14 @@ def extrme_count_capping(Xdata,
     ratio_replace = dp_Counts[flag_] / cutoff_
 
     Xdata.layers["dp_bin_backup"] = Xdata.layers["dp_bin"].copy()
-    Xdata.layers["ad_bin1_backup"] = Xdata.layers["ad_bin1"].copy()
+    Xdata.layers["ad_bin_backup"] = Xdata.layers["ad_bin"].copy()
     # mask to, and insert your replacement values:
     Xdata.layers["dp_bin"][:, flag_] = np.ceil(Xdata.layers["dp_bin"][:, flag_]/ratio_replace)
-    Xdata.layers["ad_bin1"][:, flag_] = np.ceil(Xdata.layers["ad_bin1"][:, flag_]/ratio_replace)
+    Xdata.layers["ad_bin"][:, flag_] = np.ceil(Xdata.layers["ad_bin"][:, flag_]/ratio_replace)
 
     if verbose:
         ## update counts distribution
-        ad_Counts = Xdata.layers["ad_bin1"].A.sum(axis=0)
+        ad_Counts = Xdata.layers["ad_bin"].A.sum(axis=0)
         dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
         plt.plot(ad_Counts)
         plt.plot(dp_Counts)
@@ -67,7 +67,7 @@ def concentration_mapping(Xdata,
     """
     Return bin specific concentration.
     """
-    # ad_Counts = Xdata.layers["ad_bin1"].A.sum(axis=0)
+    # ad_Counts = Xdata.layers["ad_bin"].A.sum(axis=0)
     dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
     max_cnt = dp_Counts.max()
     min_cnt = dp_Counts.min()
@@ -133,7 +133,7 @@ def fit_BAF_theoretical_values(Xdata,
                                region_anno = "chr_arm",
                                random_seed = None,
                                n_sample_cells = 200,
-                               AD_layer = "ad_bin1_phased",
+                               AD_layer = "ad_bin_phased",
                                DP_layer = "dp_bin",
                                iterations = 1,
                                calculate_ref = True,
@@ -186,7 +186,7 @@ def fit_BAF_theoretical_values(Xdata,
     return theoretical_prob, ref_BAF
 
 def BAF_theoretical_value_optimization(merge_Xdata,
-            AD_layer = "ad_bin1_phased",
+            AD_layer = "ad_bin_phased",
             DP_layer = "dp_bin",
             ref_anno = "ref_BAF1_phased_clipped",
             random_seed1 = None,
@@ -335,7 +335,7 @@ def BAF_theoretical_value_optimization(merge_Xdata,
 
 ## todo- not used yet
 def BAF_theoretical_value_CNV_optimization(merge_Xdata,
-            AD_layer = "ad_bin1_phased",
+            AD_layer = "ad_bin_phased",
             DP_layer = "dp_bin",
             ref_anno = "ref_BAF1_phased_clipped",
             random_seed1 = None,
