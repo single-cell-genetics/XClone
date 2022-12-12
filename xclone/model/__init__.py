@@ -46,7 +46,6 @@ from ._RDR_CNVratio  import hard_assign_prob
 ## iteration part
 from ._RDR_CNVratio import combine_BAF_emmprob
 from ._RDR_CNVratio import CNV_optimazation
-from ._RDR_CNVratio import CNV_optimazation2
 from .base_utils import cal_log_lik
 
 ##debug
@@ -92,16 +91,15 @@ from ._Gaussian_mixture import get_CNV_states, guide_BAF_theo_states
 
 ## combination
 from .XClone_combine import gene_to_bin_mapping
-from .XClone_combine import BAF_LOH_merge, BAF_LOH_corrected
-from .XClone_combine import CNV_states_combination, copyloss_adjust
-from .XClone_combine import visualize_states_process
+# from .XClone_combine import BAF_LOH_merge, BAF_LOH_corrected
+# from .XClone_combine import CNV_states_combination, copyloss_adjust
+# from .XClone_combine import visualize_states_process
 
 from .XClone_combine import bin_to_gene_mapping
-
 from .XClone_combine import CNV_prob_combination
 from .XClone_combine import CNV_prob_merge_for_plot
 
-
+## post-step
 from ._denoise import denoise, denoise_gene_scale
 
 ## wrap

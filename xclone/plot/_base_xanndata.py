@@ -122,7 +122,7 @@ def Xheatmap(
     change_colorbar: bool = True,
     colorbar_ticks = [0, 1, 2], 
     colorbar_label = ["copy loss", "copy neutral", "copy gain"], 
-    colorbar_name = "CNV_states",
+    colorbar_name = "CNV states",
     set_grid: bool = False, 
     save_file: bool = False,
     out_file = 'XClone_Xheatmap_test.pdf',
@@ -306,7 +306,7 @@ def XXheatmap(
     change_colorbar: bool = True,
     colorbar_ticks = [0, 1, 2], 
     colorbar_label = ["copy loss", "copy neutral", "copy gain"], 
-    colorbar_name = "CNV_states",
+    colorbar_name = "CNV states",
     save_file: bool = False,
     out_file = 'XClone_XXheatmap_test.pdf',
     **kwargs):

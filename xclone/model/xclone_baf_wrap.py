@@ -67,6 +67,9 @@ def run_BAF(BAF_adata,
     concentration = config.concentration
 
     extreme_count_cap = config.extreme_count_cap
+    ## phasing
+    phasing_len = config.phasing_len
+    bin_nproc = config.bin_nproc
 
     # HMM settings
     start_prob = config.start_prob
@@ -124,8 +127,8 @@ def run_BAF(BAF_adata,
     ## BAF Phasing
     BAF_adata, merge_Xdata =  xclone.model.BAF_Local_phasing(BAF_adata, 
                                                              region_key = "chr", 
-                                                             phasing_len = 100, 
-                                                             bin_nproc=20)
+                                                             phasing_len = phasing_len, 
+                                                             bin_nproc = bin_nproc)
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
 
     # try:
@@ -283,9 +286,9 @@ def run_BAF_plot(merge_Xdata,
                                        save_file = True, 
                                        out_file = baf_smooth_fig)
     xclone.pl.BAF_CNV_visualization(merge_Xdata, weights = False, 
-                                 cell_anno_key = plot_cell_anno_key, 
-                                 save_file = True, 
-                                 out_file = baf_final_fig)
+                                    cell_anno_key = plot_cell_anno_key, 
+                                    save_file = True, 
+                                    out_file = baf_final_fig)
     
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time

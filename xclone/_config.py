@@ -123,6 +123,10 @@ class BAF_General_config():
         self.gene_specific = False
         self.concentration_lower = 20
         self.concentration_upper = 100
+        ## loacal phasing
+        self.phasing_len = 100
+        self.bin_nproc = 20
+
 
 class Combine_General_config():
     def __init__(self):

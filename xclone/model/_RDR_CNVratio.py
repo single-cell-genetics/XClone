@@ -20,7 +20,6 @@ from .HMM_NB import calculate_Xemm_prob2
 from .HMM_NB import calculate_Xemm_probTry
 from .HMM_base import XHMM_smoothing
 
-from ..plot._visualize  import convert_res_ann
 from ..plot._data import reorder_data_by_cellanno
 from ..plot._base_xanndata import Xheatmap
 from ..plot.CNV_plot import CNV_visualization

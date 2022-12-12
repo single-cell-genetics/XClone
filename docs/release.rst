@@ -4,7 +4,7 @@ Release History
 Version 0.3.4
 -------------
 - remove deprecated funcs
-
+- update plotting tool, mainly in color settings
 
 
 Version 0.3.3

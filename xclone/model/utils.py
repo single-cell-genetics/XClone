@@ -43,3 +43,8 @@ def pairwise2(iterable_arr):
     for i,k in zip(iterable_arr[0::1], iterable_arr[1::1]):
         print(str(i), '+', str(k), '=', str(i+k))
     return 0
+
+def class2onehot(prob_, states_class_num):
+    index_ = np.argmax(prob_, axis=-1)
+    one_hot_ = np.eye(states_class_num)[index_]
+    return one_hot_

@@ -12,7 +12,9 @@ from ._base_xanndata import Xheatmap, XXheatmap
 ## Visualization part in smoothing performance
 
 def smooth_visualization(Xdata, cell_anno_key = "cell_type", 
-                         Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, **kwargs):
+                         Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7,
+                         colorbar_name = "RDR smooth", 
+                         **kwargs):
     """
     RENAME TO `RDR_smooth_visualization`.
     """
@@ -20,17 +22,20 @@ def smooth_visualization(Xdata, cell_anno_key = "cell_type",
     Xheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
             vmin=vmin, vmax=vmax,
             colorbar_ticks = [vmin, 0, vmax], 
-            colorbar_label = ["copy loss",  "copy neutral",  "copy gain"], **kwargs)
+            colorbar_label = ["copy loss",  "copy neutral",  "copy gain"], 
+            colorbar_name = colorbar_name, **kwargs)
 
 def RDR_smooth_visualization(Xdata, cell_anno_key = "cell_type", 
-                             Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, **kwargs):
+                             Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, 
+                             colorbar_name = "RDR smooth", **kwargs):
     """
     """
     re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key = cell_anno_key)
     Xheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
             vmin=vmin, vmax=vmax,
             colorbar_ticks = [vmin, 0, vmax], 
-            colorbar_label = ["copy loss",  "copy neutral",  "copy gain"], **kwargs)
+            colorbar_label = ["copy loss",  "copy neutral",  "copy gain"], 
+            colorbar_name = colorbar_name, **kwargs)
 
 
 def smooth_visualization2(Xdata, cell_anno_key = ["cell_type", "Clone"],
@@ -60,9 +65,12 @@ def smooth_visualization3(Xdata, cell_anno_key = ["cell_type", "Clone"],
 
 
 def BAF_smooth_visualization(Xdata, cell_anno_key = "cell_type", 
-                             Xlayer = "phased_KNN_smoothed", **kwargs):
+                             Xlayer = "phased_KNN_smoothed", 
+                             colorbar_name = "BAF smooth",
+                             **kwargs):
     """
     """
     re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key = cell_anno_key)
     Xheatmap(re_Xdata, Xlayer = Xlayer, 
-             cell_anno_key = cell_anno_key, center = 0.5, cmap="vlag", **kwargs)
+             cell_anno_key = cell_anno_key, center = 0.5, cmap="vlag", 
+             colorbar_name = colorbar_name, **kwargs)
