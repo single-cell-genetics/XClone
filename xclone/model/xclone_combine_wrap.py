@@ -83,11 +83,23 @@ def run_combine(RDR_Xdata,
     combine_Xdata = xclone.model.CNV_prob_combination(combine_Xdata,
                          RDR_layer = "posterior_mtx",
                          BAF_layer = "BAF_extend_post_prob")
-
-    combine_Xdata.write(RDR_combine_corrected_file)
+    try:
+        combine_Xdata.write(RDR_combine_corrected_file)
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] combine_corrected_file saved in %s." %(out_data_dir))
+    
 
     combine_Xdata = xclone.model.CNV_prob_merge_for_plot(combine_Xdata, Xlayer = "loss_corrected_prob1")
-    combine_Xdata.write(combine_final_file)
+    try:
+        # RDR_adata.write(RDR_final_file)
+        combine_Xdata.write(combine_final_file)
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] combine_final_file saved in %s." %(out_data_dir))
+    
 
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time

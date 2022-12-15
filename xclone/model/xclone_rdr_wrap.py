@@ -70,6 +70,7 @@ def run_RDR(RDR_adata,
     gene_exp_ref_log = config.gene_exp_ref_log
     guide_cnv_ratio = config.guide_cnv_ratio
     ## smoothing settings
+    KNN_neighbors = config.KNN_neighbors
     WMA_window_size = config.WMA_window_size
     # plot settings
     xclone_plot = config.xclone_plot
@@ -176,7 +177,9 @@ def run_RDR(RDR_adata,
     RDR_adata = xclone.model.extra_preprocess(RDR_adata, cluster_key = cell_anno_key,
                                               ref_celltype = ref_celltype,
                                               depth_key='library_ratio_capped',
-                                              low_dim=False, run_KNN=True, copy=True)
+                                              low_dim=False, run_KNN=True, 
+                                              KNN_neighbors = KNN_neighbors,
+                                              copy=True)
 
     RDR_adata = xclone.model.RDR_smoothing_base(RDR_adata,
                                                 clip = True,
@@ -275,3 +278,9 @@ def run_RDR_plot(RDR_adata,
     time_passed = end_time - start_time
     sub_logger.info("RDR plot module finished (%d seconds)" % (time_passed.total_seconds()))
     return None
+
+def plot_RDR_module():
+    """
+    all plots for RDR module.
+    """
+    pass

@@ -270,6 +270,61 @@ def guide_CNV_states(RDR_Xdata,
     print("[XClone] RDR CNV states ratio guiding(copy loss, copy neutral, copy gain):", guide_cnv_ratio)
     return guide_cnv_ratio
 
+from sklearn.mixture import GaussianMixture
+def guide_RDR_CNV_ratio(RDR_Xdata, 
+                        Xlayer = "RDR_smooth", 
+                        anno_key = "chr_arm", 
+                        chr_lst = ["18p", "9q", "8q"], 
+                        states = ["CNV loss: ", "CNV neutral: ", "CNV gain: "],
+                        means_init = None,
+                        n_components = 3,
+                        max_iter = 50,
+                        **kwargs):
+    """
+    based on GMM model.
+    """
+    import matplotlib.pylab as plt
+    guide_cnv_ratio = []
+    
+    # for i, tmp_state in zip(range(len(states)), states):
+    if True:
+        
+        # flag_ = RDR_Xdata.var[anno_key] == chr_lst[i]
+        flag_ = RDR_Xdata.var[anno_key].isin(chr_lst)
+
+        data_ = RDR_Xdata[:, flag_].layers[Xlayer].reshape(-1,1)
+        
+        r = np.random.RandomState(seed=1234)
+        params = {}
+        params["n_components"] = n_components
+        params["max_iter"] = max_iter
+        params["random_state"] = r
+        params["tol"] = 1e-9
+        if means_init is not None:
+            params["means_init"] = means_init
+        # if i == 0:
+        #     params["means_init"] = np.array([0.5]).reshape(-1, 1)
+        # if i == 1:
+        #     params["means_init"] = np.array([1]).reshape(-1, 1)
+        # if i == 2:
+        #     params["means_init"] = np.array([1.5]).reshape(-1, 1)
+
+
+        params.update(**kwargs)
+        gmm = GaussianMixture(**params).fit(data_)
+
+        
+
+        sort_means = np.exp(np.sort(gmm.means_[:,0]))
+        print(sort_means)
+        # print(tmp_state, sort_means)
+        # if i == 0:
+        #     guide_cnv_ratio.append(sort_means[0])
+
+    return None
+
+
+
 def fit_CNV_ratio(Xdata, 
                   init_prob_layer = "emm_prob_log", 
                   hard_assign = True, 

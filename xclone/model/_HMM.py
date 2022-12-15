@@ -34,7 +34,8 @@ class Model_Base():
     pass
     
 class Model_NB():
-    def __init__(self, n_obs, n_var, n_sta, dispersion=None,
+    def __init__(self, n_obs, n_var, n_sta, 
+                 gene_specific = True, dispersion=None,
                  ref_value_init=None, lib_ratio_init=None, 
                  cnv_ratio_init=None):        
         """Initialise Model
@@ -56,10 +57,13 @@ class Model_NB():
         if cnv_ratio_init is not None:
             self.cnv_ratio[0, 0, :] = cnv_ratio_init
         
-        # NOTE: only use one dispersion for all genes here
         self.dispersion = np.ones((1, n_var, 1)) * 0.1
         if dispersion is not None:
-            self.dispersion[:, :, :] = dispersion
+            if gene_specific:
+                self.dispersion[0, :, 0] = dispersion
+            else:
+                self.dispersion[:, :, :] = dispersion
+                # NOTE: only use one dispersion for all genes here
                     
     @property
     def mean(self):

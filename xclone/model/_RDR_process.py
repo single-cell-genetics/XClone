@@ -16,7 +16,8 @@ from .base_utils import normalize
 
 def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
                      avg_key = "ref_avg", depth_key='counts_ratio', 
-                     low_dim=False, run_KNN=False, copy=False):
+                     low_dim=False, run_KNN=False, KNN_neighbors = 10,
+                     copy=False):
     """
     """
     import scipy as sp
@@ -65,7 +66,7 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
         raw_X = adata.X.copy()
         adata.X = np.log(adata.layers['ref_normalized'] + 0.3)
         sc.pp.pca(adata)
-        sc.pp.neighbors(adata, n_neighbors=10, n_pcs=40)
+        sc.pp.neighbors(adata, n_neighbors = KNN_neighbors, n_pcs=40)
         adata.X = raw_X
         ## connectivities normalization
         adata.obsp['connectivities'] = normalize(adata.obsp['connectivities'])

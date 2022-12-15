@@ -43,6 +43,8 @@ from ._RDR_CNVratio  import fit_CNV_ratio
 from ._RDR_CNVratio  import generate_emm_GT
 from ._RDR_CNVratio  import hard_assign_prob
 
+from ._RDR_CNVratio  import guide_RDR_CNV_ratio
+
 ## iteration part
 from ._RDR_CNVratio import combine_BAF_emmprob
 from ._RDR_CNVratio import CNV_optimazation
@@ -110,3 +112,6 @@ from .xclone_baf_wrap import preview_BAF
 from .xclone_baf_wrap import run_BAF, run_BAF_plot
 
 from .xclone_combine_wrap import run_combine, run_combine_plot
+
+## 
+from ._HMM import Model_NB, HMM_Frame

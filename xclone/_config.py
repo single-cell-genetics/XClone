@@ -77,12 +77,22 @@ class PreprocessingConfig():
         if self.module == "Combine":
             self.RDR_adata_file = self.rdr_data_dir + "RDR_adata_KNN_HMM_post.h5ad"
             self.BAF_adata_file = self.baf_data_dir + "BAF_merge_Xdata_KNN_HMM_post.h5ad"
+    
+    def display(self):
+        """Display Configuration values."""
+        print(self.module, "\nConfigurations:")
+        for a in dir(self):
+            if not a.startswith("__") and not callable(getattr(self, a)):
+                print("{:30} {}".format(a, getattr(self, a)))
+        print("\n")    
 
 class XCloneGeneral_config():
     def __init__(self):
         self.cell_anno_key = "cell_type"
         self.ref_celltype = "N"
         self.exclude_XY = False
+        # KNN smoothing
+        self.KNN_neighbors = 10
 
 class RDR_General_config():
     def __init__(self):
@@ -101,7 +111,7 @@ class RDR_General_config():
         self.gene_exp_ref_log = True
         self.guide_cnv_ratio = None
         self.guide_chr_anno_key = "chr_arm"
-        self.guide_qt_lst = [0.00001, 0.96, 0.99999]
+        self.guide_qt_lst = [0.00001, 0.95, 0.99999]
         # self.guide_chr_anno_key = "chr"
         # self.guide_qt_lst = [0.00001, 0.96, 0.999]
         self.xclone_plot = True
@@ -120,6 +130,7 @@ class BAF_General_config():
         self.theo_neutral_BAF = None
         self.WMA_window_size = 101
         self.concentration = 100
+        self.extreme_count_cap = False
         self.gene_specific = False
         self.concentration_lower = 20
         self.concentration_upper = 100
@@ -167,6 +178,7 @@ class Smartseq_Config():
             pass
         
         self.exclude_XY = True
+        self.KNN_neighbors = 5
 
 ## todo: denoise part
 
@@ -279,7 +291,7 @@ class XCloneConfig():
 
     def display(self):
         """Display Configuration values."""
-        print("\nConfigurations:")
+        print(self.module, "\nConfigurations:")
         for a in dir(self):
             if not a.startswith("__") and not callable(getattr(self, a)):
                 print("{:30} {}".format(a, getattr(self, a)))
