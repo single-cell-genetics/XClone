@@ -117,8 +117,9 @@ class RDR_General_config():
         # self.guide_qt_lst = [0.00001, 0.96, 0.999]
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
-
+        ## smoothing
         self.WMA_window_size = 40
+        self.WMA_smooth_key = "chr_arm"
         ## RDR plotting
         self.rdr_plot_vmin = -0.7
         self.rdr_plot_vmax = 0.7
@@ -140,8 +141,11 @@ class BAF_General_config():
         self.concentration_lower = 20
         self.concentration_upper = 100
         ## loacal phasing
+        self.phasing_region_key = "chr"
         self.phasing_len = 100
         self.bin_nproc = 20
+        ## smoothing
+        self.WMA_smooth_key = "chr_arm"
         ## BAF plotting
         self.set_figtitle = True
 

@@ -15,6 +15,7 @@ def RDR_smoothing_base(Xdata,
                        cell_anno_key = "cell_type",
                        ref_celltype = "unclassified",
                        WMA_window_size = 50,
+                       chrom_key = "chr_arm",
                        KNN_sm = True,
                        KNN_connect_use = "connectivities",
                        verbose = False
@@ -38,7 +39,7 @@ def RDR_smoothing_base(Xdata,
     adata_tmp.X = np.array(adata_tmp.X)
 
     ## WMA smoothing
-    adata_tmp = WMA_smooth(adata_tmp, layer=None, out_layer = "WMA_smoothed", chrom_key='chr_arm', 
+    adata_tmp = WMA_smooth(adata_tmp, layer=None, out_layer = "WMA_smoothed", chrom_key=chrom_key, 
         gene_coordinate_key = 'start', method='pyramidinal', window_size = WMA_window_size, verbose=verbose)
     
     Xdata.layers["WMA_smoothed"] = adata_tmp.layers["WMA_smoothed"].copy()

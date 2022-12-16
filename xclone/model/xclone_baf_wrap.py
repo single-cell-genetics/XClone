@@ -62,14 +62,18 @@ def run_BAF(BAF_adata,
     # BAF settings
     RDR_file = config.RDR_file
     theo_neutral_BAF = config.theo_neutral_BAF
-    WMA_window_size = config.WMA_window_size
     gene_specific = config.gene_specific
     concentration = config.concentration
 
     extreme_count_cap = config.extreme_count_cap
     ## phasing
+    phasing_region_key = config.phasing_region_key
     phasing_len = config.phasing_len
     bin_nproc = config.bin_nproc
+
+    ## smoothing
+    WMA_window_size = config.WMA_window_size
+    WMA_smooth_key = config.WMA_smooth_key
 
     # HMM settings
     start_prob = config.start_prob
@@ -126,7 +130,7 @@ def run_BAF(BAF_adata,
                                                  uns_anno_key = None)
     ## BAF Phasing
     BAF_adata, merge_Xdata =  xclone.model.BAF_Local_phasing(BAF_adata, 
-                                                             region_key = "chr", 
+                                                             region_key = phasing_region_key, 
                                                              phasing_len = phasing_len, 
                                                              bin_nproc = bin_nproc)
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
@@ -162,13 +166,15 @@ def run_BAF(BAF_adata,
     merge_Xdata = xclone.model.WMA_smooth(merge_Xdata, 
                                           layer="BAF_phased_KNN", 
                                           out_layer='BAF_phased_KNN_WMA', 
-                                          window_size = WMA_window_size, 
+                                          window_size = WMA_window_size,
+                                          chrom_key = WMA_smooth_key, 
                                           verbose=False)
     
     merge_Xdata = xclone.model.WMA_smooth(merge_Xdata, 
                                           layer="fill_BAF_phased", 
                                           out_layer='BAF_phased_WMA', 
                                           window_size = WMA_window_size, 
+                                          chrom_key = WMA_smooth_key,
                                           verbose=False)
     # merge_Xdata = xclone.model.KNN_smooth(merge_Xdata, 
     #                                       KNN_connect_use = "connectivities_expr", 

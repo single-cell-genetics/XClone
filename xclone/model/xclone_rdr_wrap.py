@@ -76,6 +76,7 @@ def run_RDR(RDR_adata,
     ## smoothing settings
     KNN_neighbors = config.KNN_neighbors
     WMA_window_size = config.WMA_window_size
+    WMA_smooth_key = config.WMA_smooth_key
     # plot settings
     xclone_plot = config.xclone_plot
     plot_cell_anno_key = config.plot_cell_anno_key
@@ -191,6 +192,7 @@ def run_RDR(RDR_adata,
                                                 cell_anno_key = cell_anno_key,
                                                 ref_celltype = ref_celltype,
                                                 WMA_window_size = WMA_window_size,
+                                                chrom_key = WMA_smooth_key,
                                                 KNN_sm = True,
                                                 KNN_connect_use = "connectivities")
     
