@@ -27,14 +27,12 @@ def smooth_visualization(Xdata, cell_anno_key = "cell_type",
 
 def RDR_smooth_visualization(Xdata, cell_anno_key = "cell_type", 
                              Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, 
-                             colorbar_name = "RDR smooth", **kwargs):
+                             colorbar_name = "RDR smooth (log)", **kwargs):
     """
     """
     re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key = cell_anno_key)
     Xheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
             vmin=vmin, vmax=vmax,
-            colorbar_ticks = [vmin, 0, vmax], 
-            colorbar_label = ["copy loss",  "copy neutral",  "copy gain"], 
             colorbar_name = colorbar_name, **kwargs)
 
 

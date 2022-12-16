@@ -5,6 +5,9 @@ Version 0.3.4
 -------------
 - remove deprecated funcs
 - update plotting tool, mainly in color settings
+- update xclone tutorials in version 0.3.4
+- add tutorials in xclone plotting
+- add tutorials in xclone data analysis
 
 
 Version 0.3.3

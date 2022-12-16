@@ -58,6 +58,9 @@ def run_RDR(RDR_adata,
     # HMM settings
     start_prob = config.start_prob
     trans_t = config.trans_t
+    ## optimize 
+    max_iter = config.max_iter
+    min_iter = config.min_iter
 
     # RDR settings
     filter_ref_ave = config.filter_ref_ave
@@ -68,6 +71,7 @@ def run_RDR(RDR_adata,
     dispersion_celltype = config.dispersion_celltype
     gene_exp_group = config.gene_exp_group
     gene_exp_ref_log = config.gene_exp_ref_log
+    remove_guide_XY = config.remove_guide_XY
     guide_cnv_ratio = config.guide_cnv_ratio
     ## smoothing settings
     KNN_neighbors = config.KNN_neighbors
@@ -194,7 +198,8 @@ def run_RDR(RDR_adata,
         chr_anno_key = config.guide_chr_anno_key
         guide_chr_lst = xclone.model.guide_CNV_chrs(RDR_adata, 
                                                     Xlayer = "RDR_smooth", 
-                                                    anno_key = chr_anno_key)
+                                                    anno_key = chr_anno_key,
+                                                    remove_XY = remove_guide_XY)
         guide_qt_lst = config.guide_qt_lst
         guide_cnv_ratio = xclone.model.guide_CNV_states(RDR_adata, 
                                                         Xlayer = "RDR_smooth", 
@@ -210,8 +215,8 @@ def run_RDR(RDR_adata,
     t = trans_t
     trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
     RDR_adata = xclone.model.CNV_optimazation(RDR_adata, init_state_ratio = guide_cnv_ratio,
-                    max_iter=2,
-                    min_iter=1,
+                    max_iter = max_iter,
+                    min_iter = min_iter,
                     start_prob = start_prob,
                     trans_prob = trans_prob,
                     verbose = True)
@@ -229,16 +234,27 @@ def run_RDR(RDR_adata,
     main_logger.info("XClone RDR module finished (%d seconds)" % (time_passed.total_seconds()))
     
     if xclone_plot:
+        rdr_plot_vmin = config.rdr_plot_vmin
+        rdr_plot_vmax = config.rdr_plot_vmax
+        set_figtitle = config.set_figtitle
         if run_verbose:
             print("[XClone plotting]")
         if plot_cell_anno_key is None:
             plot_cell_anno_key = cell_anno_key
-        run_RDR_plot(RDR_adata, dataset_name, plot_cell_anno_key, out_dir)
+        
+        run_RDR_plot(RDR_adata, dataset_name, 
+                     plot_cell_anno_key, 
+                     set_figtitle,
+                     rdr_plot_vmin, rdr_plot_vmax, 
+                     out_dir)
     return RDR_adata                                              
  
 def run_RDR_plot(RDR_adata,
             dataset_name,
             plot_cell_anno_key,
+            set_figtitle = True,
+            rdr_plot_vmin = -0.7,
+            rdr_plot_vmax = 0.7,
             out_dir = None):
     """
     """
@@ -259,18 +275,25 @@ def run_RDR_plot(RDR_adata,
     sub_logger.info("RDR plot module started")
     start_time = datetime.now(timezone.utc)
     
-    
+    if set_figtitle:
+        fig_title = dataset_name + " RDR_smooth (log scale ratio)"
+
     xclone.pl.RDR_smooth_visualization(RDR_adata, 
                                        Xlayer = "RDR_smooth", 
                                        cell_anno_key = plot_cell_anno_key,
-                                       vmin=-0.7, vmax=0.7, 
+                                       change_colorbar = False,
+                                       vmin = rdr_plot_vmin, vmax = rdr_plot_vmax,
+                                       title = fig_title,
                                        save_file = True, 
                                        out_file = rdr_smooth_fig)
+    if set_figtitle:
+        fig_title = dataset_name + " RDR module"
     
     xclone.pl.CNV_visualization(RDR_adata, 
                                 states_weight = np.array([1,2,3]), 
                                 weights = True, 
                                 cell_anno_key = plot_cell_anno_key, 
+                                title = fig_title,
                                 save_file = True, 
                                 out_file = rdr_final_fig)
     

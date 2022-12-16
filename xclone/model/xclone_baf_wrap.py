@@ -251,15 +251,20 @@ def run_BAF(BAF_adata,
     main_logger.info("XClone BAF module finished (%d seconds)" % (time_passed.total_seconds()))
 
     if xclone_plot:
+        set_figtitle = config.set_figtitle
         if plot_cell_anno_key is None:
             plot_cell_anno_key = cell_anno_key
-        run_BAF_plot(merge_Xdata, dataset_name, plot_cell_anno_key, out_dir)
+        run_BAF_plot(merge_Xdata, dataset_name, 
+                     plot_cell_anno_key, 
+                     set_figtitle,
+                     out_dir)
 
     return merge_Xdata
 
 def run_BAF_plot(merge_Xdata,
                  dataset_name,
                  plot_cell_anno_key,
+                 set_figtitle = True,
                  out_dir = None):
     """
     """
@@ -271,22 +276,28 @@ def run_BAF_plot(merge_Xdata,
     out_plot_dir = str(out_dir) + "/plot/"
     xclone.al.dir_make(out_plot_dir)
 
-    # fig_title = ""
+    fig_title = ""
     baf_smooth_fig = out_plot_dir + dataset_name + "_BAF_smooth.png"
     baf_final_fig = out_plot_dir + dataset_name + "_BAF_CNV.png"
 
     sub_logger = get_logger("BAF plot module")
     sub_logger.info("BAF plot module started")
     start_time = datetime.now(timezone.utc)
-    
+
+    if set_figtitle:
+        fig_title = dataset_name + " BAF smooth"
     xclone.pl.BAF_smooth_visualization(merge_Xdata, Xlayer = "BAF_phased_KNN_WMA", 
                                        cell_anno_key = plot_cell_anno_key, 
                                        change_colorbar = False, 
                                        colorbar_name = "BAF",
+                                       title = fig_title,
                                        save_file = True, 
                                        out_file = baf_smooth_fig)
+    if set_figtitle:
+        fig_title = dataset_name + " BAF module"
     xclone.pl.BAF_CNV_visualization(merge_Xdata, weights = False, 
                                     cell_anno_key = plot_cell_anno_key, 
+                                    title = fig_title,
                                     save_file = True, 
                                     out_file = baf_final_fig)
     

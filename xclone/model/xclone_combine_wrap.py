@@ -106,11 +106,16 @@ def run_combine(RDR_Xdata,
     main_logger.info("XClone combine module finished (%d seconds)" % (time_passed.total_seconds()))
 
     if xclone_plot:
+        set_figtitle = config.set_figtitle
         if run_verbose:
             print("[XClone plotting]")
         if plot_cell_anno_key is None:
             plot_cell_anno_key = cell_anno_key
-        run_combine_plot(combine_Xdata, dataset_name, plot_cell_anno_key, merge_loss, merge_loh, out_dir)
+        run_combine_plot(combine_Xdata, dataset_name, 
+                         plot_cell_anno_key, 
+                         merge_loss, merge_loh, 
+                         set_figtitle,
+                         out_dir)
     
     return combine_Xdata
 
@@ -120,6 +125,7 @@ def run_combine_plot(combine_Xdata,
             plot_cell_anno_key,
             merge_loss = True,
             merge_loh = True,
+            set_figtitle = True,
             out_dir = None):
     """
     """
@@ -132,17 +138,22 @@ def run_combine_plot(combine_Xdata,
     out_plot_dir = str(out_dir) + "/plot/"
     xclone.al.dir_make(out_plot_dir)
 
-
+    fig_title = ""
     combine_res_base_fig = out_plot_dir + dataset_name + "combine_base.png"
     combine_res_select_fig = out_plot_dir + dataset_name + "combine_select.png"
 
     sub_logger = get_logger("Combine plot module")
     sub_logger.info("Combine plot module started")
     start_time = datetime.now(timezone.utc)
+    if set_figtitle:
+        fig_title = dataset_name + " XClone Combine module"
+
 
     ## BASE PLOT
     xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "prob1_merge", 
-        cell_anno_key = plot_cell_anno_key,  save_file = True, out_file = combine_res_base_fig)
+        cell_anno_key = plot_cell_anno_key,  
+        title = fig_title,
+        save_file = True, out_file = combine_res_base_fig)
     
     ## SELECT PLOT
     if merge_loh:
@@ -155,6 +166,7 @@ def run_combine_plot(combine_Xdata,
                                         states_num = 4, 
                                         colorbar_ticks = colorbar_ticks,
                                         colorbar_label = colorbar_label,
+                                        title = fig_title,
                                         save_file = True, 
                                         out_file = combine_res_select_fig)
         else:
@@ -166,6 +178,7 @@ def run_combine_plot(combine_Xdata,
                                         states_num = 5,
                                         colorbar_ticks = colorbar_ticks,
                                         colorbar_label = colorbar_label,
+                                        title = fig_title,
                                         save_file = True, 
                                         out_file = combine_res_select_fig)
     elif merge_loss:
@@ -177,6 +190,7 @@ def run_combine_plot(combine_Xdata,
                                         states_num = 5,
                                         colorbar_ticks = colorbar_ticks,
                                         colorbar_label = colorbar_label,
+                                        title = fig_title,
                                         save_file = True, 
                                         out_file = combine_res_select_fig)
         
@@ -189,6 +203,7 @@ def run_combine_plot(combine_Xdata,
                                         states_num = 6,
                                         colorbar_ticks = colorbar_ticks,
                                         colorbar_label = colorbar_label,
+                                        title = fig_title,
                                         save_file = True, 
                                         out_file = combine_res_select_fig)
     

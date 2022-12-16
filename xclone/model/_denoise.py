@@ -92,3 +92,23 @@ def denoise_gene_scale(Xdata, Xlayer,
      
     Xdata.layers[out_layer] = denoise_mtx
     return Xdata
+
+import numpy as np
+def merge_denoise_prob(Xdata,
+              in_layer,
+              out_layer):
+    """
+    default: merge_index = [0,1] for BCH869 dataset. 
+    todo:extend to other merge situation
+    
+    Example:
+    --------
+    >>> combine_Xdata = merge_denoise_prob(combine_Xdata, 
+                           in_layer = "denoised_gene_prob",
+                           out_layer = "denoised_gene_prob_merge")
+    """
+    Xdata.layers[out_layer] = Xdata.layers[in_layer].copy()
+    Xdata.layers[out_layer][:,:,0] = Xdata.layers[out_layer][:,:,0] + Xdata.layers[out_layer][:,:,1]
+    Xdata.layers[out_layer] = np.delete(Xdata.layers[out_layer], [1], axis = -1)
+    return Xdata
+

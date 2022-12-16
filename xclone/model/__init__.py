@@ -101,8 +101,8 @@ from .XClone_combine import bin_to_gene_mapping
 from .XClone_combine import CNV_prob_combination
 from .XClone_combine import CNV_prob_merge_for_plot
 
-## post-step
-from ._denoise import denoise, denoise_gene_scale
+## post-step[analysis for specific dataset]
+from ._denoise import denoise_gene_scale, merge_denoise_prob
 
 ## wrap
 from .xclone_rdr_wrap import preview_RDR
@@ -113,5 +113,5 @@ from .xclone_baf_wrap import run_BAF, run_BAF_plot
 
 from .xclone_combine_wrap import run_combine, run_combine_plot
 
-## 
+## debug-develop-improvement
 from ._HMM import Model_NB, HMM_Frame

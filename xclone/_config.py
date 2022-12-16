@@ -91,6 +91,7 @@ class XCloneGeneral_config():
         self.cell_anno_key = "cell_type"
         self.ref_celltype = "N"
         self.exclude_XY = False
+        self.remove_guide_XY = False
         # KNN smoothing
         self.KNN_neighbors = 10
 
@@ -111,13 +112,17 @@ class RDR_General_config():
         self.gene_exp_ref_log = True
         self.guide_cnv_ratio = None
         self.guide_chr_anno_key = "chr_arm"
-        self.guide_qt_lst = [0.00001, 0.95, 0.99999]
+        self.guide_qt_lst = [0.00001, 0.96, 0.99999]
         # self.guide_chr_anno_key = "chr"
         # self.guide_qt_lst = [0.00001, 0.96, 0.999]
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
 
         self.WMA_window_size = 40
+        ## RDR plotting
+        self.rdr_plot_vmin = -0.7
+        self.rdr_plot_vmax = 0.7
+        self.set_figtitle = True
 
 
 class BAF_General_config():
@@ -137,6 +142,9 @@ class BAF_General_config():
         ## loacal phasing
         self.phasing_len = 100
         self.bin_nproc = 20
+        ## BAF plotting
+        self.set_figtitle = True
+
 
 
 class Combine_General_config():
@@ -149,6 +157,7 @@ class Combine_General_config():
         ## combine plotting
         self.merge_loss = True
         self.merge_loh = True
+        self.set_figtitle = True
         
 
 class HMM_Configs():
@@ -158,6 +167,8 @@ class HMM_Configs():
         """
         self.start_prob = np.array([0.1, 0.8, 0.1])
         self.trans_t = 1e-6
+        self.max_iter = 2
+        self.min_iter = 1
 
 class Smartseq_Config():
     def __init__(
@@ -178,6 +189,7 @@ class Smartseq_Config():
             pass
         
         self.exclude_XY = True
+        self.remove_guide_XY = True
         self.KNN_neighbors = 5
 
 ## todo: denoise part
