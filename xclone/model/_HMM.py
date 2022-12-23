@@ -226,10 +226,10 @@ class HMM_Frame:
             
             # Convergence check
             if it >= min_iter:
-                if logLik_all[it] - logLik_all[it - 1] < epsilon_conv:
-                    break
-                elif logLik_all[it] < logLik_all[it - 1]:
+                if logLik_all[it] < logLik_all[it - 1]:
                     print("Warning: step %d, loglik decrease from %.2e to %.2e" 
-                          %(it, logLik_all[it-1], logLik_all[it]))
+                          %(it, logLik_all[it-1], logLik_all[it]))         
+                elif logLik_all[it] - logLik_all[it - 1] < epsilon_conv:
+                    break
                     
         self.logLik_all = logLik_all[:it]
