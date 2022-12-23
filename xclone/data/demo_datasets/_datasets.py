@@ -115,6 +115,8 @@ def bch869_baf(file_path: Union[str, Path] = "data/BCH869/BCH869_BAF_adata.h5ad"
     Genome version: refdata-cellranger-hg19-3.0.0
     Preprocessd: xcltk v0.1.15 BAF pipeline.
 
+    gene mode
+
     Arguments
     ---------
     file_path
@@ -130,6 +132,39 @@ def bch869_baf(file_path: Union[str, Path] = "data/BCH869/BCH869_BAF_adata.h5ad"
     >>> BAF_adata = xclone.data.bch869_baf()
     """
     url = f"{url_datadir}BCH869_scRNA/BCH869_BAF_adata.h5ad"
+    adata = read(file_path, backup_url=url)
+
+    return adata
+
+def bch869_baf_50kb(file_path: Union[str, Path] = "data/BCH869/BCH869_BAF_adata_50kb.h5ad"):
+    """A glioma sample BCH869 with histone H3 lysine27-to-methionine mutations (H3K27M-glioma), 
+    where 489 malignant cells and 3 non-tumour cells were probed by smart-seq2.
+    From `Filbin MG et al. (2018) <https://doi.org/10.1126%2Fscience.aao4750>`__.
+    scRNA-seq Source: GSE102130
+    Platform: SMART-seq2
+    Number of cells: 960 in total; 489 in detected clones
+    annotation: Single Cell Portal Study: single-cell analysis in pediatric 
+    midline gliomas with histone H3K27M mutation
+    Genome version: refdata-cellranger-hg19-3.0.0
+    Preprocessd: xcltk v0.1.15 BAF pipeline.
+
+    50kb block mode
+
+    Arguments
+    ---------
+    file_path
+        Path where to save dataset and read it from.
+    
+    Returns
+    -------
+    Returns `adata` object
+
+    Example
+    -------
+    >>> import xclones
+    >>> BAF_adata = xclone.data.bch869_baf_50kb()
+    """
+    url = f"{url_datadir}BCH869_scRNA/BCH869_BAF_adata_50kb.h5ad"
     adata = read(file_path, backup_url=url)
 
     return adata

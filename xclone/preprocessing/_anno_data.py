@@ -22,11 +22,11 @@ def load_anno(genome_mode):
     if genome_mode == "hg38_genes":
         stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_genes_hg38_update.txt')
     if genome_mode == "hg38_blocks":
-        stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_blocks_hg38.txt')
+        stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_blocks_hg38_update.txt')
     if genome_mode == "hg19_genes":
         stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_genes_hg19_update.txt')
     if genome_mode == "hg19_blocks":
-        stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_blocks_hg19.txt')
+        stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_blocks_hg19_update.txt')
     return pd.read_table(stream)#encoding='latin-1'
 
 
