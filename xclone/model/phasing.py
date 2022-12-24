@@ -12,7 +12,7 @@ from .base_utils import normalize, loglik_amplify
 
 
 def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
-                  verbose=False):
+                  init_mode='warm', verbose=False):
     """
     Phase the small blocks into a medium sized bin by assuming the allelic
     ratio is the same for all blocks. This is equavilent to a binary clustering,
@@ -32,9 +32,20 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
     N, M = AD.shape
     BD = DP - AD
     
-    # allele flipping probability (initialization with no flipping)
-    Z = np.zeros((N, 2))
-    Z[:, 0] = 1 ## high prob means no flipping
+    ## Initialization matters!!!
+    if init_mode == 'warm':
+        # Option 1: warm initialization (usually good?)
+        Z = np.zeros((N, 2))
+        Z[:, 0] = (AD.sum(1) / DP.sum(1)).reshape(-1)
+        Z[:, 1] = 1 - Z[:, 0]
+    elif init_mode == 'current':
+        # Option 2: initializing with no flipping (can return poor local optimal)
+        Z = np.zeros((N, 2))
+        Z[:, 0] = 1 ## high prob means no flipping
+    else:
+        # Option 2: random initialization (may need large number of trials)
+        Z = np.random.randint(low=0, high=2, size=(N, 2))
+        Z[:, 1] = 1 - Z[:, 0]
     
     # allele ratio parameters
     # thetas = np.array((AD.T * Z + BD.T * (1 - Z)) / (DP.T.sum(1)))
