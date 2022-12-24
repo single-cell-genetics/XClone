@@ -43,8 +43,8 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
         Z = np.zeros((N, 2))
         Z[:, 0] = 1 ## high prob means no flipping
     else:
-        # Option 2: random initialization (may need large number of trials)
-        Z = np.random.randint(low=0, high=2, size=(N, 2))
+        # Option 3: random initialization (may need large number of trials)
+        Z = np.random.rand(N, 2)
         Z[:, 1] = 1 - Z[:, 0]
     
     # allele ratio parameters
