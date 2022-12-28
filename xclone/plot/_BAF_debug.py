@@ -12,6 +12,33 @@ import scipy as sp
 
 ## debug analysis part
 
+## debug plotting
+
+def bulk_AF_chr(Xdata, chr_select = "10", 
+                cell_anno_key = "Clone_ID", cluster_ID = 1,
+                ad_key = "AD",
+                dp_key = "DP",
+                fig_title = "bulk AD/DP"):
+                
+    """
+    debug BCH869 chr10p AF.
+    """
+    import matplotlib.pylab as plt
+    BAF_adata = Xdata[:, Xdata.var["chr"] == chr_select]
+    cell_flag = Xdata.obs[cell_anno_key] == cluster_ID
+    BAF_adata = BAF_adata[cell_flag, :].copy()
+    
+    BAF_adata_p = BAF_adata[:, BAF_adata.var["arm"] == "p"].copy()
+    # BAF_adata_q = BAF_adata[:, BAF_adata.var["arm"] == "q"].copy()
+    
+    plt.plot(BAF_adata.layers[dp_key].sum(axis=0).reshape(-1, 1),alpha = 0.6)
+    plt.plot(BAF_adata_p.layers[dp_key].sum(axis=0).reshape(-1, 1), alpha = 0.6)
+
+    plt.plot(BAF_adata.layers[ad_key].sum(axis=0).reshape(-1, 1), alpha = 0.8)
+    plt.plot(BAF_adata_p.layers[ad_key].sum(axis=0).reshape(-1, 1), alpha = 0.8)
+    plt.title(fig_title)
+
+
 def state_specific_df(state_prob, Xdata, CNV_states_type = "copy_loss"):
     """
     """

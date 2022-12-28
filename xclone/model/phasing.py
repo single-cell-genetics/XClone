@@ -17,6 +17,9 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
     Phase the small blocks into a medium sized bin by assuming the allelic
     ratio is the same for all blocks. This is equavilent to a binary clustering,
     whose likelihood can be maximised by an EM alogrithm
+
+    # Note that AD DP should be in in Compressed Sparse Column format.
+    # or other sparse format.
     
     Parameters
     ----------

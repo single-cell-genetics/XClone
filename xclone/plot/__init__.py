@@ -32,6 +32,7 @@ from ._BAF_debug import state_specific_df, transfer_prob_to_df, visualize_emm_pr
 from ._BAF_debug import visualize_BAF_distribution
 
 from ._BAF_debug import get_count_df, visualize_DP
+from ._BAF_debug import bulk_AF_chr
 
 from ._explore import visualize_prob, compare_prob
 from ._explore import visualize_count

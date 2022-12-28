@@ -139,8 +139,8 @@ def run_combine_plot(combine_Xdata,
     xclone.al.dir_make(out_plot_dir)
 
     fig_title = ""
-    combine_res_base_fig = out_plot_dir + dataset_name + "combine_base.png"
-    combine_res_select_fig = out_plot_dir + dataset_name + "combine_select.png"
+    combine_res_base_fig = out_plot_dir + dataset_name + "_combine_base.png"
+    combine_res_select_fig = out_plot_dir + dataset_name + "_combine_select.png"
 
     sub_logger = get_logger("Combine plot module")
     sub_logger.info("Combine plot module started")

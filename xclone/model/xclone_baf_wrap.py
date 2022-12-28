@@ -66,6 +66,8 @@ def run_BAF(BAF_adata,
     concentration = config.concentration
 
     extreme_count_cap = config.extreme_count_cap
+    ## RDR related
+    remove_marker_genes = config.remove_marker_genes
     ## phasing
     phasing_region_key = config.phasing_region_key
     phasing_len = config.phasing_len
@@ -121,13 +123,14 @@ def run_BAF(BAF_adata,
     ## check validated RDR and BAF
     xclone.pp.check_RDR_BAF_cellorder(RDR_adata, BAF_adata)
     ## Remove marker genes
-    marker_genes = RDR_adata.uns["rank_marker_genes"]
-    BAF_adata = xclone.pp.Xdata_region_selection(BAF_adata,
-                                                 select = False,
-                                                 chr_anno_key = "GeneName",
-                                                 chr_lst = marker_genes,
-                                                 update_uns = False,
-                                                 uns_anno_key = None)
+    if remove_marker_genes:
+        marker_genes = RDR_adata.uns["rank_marker_genes"]
+        BAF_adata = xclone.pp.Xdata_region_selection(BAF_adata,
+                                                    select = False,
+                                                    chr_anno_key = "GeneName",
+                                                    chr_lst = marker_genes,
+                                                     update_uns = False,
+                                                    uns_anno_key = None)
     ## BAF Phasing
     BAF_adata, merge_Xdata =  xclone.model.BAF_Local_phasing(BAF_adata, 
                                                              region_key = phasing_region_key, 
@@ -229,11 +232,11 @@ def run_BAF(BAF_adata,
                                                       gene_specific = gene_specific, 
                                                       concentration = concentration)
 
-    merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
-                                             inlayer = "bin_phased_BAF_specific_center_emm_prob_log",
-                                             outlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN",
-                                             KNN_connectivities_key = "connectivities_expr",
-                                             KNN_smooth = True)
+    # merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
+    #                                          inlayer = "bin_phased_BAF_specific_center_emm_prob_log",
+    #                                          outlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN",
+    #                                          KNN_connectivities_key = "connectivities_expr",
+    #                                          KNN_smooth = True)
 
     t = trans_t
     trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
@@ -241,10 +244,18 @@ def run_BAF(BAF_adata,
     merge_Xdata = xclone.model.XHMM_smoothing(merge_Xdata, 
                                               start_prob = start_prob,  
                                               trans_prob = trans_prob, 
-                                              emm_inlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN", 
+                                              emm_inlayer = "bin_phased_BAF_specific_center_emm_prob_log", 
                                               nproc = 80, 
                                               verbose = False)
     
+    merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
+                                             inlayer = "posterior_mtx_log",
+                                             outlayer = "posterior_mtx_log_KNN",
+                                             KNN_connectivities_key = "connectivities_expr",
+                                             KNN_smooth = True)
+    
+    merge_Xdata.layers["posterior_mtx"] = np.exp(merge_Xdata.layers["posterior_mtx_log_KNN"])
+
     try:
         merge_Xdata.write(BAF_final_file)
     except Exception as e:

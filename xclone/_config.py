@@ -140,10 +140,15 @@ class BAF_General_config():
         self.gene_specific = False
         self.concentration_lower = 20
         self.concentration_upper = 100
+        ## related to RDR
+        self.remove_marker_genes = True
         ## loacal phasing
+        # self.init_mode = "warm"
         self.phasing_region_key = "chr"
         self.phasing_len = 100
         self.bin_nproc = 20
+        
+
         ## smoothing
         self.WMA_smooth_key = "chr_arm"
         ## BAF plotting
@@ -194,7 +199,7 @@ class Smartseq_Config():
         
         self.exclude_XY = True
         self.remove_guide_XY = True
-        self.KNN_neighbors = 5
+        # self.KNN_neighbors = 5
 
 ## todo: denoise part
 
