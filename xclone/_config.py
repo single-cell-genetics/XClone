@@ -143,6 +143,7 @@ class BAF_General_config():
         ## related to RDR
         self.remove_marker_genes = True
         ## loacal phasing
+        self.feature_mode = "GENE"
         # self.init_mode = "warm"
         self.phasing_region_key = "chr"
         self.phasing_len = 100

@@ -137,6 +137,7 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
                       phasing_len = 100, 
                       region_nproc=1, 
                       bin_nproc=1, 
+                      feature_mode = "GENE", # feature_mode ="BLOCK"
                       verbose = False):
     """
     Func:
@@ -239,23 +240,27 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
             GeneID_dict[key] = tmp_geneid_lst
         
         return GeneName_lst, GeneID_lst, GeneName_dict, GeneID_dict
-    
-    GeneName_lst, GeneID_lst, GeneName_dict, GeneID_dict = get_bin_genes(merge_var3, group_key = "bin_idx_cum")
-    merge_var["GeneName_lst"] = [",".join(x) for x in GeneName_lst]
-    merge_var["GeneID_lst"] = [",".join(x) for x in GeneID_lst]
+    if feature_mode == "GENE":
+        GeneName_lst, GeneID_lst, GeneName_dict, GeneID_dict = get_bin_genes(merge_var3, group_key = "bin_idx_cum")
+        merge_var["GeneName_lst"] = [",".join(x) for x in GeneName_lst]
+        merge_var["GeneID_lst"] = [",".join(x) for x in GeneID_lst]
 
 
-    merge_var = merge_var[["chr", "start", "stop", "arm", "chr_arm", "band", "gene1_stop", 
-    "bin_stop_arm","bin_stop_chr_arm", "bin_stop_band", "bin_idx", "bin_idx_cum",
-    "GeneName_lst", "GeneID_lst"]]
+        merge_var = merge_var[["chr", "start", "stop", "arm", "chr_arm", "band", "gene1_stop", 
+        "bin_stop_arm","bin_stop_chr_arm", "bin_stop_band", "bin_idx", "bin_idx_cum",
+        "GeneName_lst", "GeneID_lst"]]
 
-    merge_var["bin_genes_cnt"] = merge_var["GeneName_lst"].str.len()
+        merge_var["bin_genes_cnt"] = merge_var["GeneName_lst"].str.len()
+    else:
+        merge_var = merge_var[["chr", "start", "stop", "arm", "chr_arm", "band", 
+        "bin_stop_arm","bin_stop_chr_arm", "bin_stop_band", "bin_idx", "bin_idx_cum"]]
+
 
     merge_Xdata = ad.AnnData(ad_bin.T, var = merge_var, obs = update_Xdata.obs.copy())
     
-    ## in case that the list saved as string in anndata
-    merge_Xdata.uns["GeneName_lst"] = GeneName_dict
-    merge_Xdata.uns["GeneID_lst"] = GeneID_dict
+    # ## in case that the list saved as string in anndata
+    # merge_Xdata.uns["GeneName_lst"] = GeneName_dict
+    # merge_Xdata.uns["GeneID_lst"] = GeneID_dict
 
     ## soft phasing
     merge_Xdata.layers["ad_bin_softcnt"] = ad_bin_softcnt.T

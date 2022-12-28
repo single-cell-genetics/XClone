@@ -684,13 +684,15 @@ def CNV_optimazation(Xdata,
         _logLik = cal_log_lik(update_Xdata.layers["emm_prob_log"], update_Xdata.layers["posterior_mtx_log"])
         Logliklihood[it] = _logLik
 
-        if it > min_iter:
+        if it >= min_iter:
             if Logliklihood[it] < Logliklihood[it - 1]:
                 if verbose:
                     print("[XClone] Warning: Lower bound decreases!\n")
+                    print("Step %d, loglik decrease from %.2e to %.2e" 
+                          %(it, Logliklihood[it-1], Logliklihood[it]))
             elif it == max_iter - 1:
                 if verbose:
-                    print("[XClone] Warning: CNV ration optimization did not converge!\n")
+                    print("[XClone] Warning: CNV ratio optimization did not converge!\n")
                     print("[XClone] Notes: try to increase the max_iter: ", max_iter, "!\n")
             elif Logliklihood[it] - Logliklihood[it - 1] < epsilon_conv:
                 break

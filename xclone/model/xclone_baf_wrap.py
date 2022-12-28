@@ -69,6 +69,7 @@ def run_BAF(BAF_adata,
     ## RDR related
     remove_marker_genes = config.remove_marker_genes
     ## phasing
+    feature_mode = config.feature_mode
     phasing_region_key = config.phasing_region_key
     phasing_len = config.phasing_len
     bin_nproc = config.bin_nproc
@@ -135,7 +136,8 @@ def run_BAF(BAF_adata,
     BAF_adata, merge_Xdata =  xclone.model.BAF_Local_phasing(BAF_adata, 
                                                              region_key = phasing_region_key, 
                                                              phasing_len = phasing_len, 
-                                                             bin_nproc = bin_nproc)
+                                                             bin_nproc = bin_nproc,
+                                                             feature_mode = feature_mode)
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
 
     # try:
