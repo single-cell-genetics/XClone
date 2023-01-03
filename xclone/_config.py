@@ -133,11 +133,15 @@ class BAF_General_config():
         default for 10X scRNA-seq data.
         """
         self.RDR_file = None
+        self.guide_theo_states = None
         self.theo_neutral_BAF = None
+        self.ref_BAF_clip = False
+        self.BAF_states_num = 3
+        self.CNV_N_components = 3
         self.WMA_window_size = 101
         self.concentration = 100
         self.extreme_count_cap = False
-        self.gene_specific = False
+        self.gene_specific_concentration = False
         self.concentration_lower = 20
         self.concentration_upper = 100
         ## related to RDR
@@ -163,6 +167,10 @@ class Combine_General_config():
         Combination parmas init.
         """
         ## combine performing
+        self.copyloss_correct = True
+        self.copyloss_correct_mode = 1
+        self.copygain_correct= False
+        self.copygain_correct_mode = 2
 
         ## combine plotting
         self.merge_loss = True
@@ -177,6 +185,7 @@ class HMM_Configs():
         """
         self.start_prob = np.array([0.1, 0.8, 0.1])
         self.trans_t = 1e-6
+        self.trans_prob = None
         self.max_iter = 2
         self.min_iter = 1
 
@@ -193,7 +202,7 @@ class Smartseq_Config():
 
         if module == "BAF":
             self.extreme_count_cap = False
-            self.gene_specific = True
+            self.gene_specific_concentration = True
         
         if module == "Combine":
             pass

@@ -40,6 +40,11 @@ def run_combine(RDR_Xdata,
     dataset_name = config.dataset_name
     
     cell_anno_key = config.cell_anno_key
+    ## combine settings
+    copyloss_correct = config.copyloss_correct
+    copyloss_correct_mode = config.copyloss_correct_mode
+    copygain_correct= config.copygain_correct
+    copygain_correct_mode = config.copygain_correct_mode
     
     ## plot settings
     xclone_plot = config.xclone_plot
@@ -82,7 +87,11 @@ def run_combine(RDR_Xdata,
     
     combine_Xdata = xclone.model.CNV_prob_combination(combine_Xdata,
                          RDR_layer = "posterior_mtx",
-                         BAF_layer = "BAF_extend_post_prob")
+                         BAF_layer = "BAF_extend_post_prob",
+                         copyloss_correct = copyloss_correct,
+                         copyloss_correct_mode = copyloss_correct_mode,
+                         copygain_correct = copygain_correct,
+                         copygain_correct_mode = copygain_correct_mode)
     try:
         combine_Xdata.write(RDR_combine_corrected_file)
     except Exception as e:
@@ -91,7 +100,7 @@ def run_combine(RDR_Xdata,
         print("[XClone hint] combine_corrected_file saved in %s." %(out_data_dir))
     
 
-    combine_Xdata = xclone.model.CNV_prob_merge_for_plot(combine_Xdata, Xlayer = "loss_corrected_prob1")
+    combine_Xdata = xclone.model.CNV_prob_merge_for_plot(combine_Xdata, Xlayer = "corrected_prob")
     try:
         # RDR_adata.write(RDR_final_file)
         combine_Xdata.write(combine_final_file)
@@ -211,3 +220,9 @@ def run_combine_plot(combine_Xdata,
     time_passed = end_time - start_time
     sub_logger.info("Combine plot module finished (%d seconds)" % (time_passed.total_seconds()))
     return None
+
+def plot_Combine_module():
+    """
+    all plots for Combine module.
+    """
+    pass

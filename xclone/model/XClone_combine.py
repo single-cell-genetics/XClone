@@ -297,39 +297,84 @@ def bin_to_gene_mapping(BAF_merge_Xdata,
         return RDR_Xdata
         # return combined_Xdata
 
-def copyloss_corrected(combine_base_prob, mode = 1):
+def copyloss_corrected(Xdata, Xlayer, mode = 1):
     """
     (1) can use bafprob to find out allele-specific copy loss
     (2) adjust copy loss(RDR)-copy neutral(BAF) situation.
     """
-    prob_ = combine_base_prob.copy()
+    prob_ = Xdata.layers[Xlayer].copy()
     
-    # strategy 1: default used.
-    if mode == 1:
-        prob_[:,:,0,0] += prob_[:,:,0,1]/3
-        prob_[:,:,0,2] += prob_[:,:,0,1]/3
-        prob_[:,:,1,1] += prob_[:,:,0,1]/3
+    ## BAF 3 states
+    if prob_.shape[-1] == 3:
+        # strategy 1: default used.
+        if mode == 1:
+            prob_[:,:,0,0] += prob_[:,:,0,1]/3
+            prob_[:,:,0,2] += prob_[:,:,0,1]/3
+            prob_[:,:,1,1] += prob_[:,:,0,1]/3
 
-        prob_[:,:,0,1] = 0
+            prob_[:,:,0,1] = 0
     
-    # strategy 2:
-    if mode == 2:
-        prob_[:,:,1,1] += prob_[:,:,0,1]
-        prob_[:,:,0,1] = 0
+        # strategy 2:
+        if mode == 2:
+            prob_[:,:,1,1] += prob_[:,:,0,1]
+            prob_[:,:,0,1] = 0
+    
+    ## BAF 5 states
+    if prob_.shape[-1] == 5:
+        if mode == 1:
+            prob_[:,:,0,1] += prob_[:,:,0,2]/3
+            prob_[:,:,0,3] += prob_[:,:,0,2]/3
+            prob_[:,:,1,2] += prob_[:,:,0,2]/3
+
+            prob_[:,:,0,2] = 0
+        if mode == 2:
+            prob_[:,:,1,2] += prob_[:,:,0,2]
+            prob_[:,:,0,2] = 0
+    
     return prob_
 
-def copygain_corrected(combine_base_prob):
+def copygain_corrected(Xdata, Xlayer, mode = 1):
     """
     not sure if necessary; can improve in next release.
     can use bafprob to find out allele-specific copy gain.
     However, due to narrow distance between allele-specific copy gain and allele balance,
     it is hard to do now.
     """
-    pass
+    prob_ = Xdata.layers[Xlayer].copy()
+    ## BAF 3 states
+    ### default mode = 1
+    if prob_.shape[-1] == 3:
+        prob_[:,:,2,0] += prob_[:,:,2,1]/3
+        prob_[:,:,2,2] += prob_[:,:,2,1]/3
+        prob_[:,:,1,1] += prob_[:,:,2,1]/3
+
+        prob_[:,:,2,1] = 0
+    
+    ## BAF 5 states
+    if prob_.shape[-1] == 5:
+        prob_[:,:,2,1] += prob_[:,:,2,2]/3
+        prob_[:,:,2,3] += prob_[:,:,2,2]/3
+        prob_[:,:,1,2] += prob_[:,:,2,2]/3
+
+        prob_[:,:,2,2] = 0
+        
+        if mode == 2:
+            prob_[:,:,1,2] += prob_[:,:,1,1]/2
+            prob_[:,:,2,1] += prob_[:,:,1,1]/2
+            prob_[:,:,1,1] = 0
+            prob_[:,:,1,2] += prob_[:,:,1,3]/2
+            prob_[:,:,2,3] += prob_[:,:,1,3]/2
+            prob_[:,:,1,3] = 0
+
+    return prob_
 
 def CNV_prob_combination(Xdata,
                          RDR_layer = "posterior_mtx",
-                         BAF_layer = "BAF_extend_post_prob"):
+                         BAF_layer = "BAF_extend_post_prob",
+                         copyloss_correct = True,
+                         copyloss_correct_mode = 1,
+                         copygain_correct = True,
+                         copygain_correct_mode = 2):
     """
     Combine RDR prob with BAF prob.
     """
@@ -342,17 +387,25 @@ def CNV_prob_combination(Xdata,
     ## combination base
     combine_base_prob = rdr_prob_ * baf_prob_
     Xdata.layers["combine_base_prob"] = combine_base_prob
+    
     ## combination adjust
-    ## copy loss corrected-strategy1(default)
-    loss_corrected_prob1 = copyloss_corrected(combine_base_prob, mode = 1)
-    Xdata.layers["loss_corrected_prob1"] = loss_corrected_prob1
-    prob1_merge = CNV_prob_merge(Xdata, "loss_corrected_prob1")
+    ## copy loss corrected-strategy1(default mode 1)
+    if copyloss_correct & copygain_correct:
+        corrected_prob = copyloss_corrected(Xdata, "combine_base_prob", mode = copyloss_correct_mode)
+        Xdata.layers["corrected_prob"] = corrected_prob
+        corrected_prob = copygain_corrected(Xdata, "corrected_prob", mode = copygain_correct_mode)
+        Xdata.layers["corrected_prob"] = corrected_prob
+    elif copyloss_correct:
+        corrected_prob = copyloss_corrected(Xdata, "combine_base_prob", mode = copyloss_correct_mode)
+        Xdata.layers["corrected_prob"] = corrected_prob
+    elif copygain_correct:
+        corrected_prob = copygain_corrected(Xdata, "combine_base_prob", mode = copygain_correct_mode)
+        Xdata.layers["corrected_prob"] = corrected_prob
+    else:
+        Xdata.layers["corrected_prob"] = Xdata.layers["combine_base_prob"].copy()
+
+    prob1_merge = CNV_prob_merge(Xdata, "corrected_prob")
     Xdata.layers["prob1_merge"] = prob1_merge
-    ## copy loss corrected-strategy2(deprecated)
-    loss_corrected_prob2 = copyloss_corrected(combine_base_prob, mode = 2)
-    Xdata.layers["loss_corrected_prob2"] = loss_corrected_prob2
-    prob2_merge = CNV_prob_merge(Xdata, "loss_corrected_prob2")
-    Xdata.layers["prob2_merge"] = prob2_merge
 
     return Xdata
 
@@ -361,30 +414,59 @@ def CNV_prob_merge(Xdata,
     """
     Merge states prob for evaluation.
     """
-    copy_loss = Xdata.layers[Xlayer][:,:,0,:].sum(axis = -1)
-    loh = Xdata.layers[Xlayer][:,:,1,0] + Xdata.layers[Xlayer][:,:,1,2]
-    copy_neutral = Xdata.layers[Xlayer][:,:,1,1] 
-    copy_gain = Xdata.layers[Xlayer][:,:,2,:].sum(axis = -1)
+    prob_ = Xdata.layers[Xlayer].copy()
+    
+    ## BAF 3 states
+    if prob_.shape[-1] == 3:
+        copy_loss = prob_[:,:,0,:].sum(axis = -1)
+        loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        copy_neutral = prob_[:,:,1,1] 
+        copy_gain = prob_[:,:,2,:].sum(axis = -1)
+    
+    ## BAF 5 states
+    if prob_.shape[-1] == 5:
+        copy_loss = prob_[:,:,0,:].sum(axis = -1)
+        loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        copy_neutral = prob_[:,:,1,2]
+        copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        copy_gain = prob_[:,:,2,:].sum(axis = -1) + copy_gain_less
 
     prob_merge = np.stack([copy_loss, loh, copy_neutral, copy_gain], axis = -1)
     return prob_merge
 
 def CNV_prob_merge_for_plot(Xdata,
-                            Xlayer = "loss_corrected_prob1"):
+                            Xlayer = "corrected_prob"):
     """
     Merge states prob for more detailed evaluation and visualization.
     """
-    copy_loss = Xdata.layers[Xlayer][:,:,0,:].sum(axis = -1)
-    loh = Xdata.layers[Xlayer][:,:,1,0] + Xdata.layers[Xlayer][:,:,1,2]
-    copy_neutral = Xdata.layers[Xlayer][:,:,1,1] 
-    copy_gain = Xdata.layers[Xlayer][:,:,2,:].sum(axis = -1)
+    prob_ = Xdata.layers[Xlayer].copy()
+    ## BAF 3 states
+    if prob_.shape[-1] == 3:
+        copy_loss = prob_[:,:,0,:].sum(axis = -1)
+        loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        copy_neutral = prob_[:,:,1,1] 
+        copy_gain = prob_[:,:,2,:].sum(axis = -1)
 
-    copy_loss_A = Xdata.layers[Xlayer][:,:,0,2]
-    copy_loss_B = Xdata.layers[Xlayer][:,:,0,0]
+        copy_loss_A = prob_[:,:,0,2]
+        copy_loss_B = prob_[:,:,0,0]
     
-    loh_A = Xdata.layers[Xlayer][:,:,1,2]
-    loh_B = Xdata.layers[Xlayer][:,:,1,0]
+        loh_A = prob_[:,:,1,2]
+        loh_B = prob_[:,:,1,0]
     
+    ## BAF 5 states
+    if prob_.shape[-1] == 5:
+        copy_loss = prob_[:,:,0,:].sum(axis = -1)
+        loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        copy_neutral = prob_[:,:,1,2]
+        copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        copy_gain = prob_[:,:,2,:].sum(axis = -1) + copy_gain_less
+
+        copy_loss_A = prob_[:,:,0,3] + prob_[:,:,0,4]
+        copy_loss_B = prob_[:,:,0,0] + prob_[:,:,0,1]
+    
+        loh_A = prob_[:,:,1,4]
+        loh_B = prob_[:,:,1,0]
+
     plot_prob_merge1 = np.stack([copy_loss, loh, copy_neutral, copy_gain], axis = -1)
     Xdata.layers["plot_prob_merge1"] = plot_prob_merge1
     plot_prob_merge2 = np.stack([copy_loss_A, copy_loss_B, loh, copy_neutral, copy_gain], axis = -1)

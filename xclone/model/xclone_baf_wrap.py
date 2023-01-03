@@ -62,8 +62,12 @@ def run_BAF(BAF_adata,
     # BAF settings
     RDR_file = config.RDR_file
     theo_neutral_BAF = config.theo_neutral_BAF
-    gene_specific = config.gene_specific
+    ref_BAF_clip = config.ref_BAF_clip
+    BAF_states_num = config.BAF_states_num
+    CNV_N_components = config.CNV_N_components
+    gene_specific_concentration = config.gene_specific_concentration
     concentration = config.concentration
+    guide_theo_states = config.guide_theo_states
 
     extreme_count_cap = config.extreme_count_cap
     ## RDR related
@@ -81,6 +85,7 @@ def run_BAF(BAF_adata,
     # HMM settings
     start_prob = config.start_prob
     trans_t = config.trans_t
+    trans_prob = config.trans_prob
 
     # plot settings
     xclone_plot = config.xclone_plot
@@ -130,7 +135,7 @@ def run_BAF(BAF_adata,
                                                     select = False,
                                                     chr_anno_key = "GeneName",
                                                     chr_lst = marker_genes,
-                                                     update_uns = False,
+                                                    update_uns = False,
                                                     uns_anno_key = None)
     ## BAF Phasing
     BAF_adata, merge_Xdata =  xclone.model.BAF_Local_phasing(BAF_adata, 
@@ -139,14 +144,6 @@ def run_BAF(BAF_adata,
                                                              bin_nproc = bin_nproc,
                                                              feature_mode = feature_mode)
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
-
-    # try:
-    #     BAF_adata.write(BAF_base_file)
-    #     merge_Xdata.write(BAF_merge_base_file)
-    # except Exception as e:
-    #     print("[XClone Warning]", e)
-    # else:
-    #     print("[XClone hint] BAF_base_file and merged_file saved in %s." %(out_data_dir))
     
     ### check coverage for bins
     merge_Xdata.var[(merge_Xdata.layers["dp_bin"].A.sum(axis=0) == 0)]
@@ -195,23 +192,14 @@ def run_BAF(BAF_adata,
         print("[XClone hint] BAF_base_file and merged_file saved in %s." %(out_data_dir))
     
     ## HMM smoothing for CNV states calling
-    CNV_states = xclone.model.get_CNV_states(merge_Xdata, Xlayer = "BAF_phased_WMA",
-                   n_components = 3,
-                   means_init = None,
-                   max_iter = 200)
-    guide_theo_states = xclone.model.guide_BAF_theo_states(CNV_states)
-
-    merge_Xdata = xclone.model.get_BAF_ref(merge_Xdata, 
-                                           Xlayer = "fill_BAF_phased", 
-                                           out_anno = "ref_BAF_phased",
-                                           anno_key = cell_anno_key, 
-                                           ref_cell = ref_celltype)
-    merge_Xdata = xclone.model.get_BAF_ref(merge_Xdata, 
-                                           Xlayer = "fill_BAF_phased", 
-                                           out_anno = "ref_BAF_phased_clipped",
-                                           anno_key = cell_anno_key, 
-                                           ref_cell = ref_celltype, 
-                                           clipping = True)
+    if guide_theo_states is not None:
+        print("User specify guide_theo_states: ", guide_theo_states)
+    else:
+        CNV_states = xclone.model.get_CNV_states(merge_Xdata, Xlayer = "BAF_phased_WMA",
+                                                n_components = CNV_N_components,
+                                                means_init = None,
+                                                max_iter = 200)
+        guide_theo_states = xclone.model.guide_BAF_theo_states(CNV_states)
 
     ## if you have limited ref cells, you can set theo_baf as 0.5   *important
     if theo_neutral_BAF is not None:
@@ -219,10 +207,17 @@ def run_BAF(BAF_adata,
         used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
                             theo_states= guide_theo_states, specific_BAF = "theo_neutral_BAF")
     else:
-        used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
-                            theo_states= guide_theo_states, specific_BAF = "ref_BAF_phased")
+        merge_Xdata = xclone.model.get_BAF_ref(merge_Xdata, 
+                                           Xlayer = "fill_BAF_phased", 
+                                           out_anno = "ref_BAF_phased",
+                                           anno_key = cell_anno_key, 
+                                           ref_cell = ref_celltype,
+                                           clipping = ref_BAF_clip)
 
-    if gene_specific:
+        used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
+                               theo_states= guide_theo_states, specific_BAF = "ref_BAF_phased")
+
+    if gene_specific_concentration:
         concentration_lower = config.concentration_lower
         concentration_upper = config.concentration_upper
         merge_Xdata = xclone.model.concentration_mapping(merge_Xdata, concentration_lower, concentration_upper)
@@ -231,7 +226,8 @@ def run_BAF(BAF_adata,
                                                       AD_key = "ad_bin_phased", DP_key = "dp_bin",
                                                       outlayer = "bin_phased_BAF_specific_center_emm_prob_log", 
                                                       states = used_specific_states,
-                                                      gene_specific = gene_specific, 
+                                                      states_num = BAF_states_num,
+                                                      gene_specific = gene_specific_concentration, 
                                                       concentration = concentration)
 
     # merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
@@ -239,9 +235,9 @@ def run_BAF(BAF_adata,
     #                                          outlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN",
     #                                          KNN_connectivities_key = "connectivities_expr",
     #                                          KNN_smooth = True)
-
     t = trans_t
-    trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
+    if trans_prob is None:
+        trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
     
     merge_Xdata = xclone.model.XHMM_smoothing(merge_Xdata, 
                                               start_prob = start_prob,  
@@ -324,3 +320,9 @@ def run_BAF_plot(merge_Xdata,
     time_passed = end_time - start_time
     sub_logger.info("BAF plot module finished (%d seconds)" % (time_passed.total_seconds()))
     return None
+
+def plot_BAF_module():
+    """
+    all plots for BAF module.
+    """
+    pass

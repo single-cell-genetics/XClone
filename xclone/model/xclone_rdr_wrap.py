@@ -58,6 +58,7 @@ def run_RDR(RDR_adata,
     # HMM settings
     start_prob = config.start_prob
     trans_t = config.trans_t
+    trans_prob = config.trans_prob
     ## optimize 
     max_iter = config.max_iter
     min_iter = config.min_iter
@@ -215,7 +216,8 @@ def run_RDR(RDR_adata,
                                             verbose = verbose)
     
     t = trans_t
-    trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
+    if trans_prob is None:
+        trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
     RDR_adata = xclone.model.CNV_optimazation(RDR_adata, init_state_ratio = guide_cnv_ratio,
                     max_iter = max_iter,
                     min_iter = min_iter,

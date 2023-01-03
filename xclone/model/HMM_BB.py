@@ -203,6 +203,7 @@ def calculate_Xemm_prob_bb(Xdata,
                            DP_key = "DP",
                            outlayer = "BAF_emm_prob_log",
                            states = None,
+                           states_num = 5,
                            gene_specific = False,
                            concentration = 10,
                            verbose = False):
@@ -238,7 +239,10 @@ def calculate_Xemm_prob_bb(Xdata,
         DP = Xdata.layers[DP_key]
     
     if states is None:
-        states = np.array([0.01, 0.99, 0.5, 1/3, 2/3])
+        if states_num == 5:
+            states = np.array([0.01, 1/3, 0.5, 2/3, 0.99])
+        elif states_num == 3:
+            states = np.array([0.01, 0.5, 0.99])
 
     ## check the shape for the input
     if gene_specific == True:

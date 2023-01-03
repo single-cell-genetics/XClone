@@ -44,7 +44,7 @@ def color_mapping(cm_name = "haplotyped_cmap"):
     ## neutral state
     white_c = palettable.colorbrewer.diverging.PuOr_3.mpl_colors[1]
     ## loh state
-    loha_c = palettable.colorbrewer.diverging.PuOr_3.mpl_colors[0] ## orange
+    loha_c = palettable.colorbrewer.diverging.PuOr_3.mpl_colors[0] ## orange yellow
     lohb_c = palettable.colorbrewer.diverging.PuOr_3.mpl_colors[2] ## purple
     loh_c = palettable.colorbrewer.diverging.BrBG_4.mpl_colors[-2] ## cyan-blue
     ## loss state
@@ -53,12 +53,18 @@ def color_mapping(cm_name = "haplotyped_cmap"):
     loss_c = palettable.colorbrewer.diverging.RdBu_8.mpl_colors[-1] ## dark blue
     ## gain state
     gain_c = palettable.colorbrewer.diverging.RdBu_8.mpl_colors[0] ## red
+    gaina_c = palettable.colorbrewer.diverging.PiYG_8.mpl_colors[0] ## rose
+    gainb_c = palettable.colorbrewer.diverging.Spectral_8.mpl_colors[1] ## orange
     ## RDR cmap
     if cm_name == "RDR_cmap":
         color_map = [loss_c, white_c, gain_c]
+    if cm_name == "RDR_cmap1":
+        color_map = [loss_c, white_c, gaina_c, gain_c]
     ## BAF cmap
     if cm_name == "BAF_cmap":
         color_map = [lohb_c, white_c, loha_c]
+    if cm_name == "BAF_cmap1":
+        color_map = [lohb_c, gaina_c, white_c, gainb_c,loha_c]
     if cm_name == "BAF_cmap_continuous":
         color_map = palettable.colorbrewer.diverging.PuOr_3.mpl_colormap.reversed()
     ## Combine cmap
@@ -177,16 +183,19 @@ def Complex_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True,
         cmap = color_map, **kwargs)
 
 ## BAF CNV 
-def BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True, 
-                          states_weight = np.array([1,2,3]), states_num = 3,
+def BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = False, 
+                          states_weight = np.array([1,2,3]),
                           colorbar_name = "BAF states", 
                           cell_anno_key = "cell_type", **kwargs):
     """
-    updated: 2022-08-05
+    updated: 2023-01-02
     default using .layers["posterior_mtx"] for visualization
     BAF 3 states-  2 copy loss(haplotype) and one copy neutral
+
+    BAF 5 states: only support for category visualization
     """
     ## transfer data to anndata for visualization
+    states_num = Xdata.layers[Xlayer].shape[-1]
     if weights:
         ## transfer data to anndata for visualization
         res_cnv_weights_ad = convert_res_to_ann(Xdata, Xlayer, weights = weights, states_weight = states_weight)
@@ -208,26 +217,38 @@ def BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True,
         ## reorder the cells based on annotation
         res_cnv_ad_re = reorder_data_by_cellanno(res_cnv_ad, cell_anno_key=cell_anno_key)
         ## plot the Xheatmap
-        color_map = color_mapping(cm_name = "BAF_cmap")
-        Xheatmap(res_cnv_ad_re, cell_anno_key = cell_anno_key, center = center_value, 
-        colorbar_ticks = [0.3, 1, 1.7], 
-        colorbar_name = colorbar_name, 
-        colorbar_label = ["allele-A bias",  "allele balance",  "allele-B bias"],
-        cmap = color_map, **kwargs)
-        # colorbar_ticks = [0, 1, 2]
+        if states_num == 3:
+            color_map = color_mapping(cm_name = "BAF_cmap")
+            Xheatmap(res_cnv_ad_re, cell_anno_key = cell_anno_key, center = center_value, 
+            colorbar_ticks = [0.3, 1, 1.7], 
+            colorbar_name = colorbar_name, 
+            colorbar_label = ["allele-A bias",  "allele balance",  "allele-B bias"],
+            cmap = color_map, **kwargs)
+            # colorbar_ticks = [0, 1, 2]
+        elif states_num == 5:
+            color_map = color_mapping(cm_name = "BAF_cmap1")
+            Xheatmap(res_cnv_ad_re, cell_anno_key = cell_anno_key, center = center_value, 
+            colorbar_ticks = [0.3, 1, 1.9, 2.8, 3.5], 
+            colorbar_name = colorbar_name, 
+            colorbar_label = ["allele-A bias", "allele-A bias", "allele balance",  "allele-B bias", "allele-B bias"],
+            cmap = color_map, **kwargs)
 
-def Complex_BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True, 
-                       states_weight = np.array([1,2,3]), states_num = 3,
+
+def Complex_BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = False, 
+                       states_weight = np.array([1,2,3]),
                        colorbar_name = "BAF states", 
                        cell_anno_key = ["cluster", "cell_type"],
                        clusters_display_name = ["Clone", "Celltype"], 
                        **kwargs):
     """
-    updated: 2022-08-23
+    updated: 2023-01-02
     default using .layers["posterior_mtx"] for visualization
     BAF 3 states-  2 copy loss(haplotype) and one copy neutral
+
+    BAF 5 states: only support for category visualization
     """
     ## transfer data to anndata for visualization
+    states_num = Xdata.layers[Xlayer].shape[-1]
     if weights:
         ## transfer data to anndata for visualization
         res_cnv_weights_ad = convert_res_to_ann(Xdata, Xlayer, weights = weights, states_weight = states_weight)
@@ -250,13 +271,23 @@ def Complex_BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = Tru
         ## reorder the cells based on annotation
         res_cnv_ad_re = reorder_data_by_cellanno(res_cnv_ad, cell_anno_key=cell_anno_key)
         ## plot the Xheatmap
-        color_map = color_mapping(cm_name = "BAF_cmap")
-        XXheatmap(res_cnv_ad_re, cell_anno_key = cell_anno_key, clusters_display_name = clusters_display_name,
-        center = center_value, 
-        colorbar_ticks = [0, 1, 2], 
-        colorbar_name = colorbar_name, 
-        colorbar_label = ["allele-A bias",  "allele balance",  "allele-B bias"],
-        cmap = color_map, **kwargs)
+        if states_num == 3:
+            color_map = color_mapping(cm_name = "BAF_cmap")
+            XXheatmap(res_cnv_ad_re, cell_anno_key = cell_anno_key, clusters_display_name = clusters_display_name,
+            center = center_value, 
+            colorbar_ticks = [0, 1, 2], 
+            colorbar_name = colorbar_name, 
+            colorbar_label = ["allele-A bias",  "allele balance",  "allele-B bias"],
+            cmap = color_map, **kwargs)
+        elif states_num == 5:
+            color_map = color_mapping(cm_name = "BAF_cmap1")
+            XXheatmap(res_cnv_ad_re, cell_anno_key = cell_anno_key, clusters_display_name = clusters_display_name,
+            center = center_value, 
+            colorbar_ticks = [0.3, 1, 1.9, 2.8, 3.5], 
+            colorbar_name = colorbar_name, 
+            colorbar_label = ["allele-A bias", "allele-A bias", "allele balance",  "allele-B bias", "allele-B bias"],
+            cmap = color_map, **kwargs)
+        
 
 ## Visualization part in CNVratio estimation performance
 ## combined CNV

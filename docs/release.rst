@@ -9,6 +9,8 @@ Version 0.3.4
 - add tutorials in xclone plotting #
 - add tutorials in xclone data analysis #
 - BAF local phasing improvement
+- BAF nmodule support 3 and 5 states
+- Combine module support prob correct mode(both copy gain and copy loss)
 
 
 Version 0.3.3
