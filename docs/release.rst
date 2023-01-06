@@ -11,6 +11,10 @@ Version 0.3.4
 - BAF local phasing improvement
 - BAF nmodule support 3 and 5 states
 - Combine module support prob correct mode(both copy gain and copy loss)
+- update libratio capping and add cell filter limits
+- libratio fitting update(todo)
+- provide New denoise function (denoise by cluster)
+- add evaluation function in analysis module
 
 
 Version 0.3.3

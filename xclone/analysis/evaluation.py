@@ -32,11 +32,70 @@ def extract_Xdata(Xdata, use_cell_file, use_gene_file):
     
     return update_Xdata
 
+# def extract_Xdata1(Xdata, use_cell_file, use_gene_file, BCHdataset = True):
+#     """
+#     Notes:
+#     use_cell_file, use_gene_file from xianjie
+#     update for BCH869 dataset.
+    
+#     Example:
+#     --------
+#     >>> data_dir = "..."
+#     >>> use_cell_file = dat_dir + "GX109.isec.cell.anno.tsv"
+#     >>> use_gene_file = dat_dir + "GX109.isec.gene.anno.tsv"
+#     >>> RDR_adata = extract_Xdata(RDR_adata,use_cell_file, use_gene_file)
+#     """
+    
+#     use_cell = pd.read_csv(use_cell_file, sep = "\t", header = None)
+#     use_gene = pd.read_csv(use_gene_file, sep = "\t", header = None)
+#     if BCHdataset:
+#         use_cell_lst = use_cell[0].str.replace("BCH", "BT_").str.replace(".", "-").tolist()
+#     else:
+#         use_cell_lst = use_cell[0].tolist()
+
+#     use_gene_lst = use_gene[0].tolist()
+    
+#     cell_flag = Xdata.obs.index.isin(use_cell_lst)
+#     gene_flag = Xdata.var["GeneName"].isin(use_gene_lst)
+    
+#     update_Xdata = Xdata.copy()
+#     update_Xdata = update_Xdata[cell_flag,:].copy()
+#     update_Xdata = update_Xdata[:, gene_flag].copy()
+    
+#     return update_Xdata
+
+def extract_Xdata1(Xdata, GT_df):
+    """
+    Notes:
+    update for BCH869 dataset.
+    
+    Example:
+    --------
+    >>> data_dir = "..."
+    >>> use_cell_file = dat_dir + "GX109.isec.cell.anno.tsv"
+    >>> use_gene_file = dat_dir + "GX109.isec.gene.anno.tsv"
+    >>> RDR_adata = extract_Xdata(RDR_adata,use_cell_file, use_gene_file)
+    """
+
+
+    use_cell_lst = GT_df.index.tolist()
+    use_gene_lst = GT_df.columns.tolist()
+    
+    cell_flag = Xdata.obs.index.isin(use_cell_lst)
+    gene_flag = Xdata.var["GeneName"].isin(use_gene_lst)
+    
+    update_Xdata = Xdata.copy()
+    update_Xdata = update_Xdata[cell_flag,:].copy()
+    update_Xdata = update_Xdata[:, gene_flag].copy()
+    
+    return update_Xdata
+
 def Ground_truth_mtx_generate(Xdata, genes, cells_type = ['Paneth', 'TA']):
     """
     Function:
     --------
     Generate binary matrix: region with CNV state is 1, otherwise 0.
+    develop base on GX109 example.
     
     Example:
     Generate ground_truth_matrix for copy loss evaluation
@@ -57,6 +116,104 @@ def Ground_truth_mtx_generate(Xdata, genes, cells_type = ['Paneth', 'TA']):
     Ground_truth_mtx[np.repeat(cell_index,len(gene_index)),  np.tile(gene_index, len(cell_index))] = 1
     
     return Ground_truth_mtx
+
+def load_ground_truth(file_path,  out_df = True, BCHdataset = True):
+    """
+    support for load benchmarking ground truth matrix from .rds file.
+    develop base on BCH869 example.
+    """
+    import pyreadr
+    result = pyreadr.read_r(file_path) 
+    GT_df = result[None]
+    if BCHdataset:
+        GT_df.index = GT_df.index.str.replace("BCH", "BT_", regex = False).str.replace(".", "-", regex = False)
+    Ground_truth_mtx = GT_df.values
+    print("Loading Ground_truth_mtx, shape (cells, genes): ", Ground_truth_mtx.shape)
+    if out_df:
+        return GT_df
+    else:
+        return Ground_truth_mtx
+
+def resort_Ground_truth_mtx(GT_df, Xdata, verbose = True):
+    """
+    resort Ground_truth_mtx by Xdata order.
+    develop base on BCH869 example.
+    """
+    cell_barcodes = pd.DataFrame(Xdata.obs.index, columns = ["cell_barcodes"])
+    gene_names = pd.DataFrame(Xdata.var["GeneName"])
+
+    GT_df = gene_names.merge(GT_df.T, left_on = "GeneName", right_index=True, how = "left")
+    GT_df.set_index(keys = "GeneName", drop = True, inplace = True)
+    if verbose:
+        print("Ground_truth_mtx reorder genes")
+    GT_df = cell_barcodes.merge(GT_df.T, left_on = "cell_barcodes", right_index=True, how = "left")
+    GT_df.set_index(keys = "cell_barcodes", drop = True, inplace = True)
+    if verbose:
+        print("Ground_truth_mtx reorder cells")
+    Ground_truth_mtx = GT_df.values
+    if verbose:
+        print("Ground_truth_mtx shape (cells, genes): ", Ground_truth_mtx.shape)
+    return Ground_truth_mtx
+
+
+def base_evaluate_map(adata, ground_truth_file):
+    """
+    """
+    GT_df = load_ground_truth(ground_truth_file,  out_df = True, BCHdataset = True)
+    Xdata = extract_Xdata1(adata, GT_df)
+    Ground_truth_mtx = resort_Ground_truth_mtx(GT_df, Xdata)
+    
+    return Ground_truth_mtx, Xdata
+
+def roc_auc_evaluate(Ground_truth_mtx, Xdata, Xlayer = "XC_denoise", state_idx = 0, ROC_show = False):
+    """
+    ref: # https://github.com/huangyh09/foundation-data-science/blob/main/w10-classification/P3_ROC_NaiveBayes.ipynb
+    
+    state_idx = 0  copy_loss
+    state_idx = 1 loh
+    state_idx = 3 copy_gain
+    """
+   
+    import numpy as np
+    from sklearn import metrics
+    fpr, tpr, thresholds = metrics.roc_curve(Ground_truth_mtx.flatten(), Xdata.layers[Xlayer][:,:,state_idx].flatten())
+    roc_auc = metrics.roc_auc_score(Ground_truth_mtx.flatten(), Xdata.layers[Xlayer][:,:,state_idx].flatten())
+    print("AUC value: ", roc_auc)
+    
+    if ROC_show:
+        _query_threshold1 = 0.2
+        idx1 = np.argmin(np.abs(thresholds - _query_threshold1))
+        _fpr1, _tpr1, _threshold1 = fpr[idx1], tpr[idx1], thresholds[idx1]
+
+        _query_threshold2 = 0.5
+        idx2 = np.argmin(np.abs(thresholds - _query_threshold2))
+        _fpr2, _tpr2, _threshold2 = fpr[idx2], tpr[idx2], thresholds[idx2]
+
+        _query_threshold3 = 0.7
+        idx3 = np.argmin(np.abs(thresholds - _query_threshold3))
+        _fpr3, _tpr3, _threshold3 = fpr[idx3], tpr[idx3], thresholds[idx3]
+
+
+        import matplotlib.pylab as plt
+        fig = plt.figure(dpi=150)
+        plt.plot(fpr, tpr, label='AUC=%.4f' %(roc_auc))
+
+        plt.plot(_fpr1, _tpr1, 'o', label='threshold: %.2f' %(_threshold1))
+        plt.plot(_fpr2, _tpr2, 'o', label='threshold: %.2f' %(_threshold2))
+        plt.plot(_fpr3, _tpr3, 'o', label='threshold: %.2f' %(_threshold3))
+
+        plt.plot([0, 1], [0, 1], '--', color='grey')
+        plt.plot([0, 0, 1], [0, 1, 1], '--', color='purple')
+
+        plt.grid(alpha=0.4)
+
+        plt.xlabel("False positive rate (1 - specificity)")
+        plt.ylabel("True positive rate (sensitivity)")
+        plt.title("ROC curve")
+        plt.legend()
+        plt.show()
+
+    return roc_auc
 
 
 def get_confusion(ids1, ids2):
@@ -120,13 +277,15 @@ def change_res_resolution(Xdata, Xlayer, outlayer = "prob_merge", brk = "chr_arm
     ## generate merge_Xdata var
     merge_var1 = Xdata.var.copy()
     merge_var1.drop_duplicates(brk, keep="first", inplace=True)
-    keep_cols = ["chr", "start", "stop", "arm", "chr_arm", "band"]
+    # keep_cols = ["chr", "start", "stop", "arm", "chr_arm", "band"]
+    keep_cols = ["chr", "start", "stop", "arm", "chr_arm"]
     merge_var1 = merge_var1[keep_cols]
     merge_var1.rename(columns={'stop': 'gene1_stop'}, inplace=True)
 
     merge_var2 = Xdata.var.copy()
     merge_var2.drop_duplicates(brk, keep="last", inplace=True)
-    keep_cols = ["chr", "start", "stop", "arm", "chr_arm", "band"]
+    # keep_cols = ["chr", "start", "stop", "arm", "chr_arm", "band"]
+    keep_cols = ["chr", "start", "stop", "arm", "chr_arm"]
     merge_var2 = merge_var2[keep_cols]
     merge_var2.rename(columns={'start': 'lastgene_start'}, inplace=True)
     

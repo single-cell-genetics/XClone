@@ -103,6 +103,7 @@ from .XClone_combine import CNV_prob_merge_for_plot
 
 ## post-step[analysis for specific dataset]
 from ._denoise import denoise_gene_scale, merge_denoise_prob
+from ._denoise import denoise_by_cluster
 
 ## wrap
 from .xclone_rdr_wrap import preview_RDR
