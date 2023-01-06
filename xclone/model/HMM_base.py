@@ -302,11 +302,11 @@ def fwd_bkw_prob_base(start_prob=None, trans_prob=None, emm_prob_log=None, verbo
 ## HMM smoothing
 ## Part II: emm_prob_log processing
 
-def processing_prob(emm_prob_log, Xdata):
+def processing_prob_bygene(emm_prob_log, Xdata):
     """
     Based on some Selection criteria.
     mainly for nan situation.
-    Filter cells/genes before HMM smoothing.
+    Filter genes before HMM smoothing.
     """
     idx_1 = np.where(emm_prob_log == emm_prob_log)
     gene_idx = np.unique(idx_1[1])
@@ -314,8 +314,29 @@ def processing_prob(emm_prob_log, Xdata):
 
     update_Xdata = Xdata[:,gene_idx].copy()
     
-    if len(gene_idx) >= 1:
-        print("filter nan emm_prob")
+    if len(gene_idx) < Xdata.shape[1]:
+        print("Gene level: filter nan emm_prob")
+    else:
+        print("Gene level: no filtering emm_prob")
+    return emm_prob_log, update_Xdata
+
+def processing_prob_bycell(emm_prob_log, Xdata):
+    """
+    Based on some Selection criteria.
+    mainly for nan situation.
+    Filter cells before HMM smoothing.
+    """
+    idx_1 = np.where(emm_prob_log == emm_prob_log)
+    cell_idx = np.unique(idx_1[0])
+    emm_prob_log = emm_prob_log[cell_idx,:,:]
+
+    update_Xdata = Xdata[cell_idx,:].copy()
+    
+    if len(cell_idx) < Xdata.shape[0]:
+        print("Cell level: filter nan emm_prob")
+        print("[XClone] warning: filter cells!")## add warning
+    else:
+        print("Cell level: no filtering emm_prob")
     return emm_prob_log, update_Xdata
 
 ## Part III: HMM smoothing in XClone
@@ -477,17 +498,11 @@ def XHMM_smoothing(Xdata,
         trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
 
     ## filter nan emm_prob_log and update the Xdata
-    emm_prob_log, update_Xdata = processing_prob(emm_prob_log, Xdata)
+    emm_prob_log, update_Xdata = processing_prob_bycell(emm_prob_log, Xdata) # more strict
+    emm_prob_log, update_Xdata = processing_prob_bygene(emm_prob_log, update_Xdata)
+
     update_Xdata.layers["emm_prob_log_noHMM"] = emm_prob_log
     update_Xdata.layers["emm_prob_noHMM"] = np.exp(emm_prob_log)
-
-    # update_Xdata.uns["emm_prob_log"] = None
-    # update_Xdata.uns["emm_prob_log"] = emm_prob_log
-    # update_Xdata.uns["emm_prob_log_noHMM"] = None
-    # update_Xdata.uns["emm_prob_log_noHMM"] = emm_prob_log
-    # update_Xdata.uns["emm_prob_noHMM"] = None
-    # update_Xdata.uns["emm_prob_noHMM"] = np.exp(emm_prob_log)
-    # obs_Xdata = update_Xdata
 
     ## HMM smoothing for each brk block-XC_HMM_base
     ## here todo  check  both celltype and cellbased!

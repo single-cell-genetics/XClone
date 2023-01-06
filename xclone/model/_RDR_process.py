@@ -35,7 +35,13 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
     _is_ref = adata.obs[cluster_key] == ref_celltype
     adata.var['ref_avg'] = Xmtx[_is_ref, :].mean(axis=0)
     adata.obs['counts_ratio'] = Xmtx.sum(axis=1) / adata.var['ref_avg'].sum()
-    
+
+    ## check before generate expected layer
+    if depth_key == "library_ratio_capped":
+        adata.obs[depth_key] = np.where(np.isinf(adata.obs["library_alpha"]), adata.obs["counts_ratio"], adata.obs[depth_key])
+        ## todo capped again; add in later version[not test yet] 20230106
+        # adata.obs[depth_key] = np.where(adata.obs[depth_key] < 0.001*adata.obs["counts_ratio"], adata.obs["counts_ratio"], adata.obs[depth_key])
+
     ## generate normalised
     X_baseline = (adata.obs[depth_key].values.reshape(-1, 1) *
                   adata.var[avg_key].values.reshape(1, -1))

@@ -40,6 +40,8 @@ def run_combine(RDR_Xdata,
     dataset_name = config.dataset_name
     
     cell_anno_key = config.cell_anno_key
+    exclude_XY = config.exclude_XY
+    
     ## combine settings
     copyloss_correct = config.copyloss_correct
     copyloss_correct_mode = config.copyloss_correct_mode
@@ -77,6 +79,12 @@ def run_combine(RDR_Xdata,
 
     if run_verbose:
         print("[XClone Combination module running]************************")
+    
+    if exclude_XY:
+        RDR_Xdata = xclone.pp.exclude_XY_adata(RDR_Xdata)
+        BAF_merge_Xdata = xclone.pp.exclude_XY_adata(BAF_merge_Xdata)
+
+        print("[XClone warning] Combine module excelude chr XY analysis.")
 
     # map BAF to RDR
     combine_Xdata = xclone.model.bin_to_gene_mapping(BAF_merge_Xdata,

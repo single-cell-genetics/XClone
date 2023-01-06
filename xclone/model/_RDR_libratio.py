@@ -201,6 +201,7 @@ import statsmodels as sm
 def get_libsize(X_data, select_chr_index, verbose=True, 
     NB_kwargs={'disp': True, 'skip_hessian': True}):
     """
+    deprecated. 20230105 Notes
     ---> fit_lib_ratio FUNC
     based on select normal chrs ans GLM model to get the libsize
     here use NB glm
@@ -303,9 +304,9 @@ def fit_lib_ratio(Xdata, select_chr_index = None, verbose=False, avg_key = "ref_
     -------
     Example:
     --------
-    fit_lib_ratio(ref_obs_bulk_ad, select_chr_index = ref_obs_bulk_ad.obsm["select_chr_index"][1:,:], verbose=True) # for celltype
+    >>> fit_lib_ratio(ref_obs_bulk_ad, select_chr_index = ref_obs_bulk_ad.obsm["select_chr_index"][1:,:], verbose=True) # for celltype
 
-    fit_lib_ratio(ref_obs_ad, select_chr_index = ref_obs_ad.obsm["select_chr_index"][1:,:], verbose=True) # for cell
+    >>> fit_lib_ratio(ref_obs_ad, select_chr_index = ref_obs_ad.obsm["select_chr_index"][1:,:], verbose=True) # for cell
     """
     import statsmodels as sm
     import scipy as sp

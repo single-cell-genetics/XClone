@@ -388,7 +388,7 @@ def exclude_XY_adata(Xdata):
     """
     flag_ = ~(Xdata.var["chr"].isin(["X", "Y"]))
     print("[XClone] exclude chr X&Y in the analysis.")
-    return Xdata[:, flag_]
+    return Xdata[:, flag_].copy()
 
 def check_RDR_BAF_chrmapping(RDR_Xdata, BAF_Xdata):
     """
