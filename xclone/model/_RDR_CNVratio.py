@@ -690,12 +690,13 @@ def CNV_optimazation(Xdata,
                     print("[XClone] Warning: Lower bound decreases!\n")
                     print("Step %d, loglik decrease from %.2e to %.2e" 
                           %(it, Logliklihood[it-1], Logliklihood[it]))
+            elif Logliklihood[it] - Logliklihood[it - 1] <= epsilon_conv:
+                break
             elif it == max_iter - 1:
                 if verbose:
                     print("[XClone] Warning: CNV ratio optimization did not converge!\n")
                     print("[XClone] Notes: try to increase the max_iter: ", max_iter, "!\n")
-            elif Logliklihood[it] - Logliklihood[it - 1] < epsilon_conv:
-                break
+    
     Logliklihood = Logliklihood[:it+1]
 
     if verbose == True:
