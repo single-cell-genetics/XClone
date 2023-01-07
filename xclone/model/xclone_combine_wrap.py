@@ -42,6 +42,8 @@ def run_combine(RDR_Xdata,
     cell_anno_key = config.cell_anno_key
     exclude_XY = config.exclude_XY
     
+    ## RDR BAF settings
+    BAF_denoise = config.BAF_denoise
     ## combine settings
     copyloss_correct = config.copyloss_correct
     copyloss_correct_mode = config.copyloss_correct_mode
@@ -87,9 +89,18 @@ def run_combine(RDR_Xdata,
         print("[XClone warning] Combine module excelude chr XY analysis.")
 
     # map BAF to RDR
+    if BAF_denoise:
+        if "denoised_posterior_mtx" in BAF_merge_Xdata.layers:
+            BAF_use_Xlayer = "denoised_posterior_mtx"
+        else:
+            print("[XClone] warning: please proveide denoised BAF posterior_mtx layer")
+            BAF_use_Xlayer = "posterior_mtx"
+    else:
+        BAF_use_Xlayer = "posterior_mtx"
+    
     combine_Xdata = xclone.model.bin_to_gene_mapping(BAF_merge_Xdata,
                         RDR_Xdata,
-                        Xlayer = "posterior_mtx",
+                        Xlayer = BAF_use_Xlayer,
                         extend_layer = "BAF_extend_post_prob",
                         return_prob = False)
     
@@ -110,7 +121,6 @@ def run_combine(RDR_Xdata,
 
     combine_Xdata = xclone.model.CNV_prob_merge_for_plot(combine_Xdata, Xlayer = "corrected_prob")
     try:
-        # RDR_adata.write(RDR_final_file)
         combine_Xdata.write(combine_final_file)
     except Exception as e:
         print("[XClone Warning]", e)

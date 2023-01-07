@@ -3,16 +3,21 @@
 
 # Author: Rongting Huang
 
+import numpy as np
+import anndata as ad
+
+from ..analysis._clustering import XClustering
+
 def denoise_gene_scale(Xdata, Xlayer,
                        neutral_index = 2, 
                        cnv_index = [0,1,3], 
                        GMM_detection = True,
                        gmm_comp = 2,
-                       cell_prop_cutoof = 0.05,
+                       cell_prop_cutoff = 0.05,
                        out_layer = "denoised_gene_prob"):
     """
     default method: GMM detect the cell proportion identified as CNV states for each gene.
-    alternative method: set cell_prop_cutoof.[not test yet, todo]
+    alternative method: set cell_prop_cutoff.
     """
     import numpy as np
     from sklearn.mixture import GaussianMixture
@@ -30,7 +35,7 @@ def denoise_gene_scale(Xdata, Xlayer,
         label_ = gmm.predict(proportion_.reshape(-1,1))
         mask_flag = label_ == lower_index 
     else:
-        mask_flag = proportion_ <= cell_prop_cutoof
+        mask_flag = proportion_ <= cell_prop_cutoff
     
     denoise_mtx  = Xmtx.copy()
     denoise_mtx[:,mask_flag, neutral_index] = 1
@@ -40,54 +45,43 @@ def denoise_gene_scale(Xdata, Xlayer,
     Xdata.layers[out_layer] = denoise_mtx
     return Xdata
 
-import numpy as np
-def merge_denoise_prob(Xdata,
-              in_layer,
-              out_layer):
-    """
-    default: merge_index = [0,1] for BCH869 dataset. 
-    todo:extend to other merge situation
-    
-    Example:
-    --------
-    >>> combine_Xdata = merge_denoise_prob(combine_Xdata, 
-                           in_layer = "denoised_gene_prob",
-                           out_layer = "denoised_gene_prob_merge")
-    """
-    Xdata.layers[out_layer] = Xdata.layers[in_layer].copy()
-    Xdata.layers[out_layer][:,:,0] = Xdata.layers[out_layer][:,:,0] + Xdata.layers[out_layer][:,:,1]
-    Xdata.layers[out_layer] = np.delete(Xdata.layers[out_layer], [1], axis = -1)
-    return Xdata
-
-
-from ..analysis._clustering import XClustering
-import anndata as ad
-
 def denoise_by_cluster(Xdata, 
                        Xlayer,
+                       neutral_index = 2, 
+                       cnv_index = [0,1,3],
+                       GMM_detection = True,
+                       gmm_comp = 2,
+                       cell_prop_cutoff = 0.3,
+                       out_layer = "XC_denoise",
                        Clustering_X = True,
                        Clustering_layer = None,
                        N_Cluster = 2,
-                       cluster_anno_key = None,
-                       cell_prop_cutoff = 0.1,
-                       gmm_comp = 2,
-                       out_layer = "XC_denoise"):
+                       cell_prop_threshold = 0.1,
+                       cluster_anno_key = None):
     """
     Function:
     ---------
+    develop version.
 
     Params:
     -------
     Xdata: anndata.
     Xlayer: in_layer to perform `denoise_by_cluster` FUNC.
+    neutral_index: `denoise_by_cluster` params.
+    cnv_index: `denoise_by_cluster` params.
+    GMM_detection: `denoise_by_cluster` params.
+    gmm_comp: `denoise_by_cluster` params.
+    cell_prop_cutoff: `denoise_by_cluster` params.
+    out_layer: out_layer to save `denoise_by_cluster` results.
+
     Clustering_X: bool. default True: perform Xclustering to get cluster ID.
     Clustering_layer: in_layer to perform `XClustering`. 
                       default use `Xlayer` from combine module, also can try different 
                       module's layer, e.g., prob from BAF.
     N_Cluster: Specify cluster numbers for `XClustering`.
+    cell_prop_threshold: cells proportion less than cutoff, skip denoise strategy.
+
     cluster_anno_key: if `Clustering_X` is False, need specify an existed cluster_anno_key. 
-    cell_prop_cutoff: cells proportion less than cutoff, skip denoise strategy.
-    out_layer: out_layer to save `denoise_by_cluster` results.
 
     Example:
     --------
@@ -115,17 +109,35 @@ def denoise_by_cluster(Xdata,
         flag_ = Xdata.obs[cluster_anno_key] == XCluster_ID
         tmp_Xdata = Xdata[flag_, :].copy()
 
-        if tmp_Xdata.shape[0]/Xdata.shape[0] < cell_prop_cutoff:
+        if tmp_Xdata.shape[0]/Xdata.shape[0] < cell_prop_threshold:
             tmp_Xdata.layers[out_layer] = tmp_Xdata.layers[Xlayer].copy()
         else:
             tmp_Xdata = denoise_gene_scale(tmp_Xdata, Xlayer,
-                                           neutral_index = 2, 
-                                           cnv_index = [0,1,3], 
-                                           GMM_detection = True,
+                                           neutral_index = neutral_index, 
+                                           cnv_index = cnv_index, 
+                                           GMM_detection = GMM_detection,
                                            gmm_comp = gmm_comp,
-                                           cell_prop_cutoof = 0.3,
+                                           cell_prop_cutoff = cell_prop_cutoff,
                                            out_layer = out_layer)
         denoise_Xdata.append(tmp_Xdata)
 
     ordered_Xdata = ad.concat(denoise_Xdata, merge="same")
     return ordered_Xdata
+
+def merge_denoise_prob(Xdata,
+              in_layer,
+              out_layer):
+    """
+    default: merge_index = [0,1] for BCH869 dataset. 
+    todo:extend to other merge situation
+    
+    Example:
+    --------
+    >>> combine_Xdata = merge_denoise_prob(combine_Xdata, 
+                           in_layer = "denoised_gene_prob",
+                           out_layer = "denoised_gene_prob_merge")
+    """
+    Xdata.layers[out_layer] = Xdata.layers[in_layer].copy()
+    Xdata.layers[out_layer][:,:,0] = Xdata.layers[out_layer][:,:,0] + Xdata.layers[out_layer][:,:,1]
+    Xdata.layers[out_layer] = np.delete(Xdata.layers[out_layer], [1], axis = -1)
+    return Xdata

@@ -133,7 +133,7 @@ class BAF_General_config():
         default for 10X scRNA-seq data.
         """
         self.RDR_file = None
-        self.guide_theo_states = None
+        self.guide_theo_CNV_states = None
         self.theo_neutral_BAF = None
         self.ref_BAF_clip = False
         self.BAF_states_num = 3
@@ -152,10 +152,10 @@ class BAF_General_config():
         self.phasing_region_key = "chr"
         self.phasing_len = 100
         self.bin_nproc = 20
-        
-
         ## smoothing
         self.WMA_smooth_key = "chr_arm"
+        ## postprocessing
+        self.BAF_denoise = True
         ## BAF plotting
         self.set_figtitle = True
 
@@ -167,6 +167,7 @@ class Combine_General_config():
         Combination parmas init.
         """
         ## combine performing
+        self.BAF_denoise = False
         self.copyloss_correct = True
         self.copyloss_correct_mode = 1
         self.copygain_correct= False

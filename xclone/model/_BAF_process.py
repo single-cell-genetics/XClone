@@ -29,3 +29,10 @@ def get_KNN_connectivities_from_expr(Xdata, expr_adata):
     else:
         raise ValueError("[XClone] Xdata cell order are not matched! Pls check and do preprocessing!")
     return Xdata
+
+def BAF_prob_correct(Xdata, Xlayer1, Xlayer2):
+    """
+    todo: maybe add function to use 3 states layer 
+    to correct 5 states layer BAF prob noise.
+    """
+    pass

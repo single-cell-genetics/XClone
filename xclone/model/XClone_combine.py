@@ -365,7 +365,14 @@ def copygain_corrected(Xdata, Xlayer, mode = 1):
             prob_[:,:,1,2] += prob_[:,:,1,3]/2
             prob_[:,:,2,3] += prob_[:,:,1,3]/2
             prob_[:,:,1,3] = 0
-
+        
+        if mode == 3:
+            prob_[:,:,1,2] += prob_[:,:,1,1]*1/3
+            prob_[:,:,2,1] += prob_[:,:,1,1]*2/3
+            prob_[:,:,1,1] = 0
+            prob_[:,:,1,2] += prob_[:,:,1,3]*1/3
+            prob_[:,:,2,3] += prob_[:,:,1,3]*2/3
+            prob_[:,:,1,3] = 0
     return prob_
 
 def CNV_prob_combination(Xdata,
