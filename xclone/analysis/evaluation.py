@@ -215,11 +215,11 @@ def roc_auc_evaluate(Ground_truth_mtx, Xdata, Xlayer = "XC_denoise", state_idx =
 
     return roc_auc
 
-def fast_evaluate(GT_dat_dir, Combine_adata, Xlayer = "XC_denoise"):
+def fast_evaluate(GT_dat_dir, Combine_adata, Xlayer = "XC_denoise", dataset_name = "BCH869"):
     AUC_record = {}
     ## copy gain
     state_name = "copy_gain"
-    ground_truth_file = GT_dat_dir + state_name + "/truth/BCH869.isec.copy.gain.binary.matrix.rds"
+    ground_truth_file = f"{GT_dat_dir}{state_name}/truth/{dataset_name}.isec.copy.gain.binary.matrix.rds"
 
 
     Ground_truth_mtx, Xdata = base_evaluate_map(Combine_adata, ground_truth_file)
@@ -229,7 +229,7 @@ def fast_evaluate(GT_dat_dir, Combine_adata, Xlayer = "XC_denoise"):
     
     ## copy loss
     state_name = "copy_loss"
-    ground_truth_file = GT_dat_dir + state_name + "/truth/BCH869.isec.copy.loss.binary.matrix.rds"
+    ground_truth_file = f"{GT_dat_dir}{state_name}/truth/{dataset_name}.isec.copy.loss.binary.matrix.rds"
 
     Ground_truth_mtx, Xdata = base_evaluate_map(Combine_adata, ground_truth_file)
     roc_auc = roc_auc_evaluate(Ground_truth_mtx, Xdata, Xlayer, state_idx = 0, ROC_show = True)
@@ -238,7 +238,7 @@ def fast_evaluate(GT_dat_dir, Combine_adata, Xlayer = "XC_denoise"):
     
     ## loh
     state_name = "loh"
-    ground_truth_file = GT_dat_dir + state_name + "/truth/BCH869.isec.loh.binary.matrix.rds"
+    ground_truth_file = f"{GT_dat_dir}{state_name}/truth/{dataset_name}.isec.loh.binary.matrix.rds"
 
     Ground_truth_mtx, Xdata = base_evaluate_map(Combine_adata, ground_truth_file)
     roc_auc = roc_auc_evaluate(Ground_truth_mtx, Xdata, Xlayer, state_idx = 1, ROC_show = True)

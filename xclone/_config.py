@@ -171,7 +171,7 @@ class Combine_General_config():
         self.copyloss_correct = True
         self.copyloss_correct_mode = 1
         self.copygain_correct= False
-        self.copygain_correct_mode = 2
+        self.copygain_correct_mode = 1
 
         ## combine plotting
         self.merge_loss = True

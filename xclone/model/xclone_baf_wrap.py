@@ -314,7 +314,18 @@ def run_BAF(BAF_adata,
                                               emm_inlayer = "correct_emm_prob_log_KNN", 
                                               nproc = 80, 
                                               verbose = False)
+        neutral_index = 1
+        cnv_index = [0,2]
+        merge_Xdata_copy = xclone.model.denoise_gene_scale(merge_Xdata_copy, Xlayer = "posterior_mtx",
+                       neutral_index = neutral_index, 
+                       cnv_index = cnv_index, 
+                       GMM_detection = True,
+                       gmm_comp = 2,
+                       cell_prop_cutoff = 0.05,
+                       out_layer = "denoised_posterior_mtx")
+
         merge_Xdata.layers["add_posterior_mtx"] = merge_Xdata_copy.layers["posterior_mtx"]
+        merge_Xdata.layers["denoised_add_posterior_mtx"] = merge_Xdata_copy.layers["denoised_posterior_mtx"]
     
     if BAF_denoise:
         if CNV_N_components == 3:
@@ -369,7 +380,10 @@ def run_BAF_plot(merge_Xdata,
 
     fig_title = ""
     baf_smooth_fig = out_plot_dir + dataset_name + "_BAF_smooth.png"
-    baf_final_fig = out_plot_dir + dataset_name + "_BAF_CNV.png"
+    baf_final_fig1 = out_plot_dir + dataset_name + "_BAF_CNV.png"
+    baf_final_fig2 = out_plot_dir + dataset_name + "_BAF_CNV_denoise.png"
+    baf_final_fig3 = out_plot_dir + dataset_name + "_BAF_CNV_3states.png"
+    baf_final_fig4 = out_plot_dir + dataset_name + "_BAF_CNV_3states_denoise.png"
 
     sub_logger = get_logger("BAF plot module")
     sub_logger.info("BAF plot module started")
@@ -390,23 +404,31 @@ def run_BAF_plot(merge_Xdata,
                                     cell_anno_key = plot_cell_anno_key, 
                                     title = fig_title,
                                     save_file = True, 
-                                    out_file = baf_final_fig)
+                                    out_file = baf_final_fig1)
     
     if "denoised_posterior_mtx" in merge_Xdata.layers:
         xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_posterior_mtx",
-                                    weights = False, 
-                                    cell_anno_key = plot_cell_anno_key, 
-                                    title = fig_title,
-                                    save_file = True, 
-                                    out_file = baf_final_fig)
+                                        weights = False, 
+                                        cell_anno_key = plot_cell_anno_key, 
+                                        title = fig_title,
+                                        save_file = True, 
+                                        out_file = baf_final_fig2)
     
-    # if "add_posterior_mtx" in merge_Xdata.layers:
-    #     xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "add_posterior_mtx",
-    #                                 weights = False, 
-    #                                 cell_anno_key = plot_cell_anno_key, 
-    #                                 title = fig_title,
-    #                                 save_file = True, 
-    #                                 out_file = baf_final_fig)
+    if "add_posterior_mtx" in merge_Xdata.layers:
+        xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "add_posterior_mtx",
+                                        weights = False, 
+                                        cell_anno_key = plot_cell_anno_key, 
+                                        title = fig_title,
+                                        save_file = True, 
+                                        out_file = baf_final_fig3)
+    if "denoised_add_posterior_mtx" in merge_Xdata.layers:
+        xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_add_posterior_mtx",
+                                        weights = False, 
+                                        cell_anno_key = plot_cell_anno_key, 
+                                        title = fig_title,
+                                        save_file = True, 
+                                        out_file = baf_final_fig4)
+
     
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time
