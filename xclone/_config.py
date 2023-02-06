@@ -238,17 +238,16 @@ class XCloneConfig():
         self.module = module
         if self.module == "RDR":
             RDR_General_config.__init__(self)
-            pass
+            HMM_Configs.__init__(self)
         if self.module == "BAF":
             BAF_General_config.__init__(self)
-            pass
+            HMM_Configs.__init__(self)
         if self.module == "Combine":
             Combine_General_config.__init__(self)
         
         # xclone general config
         Base_settings.__init__(self)
         XCloneGeneral_config.__init__(self)
-        HMM_Configs.__init__(self)
         
         if self.set_smartseq:
             Smartseq_Config.__init__(self, module)

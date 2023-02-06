@@ -64,13 +64,6 @@ def run_combine(RDR_Xdata,
     out_data_dir = str(out_dir) + "/data/"
     xclone.al.dir_make(out_data_dir)
 
-
-    ## use_file
-    # output after CNV calling
-    # BAF_final_file = out_dir + "BAF_merge_Xdata_KNN_HMM_post.h5ad"
-    # ## use RDR connectivities
-    # RDR_final_file = out_dir + "RDR_adata_KNN_HMM_post.h5ad"
-
     RDR_combine_corrected_file = out_data_dir + "combine_adata_corrected.h5ad"
     combine_final_file = out_data_dir + "combined_final.h5ad"
     

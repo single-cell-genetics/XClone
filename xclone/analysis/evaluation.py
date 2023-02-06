@@ -32,37 +32,6 @@ def extract_Xdata(Xdata, use_cell_file, use_gene_file):
     
     return update_Xdata
 
-# def extract_Xdata1(Xdata, use_cell_file, use_gene_file, BCHdataset = True):
-#     """
-#     Notes:
-#     use_cell_file, use_gene_file from xianjie
-#     update for BCH869 dataset.
-    
-#     Example:
-#     --------
-#     >>> data_dir = "..."
-#     >>> use_cell_file = dat_dir + "GX109.isec.cell.anno.tsv"
-#     >>> use_gene_file = dat_dir + "GX109.isec.gene.anno.tsv"
-#     >>> RDR_adata = extract_Xdata(RDR_adata,use_cell_file, use_gene_file)
-#     """
-    
-#     use_cell = pd.read_csv(use_cell_file, sep = "\t", header = None)
-#     use_gene = pd.read_csv(use_gene_file, sep = "\t", header = None)
-#     if BCHdataset:
-#         use_cell_lst = use_cell[0].str.replace("BCH", "BT_").str.replace(".", "-").tolist()
-#     else:
-#         use_cell_lst = use_cell[0].tolist()
-
-#     use_gene_lst = use_gene[0].tolist()
-    
-#     cell_flag = Xdata.obs.index.isin(use_cell_lst)
-#     gene_flag = Xdata.var["GeneName"].isin(use_gene_lst)
-    
-#     update_Xdata = Xdata.copy()
-#     update_Xdata = update_Xdata[cell_flag,:].copy()
-#     update_Xdata = update_Xdata[:, gene_flag].copy()
-    
-#     return update_Xdata
 
 def extract_Xdata1(Xdata, GT_df):
     """

@@ -72,3 +72,18 @@ def BAF_smooth_visualization(Xdata, cell_anno_key = "cell_type",
     Xheatmap(re_Xdata, Xlayer = Xlayer, 
              cell_anno_key = cell_anno_key, center = 0.5, cmap="vlag", 
              colorbar_name = colorbar_name, **kwargs)
+
+def BAF_smooth_complex_visualization(Xdata,
+                                     cell_anno_key = ["cluster", "cell_type"],
+                                     clusters_display_name = ["Clone", "Celltype"],
+                                     Xlayer = "phased_KNN_smoothed", 
+                                     colorbar_name = "BAF smooth",
+                                     **kwargs):
+    """
+    """
+    re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key = cell_anno_key)
+    XXheatmap(re_Xdata, Xlayer = Xlayer, 
+             cell_anno_key = cell_anno_key, 
+             clusters_display_name = clusters_display_name,
+             center = 0.5, cmap="vlag", 
+             colorbar_name = colorbar_name, **kwargs)

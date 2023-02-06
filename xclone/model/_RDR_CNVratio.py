@@ -229,6 +229,17 @@ def correct_guide_RDR_cnv(guide_cnv_ratio, threshold = 0.15):
     if guide_cnv_ratio[2] - guide_cnv_ratio[1] < threshold:
         guide_cnv_ratio[2] = 1.5
         print("correct RDR CNV guiding copy gain ratio")
+    
+    ## add clipping for this version
+    if guide_cnv_ratio[0] < 0.3:
+        guide_cnv_ratio[0] = 0.3
+        print("[XClone] warning: correct RDR CNV guiding copy loss ratio")
+        print("[XClone] hints: can change guide_qt_lst")
+    if guide_cnv_ratio[2] > 3:
+        print("[XClone] warning: correct RDR CNV guiding copy gain ratio")
+        print("[XClone] hints: can change guide_qt_lst")
+        guide_cnv_ratio[2] = 3
+    
     return guide_cnv_ratio
 
 def guide_CNV_states(RDR_Xdata, 
@@ -694,8 +705,9 @@ def CNV_optimazation(Xdata,
                 break
             elif it == max_iter - 1:
                 if verbose:
-                    print("[XClone] Warning: CNV ratio optimization did not converge!\n")
-                    print("[XClone] Notes: try to increase the max_iter: ", max_iter, "!\n")
+                    if max_iter > 10:
+                        print("[XClone] Warning: CNV ratio optimization did not converge!\n")
+                        print("[XClone] Notes: try to increase the max_iter: ", max_iter, "!\n")
     
     Logliklihood = Logliklihood[:it+1]
 

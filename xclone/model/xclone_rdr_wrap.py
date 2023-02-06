@@ -210,6 +210,7 @@ def run_RDR(RDR_adata,
                                                         anno_key = chr_anno_key, 
                                                         qt_lst = guide_qt_lst, 
                                                         show_boxplot = False)
+        
     RDR_adata = xclone.model.gene_exp_group(RDR_adata, 
                                             n_group = gene_exp_group,
                                             ref_log =  gene_exp_ref_log,
