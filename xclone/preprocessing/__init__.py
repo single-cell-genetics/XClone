@@ -25,7 +25,7 @@ from ._RDR_preprocess import Xdata_RDR_preprocess, gene_length_scale
 from ._RDR_genes import get_markers
 from ._RDR_genes import filter_markers
 
-
+from ._preprocessing import valid_cell, gene_filter
 from ._preprocessing import filter_nulldata, filter_2nulldata, tidy_Xdata
 from ._preprocessing import filter_pre
 from ._preprocessing import filter_obs, filter_features

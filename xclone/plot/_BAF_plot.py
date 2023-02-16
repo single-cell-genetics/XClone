@@ -191,12 +191,12 @@ def visualize_cell_BAF(Xdata,
         Xheatmap(Xdata_re, Xlayer, center = 0.5, fillna_value = 0.5, 
                 cell_anno_key = cell_anno_key, cmap="vlag",
                 colorbar_ticks = None, colorbar_label = None,
-                colorbar_name = "BAF values")
+                colorbar_name = "BAF values",**kwargs)
     else:
         Xheatmap(Xdata_re, Xlayer, center = 0.5, fillna_value = 0.5, 
                 cell_anno_key = cell_anno_key, cmap="vlag",
                 colorbar_ticks = [0, 0.5, 1], colorbar_label = [0, 0.5, 1],
-                colorbar_name = "BAF values")
+                colorbar_name = "BAF values",**kwargs)
 
     ## change value around 0.5
     if shrink_BAF:
@@ -204,7 +204,7 @@ def visualize_cell_BAF(Xdata,
         Xheatmap(shrink_Xdata_re, Xlayer, center = 0.5, fillna_value = 0.5, 
                  cell_anno_key = cell_anno_key, cmap="vlag",
                  colorbar_ticks = None, colorbar_label = None,
-                 colorbar_name = "BAF values")
+                 colorbar_name = "BAF values",**kwargs)
 
     return None
 

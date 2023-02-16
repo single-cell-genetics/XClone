@@ -336,6 +336,7 @@ def copyloss_corrected(Xdata, Xlayer, mode = 1):
 def copygain_corrected(Xdata, Xlayer, mode = 1):
     """
     not sure if necessary; can improve in next release.
+    Not used in this release ("0.3.4")
     can use bafprob to find out allele-specific copy gain.
     However, due to narrow distance between allele-specific copy gain and allele balance,
     it is hard to do now.
@@ -352,11 +353,12 @@ def copygain_corrected(Xdata, Xlayer, mode = 1):
     
     ## BAF 5 states
     if prob_.shape[-1] == 5:
-        prob_[:,:,2,1] += prob_[:,:,2,2]/3
-        prob_[:,:,2,3] += prob_[:,:,2,2]/3
-        prob_[:,:,1,2] += prob_[:,:,2,2]/3
+        if mode == 1:
+            prob_[:,:,2,1] += prob_[:,:,2,2]/3
+            prob_[:,:,2,3] += prob_[:,:,2,2]/3
+            prob_[:,:,1,2] += prob_[:,:,2,2]/3
 
-        prob_[:,:,2,2] = 0
+            prob_[:,:,2,2] = 0
         
         if mode == 2:
             prob_[:,:,1,2] += prob_[:,:,1,1]/2

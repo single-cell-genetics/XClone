@@ -125,6 +125,7 @@ def Xheatmap(
     colorbar_name = "CNV states",
     set_grid: bool = False, 
     save_file: bool = False,
+    set_dpi = 600,
     out_file = 'XClone_Xheatmap_test.pdf',
     **kwargs):
     """
@@ -224,7 +225,7 @@ def Xheatmap(
     if save_file == False:
         plt.show()
     else:
-        plt.savefig(out_file, bbox_inches='tight', dpi=600)
+        plt.savefig(out_file, bbox_inches='tight', dpi=set_dpi)
         plt.show()
         plt.close()
 
@@ -308,6 +309,7 @@ def XXheatmap(
     colorbar_label = ["copy loss", "copy neutral", "copy gain"], 
     colorbar_name = "CNV states",
     save_file: bool = False,
+    set_dpi = 600,
     out_file = 'XClone_XXheatmap_test.pdf',
     **kwargs):
     """
@@ -413,7 +415,7 @@ def XXheatmap(
     if save_file == False:
         plt.show()
     else:
-        plt.savefig(out_file, bbox_inches='tight', dpi=600)
+        plt.savefig(out_file, bbox_inches='tight', dpi=set_dpi)
         plt.show()
         plt.close()
 

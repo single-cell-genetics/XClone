@@ -111,6 +111,7 @@ from .xclone_rdr_wrap import run_RDR, run_RDR_plot
 
 from .xclone_baf_wrap import preview_BAF
 from .xclone_baf_wrap import run_BAF, run_BAF_plot
+from .xclone_baf_wrap import plot_processed_BAF
 
 from .xclone_combine_wrap import run_combine, run_combine_plot
 

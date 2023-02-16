@@ -440,3 +440,46 @@ def plot_BAF_module():
     all plots for BAF module.
     """
     pass
+
+def plot_processed_BAF(merge_Xdata, 
+                       dataset_name,
+                       plot_cell_anno_key,
+                       set_figtitle = True,
+                       set_dpi = 300,
+                       out_dir = None):
+    """
+    BAF phasing and smoothing plots.
+    """
+    if out_dir is None:
+        cwd = os.getcwd()
+        out_dir = cwd + "/XCLONE_OUT/"
+    
+    out_plot_dir = str(out_dir) + "/plot/"
+    xclone.al.dir_make(out_plot_dir)
+
+    fig_title = ""
+    
+    baf_fig1 = out_plot_dir + dataset_name + "_BAF.png"
+    baf_fig2 = out_plot_dir + dataset_name + "_BAF_phased.png"
+    baf_fig3 = out_plot_dir + dataset_name + "_BAF_phased_KNN.png"
+    baf_fig4 = out_plot_dir + dataset_name + "_BAF_phased_KNN_WMA.png"
+    
+    if set_figtitle:
+        fig_title = dataset_name + " BAF"
+    xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
+                                title = fig_title, save_file = True, out_file = baf_fig1)
+    if set_figtitle:
+        fig_title = dataset_name + " Phased BAF"
+    xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF_phased", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
+                                title = fig_title, save_file = True, out_file = baf_fig2)
+    if set_figtitle:
+        fig_title = dataset_name + " Phased BAF after KNN smoothing"
+    xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF_phased_KNN", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
+                                title = fig_title, save_file = True, out_file = baf_fig3)
+    if set_figtitle:
+        fig_title = dataset_name + " Phased BAF after KNN smoothing and WMA smoothing"
+#     xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF_phased_KNN_WMA", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
+#                                 title = fig_title, save_file = True, out_file = baf_fig4)
+    xclone.pl.BAF_smooth_visualization(merge_Xdata, Xlayer = "BAF_phased_KNN_WMA", cell_anno_key=plot_cell_anno_key, change_colorbar = True,  
+                                       colorbar_ticks = [0.1, 0.5, 0.9], colorbar_label = ["0",  "0.5",  "1"], colorbar_name = "BAF values",set_dpi =set_dpi,
+                                       title = fig_title, save_file = True, out_file = baf_fig4)
