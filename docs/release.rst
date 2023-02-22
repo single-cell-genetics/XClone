@@ -9,12 +9,14 @@ Version 0.3.4
 - add tutorials in xclone plotting #
 - add tutorials in xclone data analysis #
 - BAF local phasing improvement
-- BAF nmodule support 3 and 5 states
+- BAF module support 3 and 5 states
 - Combine module support prob correct mode(both copy gain and copy loss)
 - update libratio capping and add cell filter limits
-- libratio fitting update(todo)
-- provide New denoise function (denoise by cluster)
-- add evaluation function in analysis module
+- libratio fitting update
+- provide new denoise function (denoise by cluster)
+- add ROC evaluation function in analysis module
+- add functions for XClone clustering
+- wrap independent plotting modules
 
 
 Version 0.3.3

@@ -46,7 +46,7 @@ Have a question or would like to start a new discussion? Head over to
 `GitHub discussions <https://github.com/single-cell-genetics/XClone/discussions>`_.
 In either case, you can also always send us an `email <mailto:rthuang@connect.hku.hk>`_.
 Your help to improve XClone is highly appreciated.
-For further information visit `xclone.org <https://xclone1.readthedocs.io/en/latest/>`_.
+For further information visit `xclone.org <https://xclone-cnv.readthedocs.io/en/latest/>`_.
 
 
 .. toctree::

@@ -11,6 +11,9 @@ We recommend to use Anaconda_ environment for version control and to avoid poten
     conda create -n xclone python=3.7
     conda activate xclone
 
+We strongly recommend users install xclone in Python 3.7 environment, for higher version may not stable
+for higher version of packages dependencies.
+
 XClone package can be conveniently installed via PyPI (for stable version) ::
 
     pip install xclone
