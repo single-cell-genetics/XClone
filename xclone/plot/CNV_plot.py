@@ -230,7 +230,7 @@ def BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = False,
             Xheatmap(res_cnv_ad_re, cell_anno_key = cell_anno_key, center = center_value, 
             colorbar_ticks = [0.3, 1, 1.9, 2.8, 3.5], 
             colorbar_name = colorbar_name, 
-            colorbar_label = ["allele-A bias", "allele-A bias", "allele balance",  "allele-B bias", "allele-B bias"],
+            colorbar_label = ["allele-A bias (++)", "allele-A bias (+)", "allele balance",  "allele-B bias (+)", "allele-B bias (++)"],
             cmap = color_map, **kwargs)
 
 
@@ -285,7 +285,7 @@ def Complex_BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = Fal
             center = center_value, 
             colorbar_ticks = [0.3, 1, 1.9, 2.8, 3.5], 
             colorbar_name = colorbar_name, 
-            colorbar_label = ["allele-A bias", "allele-A bias", "allele balance",  "allele-B bias", "allele-B bias"],
+            colorbar_label = ["allele-A bias (++)", "allele-A bias (+)", "allele balance",  "allele-B bias (+)", "allele-B bias (++)"],
             cmap = color_map, **kwargs)
         
 

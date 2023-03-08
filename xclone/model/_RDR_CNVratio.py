@@ -597,6 +597,7 @@ def combine_BAF_emmprob(Xdata, BAF_Xdata):
     return Xdata
 
 def CNV_optimazation(Xdata,
+                     depth_key = "library_ratio_capped",
                      dispersion_key = "dispersion_capped",
                      init_state_ratio = np.array([0.5, 1.0, 1.5]), 
                      max_iter=20, 
@@ -673,6 +674,7 @@ def CNV_optimazation(Xdata,
 
             fit_cnv_params['random_seed'] = 2
             fit_cnv_params['verbose'] = fitCNV_verbose
+            fit_cnv_params['depth_key'] = depth_key
 
             fit_cnv_params.update(**kwargs)
             CNV_ratio, model_results = fit_CNV_ratio(**fit_cnv_params)

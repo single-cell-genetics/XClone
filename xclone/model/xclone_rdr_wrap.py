@@ -69,6 +69,7 @@ def run_RDR(RDR_adata,
     marker_group_anno_key = config.marker_group_anno_key
     top_n_marker = config.top_n_marker
     remove_marker = config.remove_marker
+    fit_GLM_libratio = config.fit_GLM_libratio
     dispersion_celltype = config.dispersion_celltype
     gene_exp_group = config.gene_exp_group
     gene_exp_ref_log = config.gene_exp_ref_log
@@ -134,25 +135,33 @@ def run_RDR(RDR_adata,
     RDR_adata, RDR_adata_bulk = xclone.pp.Xdata_RDR_preprocess(RDR_adata, filter_ref_ave = None, 
     cell_anno_key = cell_anno_key, ref_celltype = ref_celltype)
 
-    ## fit libratio for each cell based on select normal chrs*
-    RDR_adata_bulk = xclone.model.select_normal_CHR(RDR_adata_bulk, select_chr_num = 4)
-    ### extend the chr index to whole dataset for libratio fitting
-    RDR_adata_bulk= xclone.model.extend_chr_index_to_singlecell(RDR_adata_bulk, 
+    if fit_GLM_libratio:
+        ## fit libratio for each cell based on select normal chrs*
+        select_normal_chr_num = config.select_normal_chr_num
+        RDR_adata_bulk = xclone.model.select_normal_CHR(RDR_adata_bulk, select_chr_num = select_normal_chr_num)
+        ### extend the chr index to whole dataset for libratio fitting
+        RDR_adata_bulk= xclone.model.extend_chr_index_to_singlecell(RDR_adata_bulk, 
+                                                                    RDR_adata_bulk, 
+                                                                    cell_anno_key = cell_anno_key)
+        RDR_adata = xclone.model.extend_chr_index_to_singlecell(RDR_adata, 
                                                                 RDR_adata_bulk, 
                                                                 cell_anno_key = cell_anno_key)
-    RDR_adata = xclone.model.extend_chr_index_to_singlecell(RDR_adata, 
-                                                            RDR_adata_bulk, 
-                                                            cell_anno_key = cell_anno_key)
 
-    RDR_adata_bulk = xclone.model.fit_lib_ratio(RDR_adata_bulk, verbose = True, 
-                                                NB_kwargs={'disp': False, 'skip_hessian': True})
-    RDR_adata = xclone.model.fit_lib_ratio(RDR_adata, verbose = False, 
+        RDR_adata_bulk = xclone.model.fit_lib_ratio(RDR_adata_bulk, verbose = True, 
+                                                    NB_kwargs={'disp': False, 'skip_hessian': True})
+        RDR_adata = xclone.model.fit_lib_ratio(RDR_adata, verbose = False, 
                                                 NB_kwargs={'disp': False, 'skip_hessian': True})
     
-    xclone.model.check_libratio(RDR_adata, anno_key = "library_ratio")
-    RDR_adata = xclone.model.libsize_clip(RDR_adata, max_threshold = 5)
-    xclone.model.check_libratio(RDR_adata, anno_key = "library_ratio_capped")
+        xclone.model.check_libratio(RDR_adata, anno_key = "library_ratio")
+        RDR_adata = xclone.model.libsize_clip(RDR_adata, max_threshold = 5)
+        xclone.model.check_libratio(RDR_adata, anno_key = "library_ratio_capped")
 
+        libsize_key = "library_ratio_capped"
+        depth_key = "library_ratio_capped"
+    
+    else:
+        libsize_key = "counts_ratio"
+        depth_key = "counts_ratio"
     ## fit gene-specific dispersion based on reference celltype
     if dispersion_celltype is None:
         dispersion_celltype = ref_celltype
@@ -160,7 +169,7 @@ def run_RDR(RDR_adata,
                                                  cell_anno_key = cell_anno_key, 
                                                  select_celltype = dispersion_celltype)
     RDR_adata_REF = xclone.model.fit_Dispersions(RDR_adata_REF, 
-                                                 libsize_key = "library_ratio_capped", 
+                                                 libsize_key = libsize_key, 
                                                  NB_kwargs={'disp': False, 'skip_hessian': True},
                                                  verbose = False, model_results_path = None)
     xclone.model.check_dispersion(RDR_adata_REF, anno_key = "dispersion")
@@ -182,7 +191,7 @@ def run_RDR(RDR_adata,
 
     RDR_adata = xclone.model.extra_preprocess(RDR_adata, cluster_key = cell_anno_key,
                                               ref_celltype = ref_celltype,
-                                              depth_key='library_ratio_capped',
+                                              depth_key=depth_key,
                                               low_dim=False, run_KNN=True, 
                                               KNN_neighbors = KNN_neighbors,
                                               copy=True)
@@ -219,7 +228,7 @@ def run_RDR(RDR_adata,
     t = trans_t
     if trans_prob is None:
         trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
-    RDR_adata = xclone.model.CNV_optimazation(RDR_adata, init_state_ratio = guide_cnv_ratio,
+    RDR_adata = xclone.model.CNV_optimazation(RDR_adata, depth_key = depth_key, init_state_ratio = guide_cnv_ratio,
                     max_iter = max_iter,
                     min_iter = min_iter,
                     start_prob = start_prob,

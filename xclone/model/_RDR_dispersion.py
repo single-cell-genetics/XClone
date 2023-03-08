@@ -308,7 +308,7 @@ def dispersion_clip(Xdata, anno_key = "dispersion",
     
     Xdata.var[update_anno_key] = np.clip(
     Xdata.var[anno_key], min_, max_)
-    print("[XClone RDR library ratio]: clipping")
+    print("[XClone RDR dispersion]: clipping")
 
     return Xdata
 

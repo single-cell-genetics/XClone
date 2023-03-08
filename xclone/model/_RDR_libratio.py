@@ -27,8 +27,9 @@ from ._RDR_base import list_update
 # from .._logging import get_logger
 
 ## 1) preprocessing for libratio fitting
-def select_normal_CHR(Xdata, select_chr_num = 4):
+def select_normal_CHR1(Xdata, select_chr_num = 4):
     """
+    deprecated 
     Function:
     chr based: select 4 normal chrs(based on raw ratio) to 
                get the lib size for rescaling.
@@ -74,11 +75,56 @@ def select_normal_CHR(Xdata, select_chr_num = 4):
     
     ## select the near normal chrs based on the t-test p_value
     order_index = np.argsort(p_val, axis=1)
+    order_index = order_index[:, ::-1] # debugs notes: select higher p_val chr
     select_chr_index = order_index[:,0:select_chr_num]
 
     Xdata.obsm["chr_index"] = select_chr_index
     Xdata.obsm["t_stat"] = t_stat
     Xdata.obsm["p_val"] = p_val
+    print(Xdata.obs)
+    print(select_chr_index)
+    return Xdata
+
+
+import numpy as np
+from sklearn.mixture import GaussianMixture
+
+def select_normal_CHR(Xdata, select_chr_num = 4):
+    """
+    """
+    chr_lst = Xdata.var["chr"].drop_duplicates(keep="first")
+    chr_len = chr_lst.shape[0]
+
+    for i in range(chr_len):
+        chr_flag = Xdata.var["chr"] == chr_lst[i]
+        tmp_chr = Xdata.layers["raw_ratio"][:, chr_flag]
+
+        gm = GaussianMixture(n_components=2, random_state=0).fit(tmp_chr.T)
+        # gm.means_
+        # gm.covariances_
+        type_lst = [*range(0,tmp_chr.shape[0])]
+        means_ = gm.means_[(np.argsort(gm.means_, axis = 0)[1,:], type_lst)]
+        vars_ = gm.covariances_[(np.argsort(gm.means_, axis = 0)[1,:], type_lst, type_lst)]
+
+        import scipy.stats
+        #find p-value(z-score)
+        tmp_pval = scipy.stats.norm.sf(abs((0-means_)/np.sqrt(vars_)))
+        if i == 0:
+            p_val = tmp_pval
+        else:
+            p_val = np.vstack((p_val, tmp_pval))
+    p_val = p_val.T
+    
+    ## select the near normal chrs based on the t-test p_value
+    order_index = np.argsort(p_val, axis=1)
+    order_index = order_index[:, ::-1]
+    select_chr_index = order_index[:,0:select_chr_num]
+
+    Xdata.obsm["chr_index"] = select_chr_index
+    Xdata.obsm["p_val"] = p_val
+    print(Xdata.obs)
+    print(p_val)
+    print(select_chr_index)
     return Xdata
 
 

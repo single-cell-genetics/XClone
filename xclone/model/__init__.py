@@ -15,7 +15,7 @@ from .data_base_utils import Xdata_mapping
 from ._RDR_libratio import total_count_ratio
 from ._RDR_libratio import optmize_libratio2, get_libsize2, libratio_elbo_func, libratio_elbo_fun
 
-from ._RDR_libratio import select_normal_CHR, extend_chr_index
+from ._RDR_libratio import select_normal_CHR, extend_chr_index, select_normal_CHR1
 from ._RDR_libratio import extend_chr_index_to_singlecell
 from ._RDR_libratio import cell_filter_by_celltype
 from ._RDR_libratio import get_libsize

@@ -106,6 +106,8 @@ class RDR_General_config():
         self.marker_group_anno_key = None
         self.top_n_marker = 15
         self.remove_marker = True
+        self.fit_GLM_libratio = True
+        self.select_normal_chr_num = 4
         self.dispersion_celltype = None
         self.gene_exp_group = 1
         # active when exp_group larger than 2

@@ -82,10 +82,10 @@ def Xdata_RDR_preprocess(Xdata,
     else:
         raise ValueError("Xdata should be sparse matrix! Pls check!")
     
-    if mode == "Counts_ratio":
-        ## cell counts_ratio to be compared with learned libratio
-        Xdata.obs[obs_key] = Xdata.X.A.sum(axis=1) / Xdata.var['ref_avg'].sum()
-        return Xdata
+    # if mode == "Counts_ratio":
+    #     ## cell counts_ratio to be compared with learned libratio
+    #     Xdata.obs[obs_key] = Xdata.X.A.sum(axis=1) / Xdata.var['ref_avg'].sum()
+    #     return Xdata
     
     # reference data preprocessing
     if ref_celltype is None:
@@ -95,6 +95,7 @@ def Xdata_RDR_preprocess(Xdata,
     ref_Xdata = Xdata[ref_flag,:]
 
     Xdata.var['ref_avg'] = ref_Xdata.X.A.mean(axis=0)
+
     
     ## filter genes based on ref_average counts
     ### if filter_ref_ave is None, skip the filtering step*
@@ -107,6 +108,8 @@ def Xdata_RDR_preprocess(Xdata,
     
     # mode="FILTER"
     update_Xdata = Xdata[:, gene_flag].copy()
+    ## cell counts_ratio to be compared with learned libratio
+    update_Xdata.obs[obs_key] = update_Xdata.X.A.sum(axis=1) / update_Xdata.var['ref_avg'].sum()
     
     if mode == "FILTER":
         
@@ -161,7 +164,8 @@ def rr_ad_celltype_processing(Xdata, ref_celltype, cell_anno_key):
     ## calculate ratio-bulk
     ## return rr_ad_celltype for log raw ratio visualization and choosing normal chrs
     cell_lib = obs_all_bulk.sum(axis=1, keepdims=True) # equivalent normalization term like ref_bulk
-    raw_ratio = np.log2((obs_all_bulk+0.1) / (cell_lib*ref_norm)) ## add small value 0.1 for visualization 
+    # raw_ratio = np.log2((obs_all_bulk+0.1) / (cell_lib*ref_norm)) ## add small value 0.1 for visualization 
+    raw_ratio = np.log2((obs_all_bulk + 1e-8) / (cell_lib*ref_norm)) ## add small value 1e-6 for visualization
 
     obs_all_bulk_ad.layers["raw_ratio"] = raw_ratio
     return obs_all_bulk_ad
@@ -182,7 +186,8 @@ def rr_ad_cell_processing(Xdata, ref_celltype, cell_anno_key):
     # 02-cell based anndata
     ## calculate ratio-cell
     cell_lib = obs_Xdata.X.A.sum(axis=1, keepdims=True)
-    raw_ratio = np.log((obs_Xdata.X.A + 0.1) / (cell_lib*ref_norm)) ## add small value 0.1 for visualization 
+    # raw_ratio = np.log((obs_Xdata.X.A + 0.1) / (cell_lib*ref_norm)) ## add small value 0.1 for visualization
+    raw_ratio = np.log((obs_Xdata.X.A + 1e-8) / (cell_lib*ref_norm)) ## add small value 1e-6 for visualization
 
     rr_cell_ad = ad.AnnData(raw_ratio, var=obs_Xdata.var.copy(), obs = obs_Xdata.obs.copy())
     
