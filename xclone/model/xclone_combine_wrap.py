@@ -146,7 +146,8 @@ def run_combine_plot(combine_Xdata,
             merge_loss = True,
             merge_loh = True,
             set_figtitle = True,
-            out_dir = None):
+            out_dir = None,
+            **kwargs):
     """
     """
 
@@ -173,7 +174,8 @@ def run_combine_plot(combine_Xdata,
     xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "prob1_merge", 
         cell_anno_key = plot_cell_anno_key,  
         title = fig_title,
-        save_file = True, out_file = combine_res_base_fig)
+        save_file = True, out_file = combine_res_base_fig,
+        **kwargs)
     
     ## SELECT PLOT
     if merge_loh:
@@ -188,7 +190,8 @@ def run_combine_plot(combine_Xdata,
                                         colorbar_label = colorbar_label,
                                         title = fig_title,
                                         save_file = True, 
-                                        out_file = combine_res_select_fig)
+                                        out_file = combine_res_select_fig,
+                                        **kwargs)
         else:
             colorbar_ticks = [0,1,2,3,4]
             colorbar_label = ["copy lossA", "copy lossB", "LOH", "copy neutral", "copy gain"]
@@ -200,7 +203,8 @@ def run_combine_plot(combine_Xdata,
                                         colorbar_label = colorbar_label,
                                         title = fig_title,
                                         save_file = True, 
-                                        out_file = combine_res_select_fig)
+                                        out_file = combine_res_select_fig,
+                                        **kwargs)
     elif merge_loss:
         colorbar_ticks = [0,1,2,3,4]
         colorbar_label = ["copy loss","LOH-A", "LOH-B",  "copy neutral", "copy gain"]
@@ -212,7 +216,8 @@ def run_combine_plot(combine_Xdata,
                                         colorbar_label = colorbar_label,
                                         title = fig_title,
                                         save_file = True, 
-                                        out_file = combine_res_select_fig)
+                                        out_file = combine_res_select_fig,
+                                        **kwargs)
         
     else:
         colorbar_ticks = [0,1,2,3,4,5]
@@ -225,7 +230,8 @@ def run_combine_plot(combine_Xdata,
                                         colorbar_label = colorbar_label,
                                         title = fig_title,
                                         save_file = True, 
-                                        out_file = combine_res_select_fig)
+                                        out_file = combine_res_select_fig,
+                                        **kwargs)
     
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time

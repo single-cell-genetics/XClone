@@ -367,7 +367,8 @@ def run_BAF_plot(merge_Xdata,
                  dataset_name,
                  plot_cell_anno_key,
                  set_figtitle = True,
-                 out_dir = None):
+                 out_dir = None,
+                 **kwargs):
     """
     """
     ## Result output prepare
@@ -397,14 +398,17 @@ def run_BAF_plot(merge_Xdata,
                                        colorbar_name = "BAF",
                                        title = fig_title,
                                        save_file = True, 
-                                       out_file = baf_smooth_fig)
+                                       out_file = baf_smooth_fig,
+                                       **kwargs)
     if set_figtitle:
         fig_title = dataset_name + " BAF module"
     xclone.pl.BAF_CNV_visualization(merge_Xdata, weights = False, 
                                     cell_anno_key = plot_cell_anno_key, 
                                     title = fig_title,
                                     save_file = True, 
-                                    out_file = baf_final_fig1)
+                                    out_file = baf_final_fig1,
+                                    **kwargs)
+                                    
     
     if "denoised_posterior_mtx" in merge_Xdata.layers:
         xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_posterior_mtx",
@@ -412,7 +416,8 @@ def run_BAF_plot(merge_Xdata,
                                         cell_anno_key = plot_cell_anno_key, 
                                         title = fig_title,
                                         save_file = True, 
-                                        out_file = baf_final_fig2)
+                                        out_file = baf_final_fig2,
+                                        **kwargs)
     
     if "add_posterior_mtx" in merge_Xdata.layers:
         xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "add_posterior_mtx",
@@ -420,14 +425,16 @@ def run_BAF_plot(merge_Xdata,
                                         cell_anno_key = plot_cell_anno_key, 
                                         title = fig_title,
                                         save_file = True, 
-                                        out_file = baf_final_fig3)
+                                        out_file = baf_final_fig3,
+                                        **kwargs)
     if "denoised_add_posterior_mtx" in merge_Xdata.layers:
         xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_add_posterior_mtx",
                                         weights = False, 
                                         cell_anno_key = plot_cell_anno_key, 
                                         title = fig_title,
                                         save_file = True, 
-                                        out_file = baf_final_fig4)
+                                        out_file = baf_final_fig4,
+                                        **kwargs)
 
     
     end_time = datetime.now(timezone.utc)
@@ -446,7 +453,8 @@ def plot_processed_BAF(merge_Xdata,
                        plot_cell_anno_key,
                        set_figtitle = True,
                        set_dpi = 300,
-                       out_dir = None):
+                       out_dir = None,
+                       **kwargs):
     """
     BAF phasing and smoothing plots.
     """
@@ -467,19 +475,19 @@ def plot_processed_BAF(merge_Xdata,
     if set_figtitle:
         fig_title = dataset_name + " BAF"
     xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
-                                title = fig_title, save_file = True, out_file = baf_fig1)
+                                title = fig_title, save_file = True, out_file = baf_fig1, **kwargs)
     if set_figtitle:
         fig_title = dataset_name + " Phased BAF"
     xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF_phased", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
-                                title = fig_title, save_file = True, out_file = baf_fig2)
+                                title = fig_title, save_file = True, out_file = baf_fig2, **kwargs)
     if set_figtitle:
         fig_title = dataset_name + " Phased BAF after KNN smoothing"
     xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF_phased_KNN", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
-                                title = fig_title, save_file = True, out_file = baf_fig3)
+                                title = fig_title, save_file = True, out_file = baf_fig3, **kwargs)
     if set_figtitle:
         fig_title = dataset_name + " Phased BAF after KNN smoothing and WMA smoothing"
 #     xclone.pl.visualize_cell_BAF(merge_Xdata, Xlayer = "BAF_phased_KNN_WMA", cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
 #                                 title = fig_title, save_file = True, out_file = baf_fig4)
     xclone.pl.BAF_smooth_visualization(merge_Xdata, Xlayer = "BAF_phased_KNN_WMA", cell_anno_key=plot_cell_anno_key, change_colorbar = True,  
                                        colorbar_ticks = [0.1, 0.5, 0.9], colorbar_label = ["0",  "0.5",  "1"], colorbar_name = "BAF values",set_dpi =set_dpi,
-                                       title = fig_title, save_file = True, out_file = baf_fig4)
+                                       title = fig_title, save_file = True, out_file = baf_fig4, **kwargs)

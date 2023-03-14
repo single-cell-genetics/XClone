@@ -269,7 +269,8 @@ def run_RDR_plot(RDR_adata,
             set_figtitle = True,
             rdr_plot_vmin = -0.7,
             rdr_plot_vmax = 0.7,
-            out_dir = None):
+            out_dir = None,
+            **kwargs):
     """
     """
     ## Result output prepare
@@ -299,7 +300,8 @@ def run_RDR_plot(RDR_adata,
                                        vmin = rdr_plot_vmin, vmax = rdr_plot_vmax,
                                        title = fig_title,
                                        save_file = True, 
-                                       out_file = rdr_smooth_fig)
+                                       out_file = rdr_smooth_fig,
+                                       **kwargs)
     if set_figtitle:
         fig_title = dataset_name + " RDR module"
     
@@ -309,7 +311,8 @@ def run_RDR_plot(RDR_adata,
                                 cell_anno_key = plot_cell_anno_key, 
                                 title = fig_title,
                                 save_file = True, 
-                                out_file = rdr_final_fig)
+                                out_file = rdr_final_fig,
+                                **kwargs)
     
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time

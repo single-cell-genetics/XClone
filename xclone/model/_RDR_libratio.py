@@ -91,6 +91,7 @@ from sklearn.mixture import GaussianMixture
 
 def select_normal_CHR(Xdata, select_chr_num = 4):
     """
+    problem: maybe not all chr have 2 GMM comp, e.g., chr with copy loss.
     """
     chr_lst = Xdata.var["chr"].drop_duplicates(keep="first")
     chr_len = chr_lst.shape[0]
