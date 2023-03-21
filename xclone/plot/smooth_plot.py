@@ -10,6 +10,16 @@ from ._data import reorder_data_by_cellanno
 from ._base_xanndata import Xheatmap, XXheatmap
 
 ## Visualization part in smoothing performance
+def raw_ratio_visualization(Xdata, cell_anno_key = "cell_type",
+                            Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7,
+                            colorbar_name = "RDR raw ratio (log)", 
+                            **kwargs):
+    """
+    """
+    re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key = cell_anno_key)
+    Xheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
+            vmin=vmin, vmax=vmax,
+            colorbar_name = colorbar_name, **kwargs)
 
 def smooth_visualization(Xdata, cell_anno_key = "cell_type", 
                          Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7,

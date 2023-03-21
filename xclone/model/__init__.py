@@ -108,6 +108,7 @@ from ._denoise import denoise_by_cluster
 ## wrap
 from .xclone_rdr_wrap import preview_RDR
 from .xclone_rdr_wrap import run_RDR, run_RDR_plot
+from .xclone_rdr_wrap import plot_processed_RDR
 
 from .xclone_baf_wrap import preview_BAF
 from .xclone_baf_wrap import run_BAF, run_BAF_plot

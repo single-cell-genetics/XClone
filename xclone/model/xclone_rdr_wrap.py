@@ -324,3 +324,42 @@ def plot_RDR_module():
     all plots for RDR module.
     """
     pass
+
+def plot_processed_RDR(RDR_Xdata, 
+                       dataset_name,
+                       plot_cell_anno_key,
+                       set_figtitle = True,
+                       set_dpi = 300,
+                       out_dir = None,
+                       **kwargs):
+    """
+    RDR raw ratio and smoothing plots.
+    """
+    if out_dir is None:
+        cwd = os.getcwd()
+        out_dir = cwd + "/XCLONE_OUT/"
+    
+    out_plot_dir = str(out_dir) + "/plot/"
+    xclone.al.dir_make(out_plot_dir)
+
+    fig_title = ""
+    
+    rdr_fig1 = out_plot_dir + dataset_name + "_RDR_raw_ratio.png"
+    rdr_fig2 = out_plot_dir + dataset_name + "_RDR_WMA.png"
+    rdr_fig3 = out_plot_dir + dataset_name + "_RDR_WMA_KNN.png"
+    
+    if set_figtitle:
+        fig_title = dataset_name + " RDR raw ratio"
+    xclone.pl.raw_ratio_visualization(RDR_Xdata, Xlayer = "raw_ratio", cell_anno_key = plot_cell_anno_key,
+                                      set_dpi =set_dpi, change_colorbar = False,vmin = -0.7, vmax = 0.7,
+                                      title = fig_title, save_file = True, out_file = rdr_fig1, **kwargs)
+    if set_figtitle:
+        fig_title = dataset_name + " RDR raw ratio after WMA smoothing"
+    xclone.pl.RDR_smooth_visualization(RDR_Xdata, Xlayer = 'WMA_smoothed', cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
+                                       change_colorbar = False, vmin = -0.7, vmax = 0.7,
+                                       title = fig_title, save_file = True, out_file = rdr_fig2, **kwargs)
+    if set_figtitle:
+        fig_title = dataset_name + " RDR raw ratio after WMA smoothing and KNN smoothing"
+    xclone.pl.RDR_smooth_visualization(RDR_Xdata, Xlayer = 'RDR_smooth', cell_anno_key = plot_cell_anno_key, set_dpi =set_dpi,
+                                       change_colorbar = False, vmin = -0.7, vmax = 0.7,
+                                       title = fig_title, save_file = True, out_file = rdr_fig3, **kwargs)

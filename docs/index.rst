@@ -10,9 +10,9 @@
 .. :Version: 0.3.0
 .. :Last viewed: Oct 20, 2022
 
-=====================================================================================
-XClone: detection of allele-specific subclonal copy number variations in single cells
-=====================================================================================
+===========================================================================================================
+XClone: detection of allele-specific subclonal copy number variations from single-cell transcriptomic data
+===========================================================================================================
 
 .. image:: ./image/XClone_overview_150dpi.png
    :width: 800px
@@ -67,7 +67,7 @@ For further information visit `xclone.org <https://xclone-cnv.readthedocs.io/en/
    tutorials
    getting_started
    preprocessing
-   TNBC1_XClone_demo_v3
-   BCH869_XClone_demo_v3
+   TNBC1_XClone_demo_update
+   BCH869_XClone_demo_update
    TNBC1_XClone_demo_v2
    BCH869_XClone_demo_v2

@@ -147,7 +147,7 @@ def generate_bb_logprob(AD, DP,
     emm_prob_log: betabinom.logpmf, should be in `log` format.
     """
     if states is None:
-        states = np.array([0.01, 0.99, 0.5, 1/3, 2/3])
+        states = np.array([0.01, 1/3, 0.5, 2/3, 0.99])
         states = states.reshape(1, 1, -1)
     elif states.ndim == 1:
         states = states.reshape(1, 1, -1)
