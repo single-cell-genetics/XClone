@@ -35,7 +35,7 @@ notebooks = [
     # "TNBC1_XClone_demo_v3.ipynb",
     # "BCH869_XClone_demo_v3.ipynb",
     "TNBC1_XClone_update.ipynb",
-    "BCH869_XClone_update.ipynb",
+    "BCH869_XClone_tutorials.ipynb",
     "TNBC1_XClone_demo_v2.ipynb",
     "BCH869_XClone_demo_v2.ipynb"
 ]

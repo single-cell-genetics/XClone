@@ -58,22 +58,24 @@ def run_BAF(BAF_adata,
     cell_anno_key = config.cell_anno_key
     ref_celltype = config.ref_celltype
     exclude_XY = config.exclude_XY
+
+    ## RDR related
+    RDR_file = config.RDR_file
+    remove_marker_genes = config.remove_marker_genes
     
     # BAF settings
-    RDR_file = config.RDR_file
     theo_neutral_BAF = config.theo_neutral_BAF
     ref_BAF_clip = config.ref_BAF_clip
-    BAF_states_num = config.BAF_states_num
+    BAF_states_num = config.CNV_N_components
     CNV_N_components = config.CNV_N_components
     gene_specific_concentration = config.gene_specific_concentration
     concentration = config.concentration
     guide_theo_CNV_states = config.guide_theo_CNV_states
 
     extreme_count_cap = config.extreme_count_cap
-
+    BAF_add = config.BAF_add
     BAF_denoise = config.BAF_denoise
-    ## RDR related
-    remove_marker_genes = config.remove_marker_genes
+    
     ## phasing
     feature_mode = config.feature_mode
     phasing_region_key = config.phasing_region_key
@@ -240,7 +242,10 @@ def run_BAF(BAF_adata,
                                              KNN_smooth = True)
     t = trans_t
     if trans_prob is None:
-        trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
+        if CNV_N_components == 3:
+            trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
+        if CNV_N_components == 5:
+            trans_prob = np.array([[1-4*t, t, t, t,t],[t, 1-4*t, t, t,t],[t, t, 1-4*t, t,t], [t, t, t, 1-4*t, t], [t, t, t, t, 1-4*t]])
     
     merge_Xdata = xclone.model.XHMM_smoothing(merge_Xdata, 
                                               start_prob = start_prob,  
@@ -258,10 +263,12 @@ def run_BAF(BAF_adata,
     # merge_Xdata.layers["posterior_mtx"] = np.exp(merge_Xdata.layers["posterior_mtx_log"])
     
     
-    ## try to add 3 states layer for comparasion or denoise or correction[testing version]
-    ### [testing version] only support BAF 5 states to add 3 states visualization for comparasion now.
+    ## try to add 3 states layer for comparasion or denoise or correction. [testing version]
+    ### only support BAF 5 states to add 3 states visualization for comparasion now.[testing version] 
     if CNV_N_components == 5:
-        BAF_add = True
+        if BAF_add is None:
+            BAF_add = True 
+            # default for BAF module 5 states mode to have 3 states for comparasion.
     else:
         BAF_add = False
     
@@ -298,7 +305,6 @@ def run_BAF(BAF_adata,
                                                       AD_key = "ad_bin_phased", DP_key = "dp_bin",
                                                       outlayer = "correct_emm_prob_log", 
                                                       states = used_specific_states,
-                                                      states_num = BAF_states_num,
                                                       gene_specific = gene_specific_concentration, 
                                                       concentration = concentration)
         merge_Xdata_copy = xclone.model.BAF_smoothing(merge_Xdata_copy,
@@ -414,7 +420,7 @@ def run_BAF_plot(merge_Xdata,
         xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_posterior_mtx",
                                         weights = False, 
                                         cell_anno_key = plot_cell_anno_key, 
-                                        title = fig_title,
+                                        title = fig_title + " (denoise)",
                                         save_file = True, 
                                         out_file = baf_final_fig2,
                                         **kwargs)
@@ -431,7 +437,7 @@ def run_BAF_plot(merge_Xdata,
         xclone.pl.BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_add_posterior_mtx",
                                         weights = False, 
                                         cell_anno_key = plot_cell_anno_key, 
-                                        title = fig_title,
+                                        title = fig_title + " (denoise)",
                                         save_file = True, 
                                         out_file = baf_final_fig4,
                                         **kwargs)

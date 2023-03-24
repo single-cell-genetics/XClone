@@ -1,5 +1,7 @@
 from .version import __version__
+from time import gmtime, strftime
 print (f'(Running XClone {__version__})')
+print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
 
 # set simplified alias
 from . import preprocessing as pp

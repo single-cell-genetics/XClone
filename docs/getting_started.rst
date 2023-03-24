@@ -2,6 +2,16 @@
 ===============
 Getting Started
 ===============
+XClone is a software tool designed for analyzing single-cell RNA sequencing data to identify copy number variations within individual cells.  
+CNVs are important in a variety of biological processes, especially in cancer development.
+
+XClone uses probabilistic modelling to estimate the copy number variation status of each gene within each cell in a sample. 
+By analyzing the expression levels of genes and B allele frequency of gene_bins, 
+XClone can determine which cells are likely to have copy number variations and which genes are affected.
+
+In this tutorial, we'll walk through the steps of using XClone to analyze single-cell RNA sequencing data for CNV analysis. 
+We'll cover everything from preparing the input data to interpreting the output of the analysis. 
+Whether you're new to single-cell RNA sequencing or an experienced user, this tutorial will provide a comprehensive introduction to using XClone for CNV analysis.
 
 Public Datasets
 ===============
@@ -17,7 +27,7 @@ For start, please refer to tutorials analyzing `TNBC1`_ and `BCH869`_ datasets, 
 
 .. _examples: https://connecthkuhk-my.sharepoint.com/:f:/g/personal/rthuang_connect_hku_hk/EhB6wYPgnL1MlUGP5sLHOhQBpLv3EFG4kToa0eY7sMZDLw?e=bypaf5
 .. _TNBC1: ./TNBC1_XClone_update.html
-.. _BCH869: ./BCH869_XClone_update.html
+.. _BCH869: ./BCH869_XClone_tutorials.html
 .. _TNBC1_tutorial: ./TNBC1_XClone_demo_v2.html
 .. _BCH869_tutorial: ./BCH869_XClone_demo_v2.html
 .. _demo_data: https://connecthkuhk-my.sharepoint.com/:f:/g/personal/rthuang_connect_hku_hk/EnKri0rS-ZpHl0VGVHUp4k0B_3iZ_gpD-obVuDwEMQUieQ?e=k0eR4T

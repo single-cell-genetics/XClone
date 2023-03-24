@@ -98,7 +98,7 @@ class XCloneGeneral_config():
 class RDR_General_config():
     def __init__(self):
         """
-        RDR params init. 
+        RDR params init settings. 
         default for 10X scRNA-seq data.
         """
         self.smart_transform = False
@@ -106,7 +106,7 @@ class RDR_General_config():
         self.marker_group_anno_key = None
         self.top_n_marker = 15
         self.remove_marker = True
-        self.fit_GLM_libratio = True
+        self.fit_GLM_libratio = False # default use counts ratio
         self.select_normal_chr_num = 4
         self.dispersion_celltype = None
         self.gene_exp_group = 1
@@ -114,32 +114,38 @@ class RDR_General_config():
         self.gene_exp_ref_log = True
         self.guide_cnv_ratio = None
         self.guide_chr_anno_key = "chr_arm"
-        self.guide_qt_lst = [0.00001, 0.96, 0.99999]
+        self.guide_qt_lst = [1e-04, 0.96, 0.99]
+        # [0.00001, 0.96, 0.99999]
         # self.guide_chr_anno_key = "chr"
         # self.guide_qt_lst = [0.00001, 0.96, 0.999]
-        self.xclone_plot = True
-        self.plot_cell_anno_key =  None
         ## smoothing
         self.WMA_window_size = 40
         self.WMA_smooth_key = "chr_arm"
         ## RDR plotting
+        self.xclone_plot = True
+        self.plot_cell_anno_key =  None
         self.rdr_plot_vmin = -0.7
         self.rdr_plot_vmax = 0.7
         self.set_figtitle = True
 
 
 class BAF_General_config():
-    def __init__(self):
+    def __init__(self, baf_bias_mode):
         """
-        BAF params init.
+        BAF params init settings.
         default for 10X scRNA-seq data.
         """
+        self.baf_bias_mode = baf_bias_mode
+        if self.baf_bias_mode == 0:
+            self.CNV_N_components = 3
+        elif self.baf_bias_mode == 1:
+            self.CNV_N_components = 5
+            self.BAF_add = None
+
         self.RDR_file = None
         self.guide_theo_CNV_states = None
         self.theo_neutral_BAF = None
         self.ref_BAF_clip = False
-        self.BAF_states_num = 3
-        self.CNV_N_components = 3
         self.WMA_window_size = 101
         self.concentration = 100
         self.extreme_count_cap = False
@@ -159,6 +165,8 @@ class BAF_General_config():
         ## postprocessing
         self.BAF_denoise = True
         ## BAF plotting
+        self.xclone_plot = True
+        self.plot_cell_anno_key =  None
         self.set_figtitle = True
 
 
@@ -166,50 +174,78 @@ class BAF_General_config():
 class Combine_General_config():
     def __init__(self):
         """
-        Combination parmas init.
+        Combination parmas init settings.
+        default settings.
         """
         ## combine performing
         self.BAF_denoise = False
-        self.copyloss_correct = True
+        self.copyloss_correct = True # default
         self.copyloss_correct_mode = 1
-        self.copygain_correct= False
-        self.copygain_correct_mode = 1
+        self.copygain_correct= False # default
+        if  self.copygain_correct== False:
+            self.copygain_correct_mode = None
 
         ## combine plotting
         self.merge_loss = True
         self.merge_loh = True
         self.set_figtitle = True
+        self.xclone_plot = True
+        self.plot_cell_anno_key =  None
         
 
 class HMM_Configs():
     def __init__(self):
         """
-        HMM smoothing params init.
+        HMM smoothing params init settings.
+        default settings.
         """
-        self.start_prob = np.array([0.1, 0.8, 0.1])
+        ## base setting
         self.trans_t = 1e-6
-        self.trans_prob = None
-        self.max_iter = 2
-        self.min_iter = 1
+        # self.trans_prob = None
+        t = self.trans_t
+        
+        if self.module == "RDR":
+            self.start_prob = np.array([0.1, 0.8, 0.1])
+            self.trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
+
+            ## HMM iteration
+            self.max_iter = 2
+            self.min_iter = 1
+
+        if self.module == "BAF":
+            if self.CNV_N_components == 3:
+                self.start_prob = np.array([0.3, 0.4, 0.3])
+                self.trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
+            elif self.CNV_N_components == 5:
+                self.start_prob = np.array([0.2, 0.15, 0.3, 0.15, 0.2])
+                self.trans_prob = np.array([[1-4*t, t, t, t,t],[t, 1-4*t, t, t,t],[t, t, 1-4*t, t,t], [t, t, t, 1-4*t, t], [t, t, t, t, 1-4*t]])
+        
 
 class Smartseq_Config():
-    def __init__(
-        self,
-        module):
+    def __init__(self):
         """
         Smartseq specific config settings.
+        default settings.
         """
-        if module == "RDR":
+        if self.module == "RDR":
             self.smart_transform = True
             self.filter_ref_ave = 1.8
+            ## HMM related
+            self.start_prob = np.array([0.3, 0.4, 0.3])
 
-        if module == "BAF":
+        if self.module == "BAF":
             self.extreme_count_cap = False
             self.gene_specific_concentration = True
+            if self.gene_specific_concentration == True:
+                self.concentration = None
+
+            ## smoothing related
+            self.WMA_window_size = 6
         
-        if module == "Combine":
+        if self.module == "Combine":
             pass
         
+        ## general settings
         self.exclude_XY = True
         self.remove_guide_XY = True
         # self.KNN_neighbors = 5
@@ -226,6 +262,7 @@ class XCloneConfig():
         dataset_name: str = "XClone_scDATA",
         set_smartseq: bool = False,
         module: str = "RDR",
+        baf_bias_mode = 1,
         plot_suffix: str = "",
         file_format_data: str = "h5ad",
         file_format_figs: str = "pdf",
@@ -233,8 +270,15 @@ class XCloneConfig():
         _frameon: bool = True,
         _vector_friendly: bool = False
     ):
+        """
+        """
         self.dataset_name = dataset_name
         self.set_smartseq = set_smartseq
+        if module in ["RDR", "BAF", "Combine"]:
+            pass
+        else:
+            print(module)
+            raise ValueError("module is NOT supported in XClone.")
         
         # module specific
         self.module = module
@@ -242,7 +286,7 @@ class XCloneConfig():
             RDR_General_config.__init__(self)
             HMM_Configs.__init__(self)
         if self.module == "BAF":
-            BAF_General_config.__init__(self)
+            BAF_General_config.__init__(self, baf_bias_mode)
             HMM_Configs.__init__(self)
         if self.module == "Combine":
             Combine_General_config.__init__(self)
@@ -252,7 +296,7 @@ class XCloneConfig():
         XCloneGeneral_config.__init__(self)
         
         if self.set_smartseq:
-            Smartseq_Config.__init__(self, module)
+            Smartseq_Config.__init__(self)
 
         # other general config
         self.plot_suffix = plot_suffix

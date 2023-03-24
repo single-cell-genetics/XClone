@@ -2,7 +2,7 @@
 """
 # Author: Yuanhua Huang, Rongting Huang
 # Date: 2022/03/26
-# update: 2022/07/26
+# update: 2023/03/21
 
 import numpy as np
 from scipy.sparse import csc_matrix
@@ -76,6 +76,7 @@ def WMA_smooth(adata, layer=None, out_layer='smoothed', chrom_key='chr_arm',
             method=method, window_size=window_size, verbose=verbose
         )
         adata.varp[connect_key] = _WMA_mat
+        print('make WMA connectivities matrix, saved in varp[%s].' %(connect_key))
     else:
         print('%s exists for direct use.' %(connect_key))
         

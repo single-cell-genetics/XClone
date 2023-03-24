@@ -73,6 +73,8 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
         adata.X = np.log(adata.layers['ref_normalized'] + 0.3)
         sc.pp.pca(adata)
         sc.pp.neighbors(adata, n_neighbors = KNN_neighbors, n_pcs=40)
+        ## Notes: connectivities and distances can be slightly different rvery run
+        ## even the random_state = 0 (default).
         adata.X = raw_X
         ## connectivities normalization
         adata.obsp['connectivities'] = normalize(adata.obsp['connectivities'])
