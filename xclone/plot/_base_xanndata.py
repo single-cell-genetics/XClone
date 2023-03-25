@@ -101,7 +101,9 @@ def set_Xheatmap_args(legend_pos=2):
     paras['center'] = False
     paras['rasterized'] = True
     ## figure setting
-    paras['figsize'] = (16,8)
+    paras['figsize'] = (16,8) # publication
+    ### webplot
+    # paras['figsize'] = (12,8)
 
     ## legend
     legend_paras = {}
@@ -246,7 +248,10 @@ def set_XXheatmap_args(legend_pos=2, legend_mode=1):
     paras['center'] = False
     paras['rasterized'] = True
     ## figure setting
-    paras['figsize'] = (16,8)
+    paras['figsize'] = (16,8) # publication
+    ### webplot
+    # paras['figsize'] = (12,8)
+
 
     ## legend
     legend_paras = {}

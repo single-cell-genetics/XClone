@@ -26,7 +26,7 @@ Examples of XClone and steps for reproducible results are provided in Jupyter No
 For start, please refer to tutorials analyzing `TNBC1`_ and `BCH869`_ datasets, or `TNBC1_tutorial`_ and `BCH869_tutorial`_ records step by step.
 
 .. _examples: https://connecthkuhk-my.sharepoint.com/:f:/g/personal/rthuang_connect_hku_hk/EhB6wYPgnL1MlUGP5sLHOhQBpLv3EFG4kToa0eY7sMZDLw?e=bypaf5
-.. _TNBC1: ./TNBC1_XClone_update.html
+.. _TNBC1: ./TNBC1_XClone_tutorials.html
 .. _BCH869: ./BCH869_XClone_tutorials.html
 .. _TNBC1_tutorial: ./TNBC1_XClone_demo_v2.html
 .. _BCH869_tutorial: ./BCH869_XClone_demo_v2.html
