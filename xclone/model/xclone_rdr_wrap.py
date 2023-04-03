@@ -59,6 +59,7 @@ def run_RDR(RDR_adata,
     start_prob = config.start_prob
     trans_t = config.trans_t
     trans_prob = config.trans_prob
+    HMM_brk = config.HMM_brk
     ## optimize 
     max_iter = config.max_iter
     min_iter = config.min_iter
@@ -231,6 +232,7 @@ def run_RDR(RDR_adata,
     RDR_adata = xclone.model.CNV_optimazation(RDR_adata, depth_key = depth_key, init_state_ratio = guide_cnv_ratio,
                     max_iter = max_iter,
                     min_iter = min_iter,
+                    HMM_brk = HMM_brk,
                     start_prob = start_prob,
                     trans_prob = trans_prob,
                     verbose = True)

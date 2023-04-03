@@ -6,17 +6,21 @@ Version 0.3.4
 - remove deprecated funcs
 - update plotting tool, mainly in color settings
 - update xclone tutorials in version 0.3.4
-- add tutorials in xclone plotting #
-- add tutorials in xclone data analysis #
 - BAF local phasing improvement
-- BAF module support 3 and 5 states
-- Combine module support prob correct mode(both copy gain and copy loss)
+- BAF module support 3 and 5 allele bias states
+- Combine module support prob correct mode for copy gain
+- Combine module support prob correct mode for copy loss (default)
 - update libratio capping and add cell filter limits
+- use counts ratio as default
 - libratio fitting update
 - provide new denoise function (denoise by cluster)
 - add ROC evaluation function in analysis module
 - add functions for XClone clustering
 - wrap independent plotting modules
+- potential init to add predefined segmentation
+- minor debug on BAF guide allele bias ratio
+- add tutorials in xclone plotting #
+- add tutorials in xclone data analysis #
 
 
 Version 0.3.3

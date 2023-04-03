@@ -138,6 +138,7 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
                       region_nproc=1, 
                       bin_nproc=1, 
                       feature_mode = "GENE", # feature_mode ="BLOCK"
+                      var_add = None,
                       verbose = False):
     """
     Func:
@@ -244,16 +245,26 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
         GeneName_lst, GeneID_lst, GeneName_dict, GeneID_dict = get_bin_genes(merge_var3, group_key = "bin_idx_cum")
         merge_var["GeneName_lst"] = [",".join(x) for x in GeneName_lst]
         merge_var["GeneID_lst"] = [",".join(x) for x in GeneID_lst]
-
-
-        merge_var = merge_var[["chr", "start", "stop", "arm", "chr_arm", "band", "gene1_stop", 
+        
+        var_keep_lst = ["chr", "start", "stop", "arm", "chr_arm", "band", "gene1_stop", 
         "bin_stop_arm","bin_stop_chr_arm", "bin_stop_band", "bin_idx", "bin_idx_cum",
-        "GeneName_lst", "GeneID_lst"]]
+        "GeneName_lst", "GeneID_lst"]
+        if var_add is not None:
+            if var_add in Xdata.var.columns:
+                var_keep_lst.append(var_add)
+                # print("add var: ", var_add)
 
+        merge_var = merge_var[var_keep_lst]
         merge_var["bin_genes_cnt"] = merge_var["GeneName_lst"].str.len()
     else:
-        merge_var = merge_var[["chr", "start", "stop", "arm", "chr_arm", "band", 
-        "bin_stop_arm","bin_stop_chr_arm", "bin_stop_band", "bin_idx", "bin_idx_cum"]]
+        var_keep_lst = ["chr", "start", "stop", "arm", "chr_arm", "band", 
+        "bin_stop_arm","bin_stop_chr_arm", "bin_stop_band", "bin_idx", "bin_idx_cum"]
+        if var_add is not None:
+            if var_add in Xdata.var.columns:
+                var_keep_lst.append(var_add)
+                # print("add var: ", var_add)
+
+        merge_var = merge_var[var_keep_lst]
 
 
     merge_Xdata = ad.AnnData(ad_bin.T, var = merge_var, obs = update_Xdata.obs.copy())

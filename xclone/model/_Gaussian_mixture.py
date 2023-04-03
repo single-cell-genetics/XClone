@@ -91,24 +91,24 @@ def correct_guide_BAF_cnv(guide_cnv_ratio, threshold = 0.1, theo_neutral = 0.5):
     if states_num == 2:
         if abs(theo_neutral - guide_cnv_ratio[0]) < threshold:
             guide_cnv_ratio[0] = 0.3
-            print("correct BAF CNV guiding copy loss-A ratio")
+            print("correct BAF CNV guiding copy loss-B ratio")
         if abs(guide_cnv_ratio[1] - theo_neutral) < threshold:
             guide_cnv_ratio[1] = 0.7
-            print("correct RDR CNV guiding copy loss-B ratio")
+            print("correct BAF CNV guiding copy loss-A ratio")
     if states_num == 4:
         ## todo need correct again maybe.
-        if abs(theo_neutral - guide_cnv_ratio[0]) < threshold:
+        if abs(theo_neutral - guide_cnv_ratio[0]) < 2*threshold:
             guide_cnv_ratio[0] = 0.15
-            print("correct BAF CNV guiding copy loss-A ratio")
-        if abs(guide_cnv_ratio[1] - theo_neutral) < 2*threshold:
+            print("correct BAF CNV guiding copy loss-B ratio")
+        if abs(guide_cnv_ratio[3] - theo_neutral) < 2*threshold:
             guide_cnv_ratio[3] = 0.85
-            print("correct RDR CNV guiding copy loss-B ratio")
+            print("correct BAF CNV guiding copy loss-A ratio")
         
-        if abs(theo_neutral - guide_cnv_ratio[2]) < threshold:
+        if abs(theo_neutral - guide_cnv_ratio[1]) < threshold:
             guide_cnv_ratio[1] = 1/3
             print("correct BAF CNV guiding copy gain-A ratio")
-        if abs(guide_cnv_ratio[3] - theo_neutral) < 2*threshold:
+        if abs(guide_cnv_ratio[2] - theo_neutral) < threshold:
             guide_cnv_ratio[2] = 2/3
-            print("correct RDR CNV guiding copy gain-B ratio")
+            print("correct BAF CNV guiding copy gain-B ratio")
 
     return guide_cnv_ratio

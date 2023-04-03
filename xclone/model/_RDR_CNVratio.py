@@ -606,6 +606,7 @@ def CNV_optimazation(Xdata,
                      verbose= True,
                      fitCNV_verbose = False,
                      HMM_verbose = False,
+                     HMM_brk = "chr_arm",
                      start_prob = None,
                      trans_prob = None,
                      combine_BAF = False,
@@ -687,7 +688,7 @@ def CNV_optimazation(Xdata,
             Xdata = calculate_Xemm_probTry(Xdata, dispersion_key, 
                                                   states = specific_states, combine_BAF = combine_BAF)
         ### posterior_mtx_log
-        update_Xdata = XHMM_smoothing(Xdata, emm_inlayer = "emm_prob_log", 
+        update_Xdata = XHMM_smoothing(Xdata, brk = HMM_brk, emm_inlayer = "emm_prob_log", 
                                       start_prob = start_prob, trans_prob = trans_prob, 
                                       nproc = nproc, verbose = HMM_verbose)
 

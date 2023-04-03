@@ -12,7 +12,7 @@ The full description of the algorithm and its application on published cancer da
 [full-text](link here)
 
 The demo of XClone and results on the 3 processed cancer datasets are available at
-[xclone-data](https://github.com/Rongtingting/xclone-data)
+`xclone-data <https://github.com/Rongtingting/xclone-data>`_
 
 
 Please frequently read Development and keep software up to date since XClone is being updated 
@@ -27,7 +27,7 @@ Installation
 Main Module
 -----------
 
-XClone requires Python 3.7 or later. 
+XClone requires Python 3.7 or later (recommend 3.7). 
 We recommend to use Anaconda environment for version control and to avoid potential conflicts::
 
     conda create -n xclone python=3.7

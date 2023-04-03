@@ -121,6 +121,7 @@ class RDR_General_config():
         ## smoothing
         self.WMA_window_size = 40
         self.WMA_smooth_key = "chr_arm"
+        # WMA_smooth_key may update to predefined segment for simple clones
         ## RDR plotting
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
@@ -146,7 +147,6 @@ class BAF_General_config():
         self.guide_theo_CNV_states = None
         self.theo_neutral_BAF = None
         self.ref_BAF_clip = False
-        self.WMA_window_size = 101
         self.concentration = 100
         self.extreme_count_cap = False
         self.gene_specific_concentration = False
@@ -161,9 +161,14 @@ class BAF_General_config():
         self.phasing_len = 100
         self.bin_nproc = 20
         ## smoothing
+        self.WMA_window_size = 101
         self.WMA_smooth_key = "chr_arm"
         ## postprocessing
         self.BAF_denoise = True
+        self.BAF_denoise_GMM_detection = True
+        self.BAF_denoise_GMM_comp = 2
+        self.BAF_denoise_cellprop_cutoff = 0.05
+        
         ## BAF plotting
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
@@ -204,6 +209,8 @@ class HMM_Configs():
         # self.trans_prob = None
         t = self.trans_t
         
+        self.HMM_brk = "chr_arm"
+        
         if self.module == "RDR":
             self.start_prob = np.array([0.1, 0.8, 0.1])
             self.trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
@@ -219,6 +226,7 @@ class HMM_Configs():
             elif self.CNV_N_components == 5:
                 self.start_prob = np.array([0.2, 0.15, 0.3, 0.15, 0.2])
                 self.trans_prob = np.array([[1-4*t, t, t, t,t],[t, 1-4*t, t, t,t],[t, t, 1-4*t, t,t], [t, t, t, 1-4*t, t], [t, t, t, t, 1-4*t]])
+
         
 
 class Smartseq_Config():

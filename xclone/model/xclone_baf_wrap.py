@@ -75,6 +75,9 @@ def run_BAF(BAF_adata,
     extreme_count_cap = config.extreme_count_cap
     BAF_add = config.BAF_add
     BAF_denoise = config.BAF_denoise
+    GMM_detect = config.BAF_denoise_GMM_detection
+    BAF_denoise_GMM_comp = config.BAF_denoise_GMM_comp
+    BAF_denoise_cellprop_cutoff = config.BAF_denoise_cellprop_cutoff
     
     ## phasing
     feature_mode = config.feature_mode
@@ -90,6 +93,7 @@ def run_BAF(BAF_adata,
     start_prob = config.start_prob
     trans_t = config.trans_t
     trans_prob = config.trans_prob
+    HMM_brk = config.HMM_brk
 
     # plot settings
     xclone_plot = config.xclone_plot
@@ -142,11 +146,16 @@ def run_BAF(BAF_adata,
                                                     update_uns = False,
                                                     uns_anno_key = None)
     ## BAF Phasing
+    if HMM_brk in ["chr", "chr_arm"]:
+        BAF_var_add = None
+    else:
+        BAF_var_add = HMM_brk
     BAF_adata, merge_Xdata =  xclone.model.BAF_Local_phasing(BAF_adata, 
                                                              region_key = phasing_region_key, 
                                                              phasing_len = phasing_len, 
                                                              bin_nproc = bin_nproc,
-                                                             feature_mode = feature_mode)
+                                                             feature_mode = feature_mode,
+                                                             var_add = BAF_var_add)
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
     
     ### check coverage for bins
@@ -247,7 +256,8 @@ def run_BAF(BAF_adata,
         if CNV_N_components == 5:
             trans_prob = np.array([[1-4*t, t, t, t,t],[t, 1-4*t, t, t,t],[t, t, 1-4*t, t,t], [t, t, t, 1-4*t, t], [t, t, t, t, 1-4*t]])
     
-    merge_Xdata = xclone.model.XHMM_smoothing(merge_Xdata, 
+    merge_Xdata = xclone.model.XHMM_smoothing(merge_Xdata,
+                                              brk = HMM_brk, 
                                               start_prob = start_prob,  
                                               trans_prob = trans_prob, 
                                               emm_inlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN", 
@@ -314,7 +324,8 @@ def run_BAF(BAF_adata,
                                              KNN_smooth = True)
         start_prob = np.array([0.3, 0.4, 0.3])                                 
         trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
-        merge_Xdata_copy = xclone.model.XHMM_smoothing(merge_Xdata_copy, 
+        merge_Xdata_copy = xclone.model.XHMM_smoothing(merge_Xdata_copy,
+                                              brk = HMM_brk, 
                                               start_prob = start_prob,  
                                               trans_prob = trans_prob, 
                                               emm_inlayer = "correct_emm_prob_log_KNN", 
@@ -343,9 +354,9 @@ def run_BAF(BAF_adata,
         merge_Xdata = xclone.model.denoise_gene_scale(merge_Xdata, Xlayer = "posterior_mtx",
                        neutral_index = neutral_index, 
                        cnv_index = cnv_index, 
-                       GMM_detection = True,
-                       gmm_comp = 2,
-                       cell_prop_cutoff = 0.05,
+                       GMM_detection = GMM_detect,
+                       gmm_comp = BAF_denoise_GMM_comp,
+                       cell_prop_cutoff = BAF_denoise_cellprop_cutoff,
                        out_layer = "denoised_posterior_mtx")
     try:
         merge_Xdata.write(BAF_final_file)
