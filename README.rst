@@ -73,6 +73,6 @@ Alternatively, you can install from this GitHub repository for latest (often dev
     :target: https://pypi.org/project/xclone
     :alt: PyPI
 
-.. |PyPyDownloads| image:: https://static.pepy.tech/personalized-badge/xclone?period=month&units=international_system&left_color=black&right_color=orange&left_text=Downloads
+.. |PyPiDownloads| image:: https://static.pepy.tech/personalized-badge/xclone?period=month&units=international_system&left_color=black&right_color=orange&left_text=Downloads
     :target: https://pepy.tech/project/xclone
-    :alt: PyPyDownloads
+    :alt: PyPiDownloads
