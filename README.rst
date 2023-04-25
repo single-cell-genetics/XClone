@@ -1,3 +1,6 @@
+|DOI| |Stars| |Compatible| |PyPI| |PyPiDownloads|
+
+
 ======
 XClone
 ======
@@ -27,7 +30,7 @@ Installation
 Main Module
 -----------
 
-XClone requires Python 3.7 or later (recommend 3.7). 
+XClone requires Python 3.7 (recommend 3.7 for stable performance). 
 We recommend to use Anaconda environment for version control and to avoid potential conflicts::
 
     conda create -n xclone python=3.7
@@ -53,3 +56,23 @@ xcltk is avaliable through pypi. To install, type the following command line, an
 Alternatively, you can install from this GitHub repository for latest (often development) version by following command line::
 
     pip install -U git+https://github.com/hxj5/xcltk
+
+.. |Compatible| image:: https://img.shields.io/badge/python-3.7-blue
+    :target: https://pypi.org/project/xclone
+    :alt: Compatible
+
+.. |DOI| image:: https://img.shields.io/badge/DOI-10.1101/2023.04.03.535352-orange?logo=gitbook&logoColor=FFFFFF&style=flat-square
+    :target: https://doi.org/10.1101/2023.04.03.535352
+    :alt: DOI
+
+.. |Stars| image:: https://img.shields.io/github/stars/single-cell-genetics/XClone?logo=GitHub&color=yellow&style=flat-square
+    :target: https://github.com/single-cell-genetics/XClone
+    :alt: Stars
+
+.. |PyPI| image:: https://img.shields.io/pypi/v/xclone?logo=PyPi&logoColor=FFFFFF&style=flat-square&color=blue
+    :target: https://pypi.org/project/xclone
+    :alt: PyPI
+
+.. |PyPyDownloads| image:: https://static.pepy.tech/personalized-badge/xclone?period=month&units=international_system&left_color=black&right_color=orange&left_text=Downloads
+    :target: https://pepy.tech/project/xclone
+    :alt: PyPyDownloads
