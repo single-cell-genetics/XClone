@@ -1,4 +1,4 @@
-|DOI| |Stars| |Compatible| |PyPI| |PyPiDownloads|
+|DOI| |Stars| |Compatible| |PyPI| |PyPiDownloads| |Docs Status|
 
 
 ======
@@ -73,6 +73,10 @@ Alternatively, you can install from this GitHub repository for latest (often dev
     :target: https://pypi.org/project/xclone
     :alt: PyPI
 
-.. |PyPiDownloads| image:: https://static.pepy.tech/personalized-badge/xclone?period=month&units=international_system&left_color=black&right_color=orange&left_text=Downloads
+.. |PyPiDownloads| image:: https://static.pepy.tech/personalized-badge/xclone?period=total&units=international_system&left_color=FFFFFF&right_color=orange&left_text=Downloads
     :target: https://pepy.tech/project/xclone
     :alt: PyPiDownloads
+
+.. |Docs Status| image:: https://img.shields.io/readthedocs/xclone-cnv/latest?logo=readthedocs&logoColor=FFFFFF&style=flat-square
+    :target: https://xclone-cnv.readthedocs.io/en/latest/
+    :alt: Docs Status
