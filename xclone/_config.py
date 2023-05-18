@@ -139,6 +139,7 @@ class BAF_General_config():
         self.baf_bias_mode = baf_bias_mode
         if self.baf_bias_mode == 0:
             self.CNV_N_components = 3
+            self.BAF_add = False
         elif self.baf_bias_mode == 1:
             self.CNV_N_components = 5
             self.BAF_add = None

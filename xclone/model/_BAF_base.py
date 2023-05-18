@@ -28,6 +28,7 @@ def select_chr_region(Xdata, region_loc, region_key="chr"):
 def process_bin(idx, AD, DP):
     """
     Func:
+    bin: default for 100 genes
     """ 
     ## Z: allele flipping probability
     ad_sum, ad_sum1, dp_sum, Z, thetas, _logLik_new = Local_Phasing(AD, DP)
@@ -107,6 +108,7 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
             theta_bin = RV_bin["theta_bin"]
             bin_idx = RV_bin["bin_idx"]
             bin_idx_lst = RV_bin["bin_idx_lst"]
+            allele_flip_local = RV_bin["flip"]
         else:
             AD_phased = np.vstack((AD_phased, RV_bin["AD_phased"]))
             ad_bin_softcnt = np.vstack((ad_bin_softcnt, RV_bin["ad_bin_softcnt"]))
@@ -115,6 +117,7 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
             theta_bin = np.vstack((theta_bin, RV_bin["theta_bin"]))
             bin_idx = np.append(bin_idx, RV_bin["bin_idx"])
             bin_idx_lst = np.append(bin_idx_lst, RV_bin["bin_idx_lst"])
+            allele_flip_local = np.append(allele_flip_local, RV_bin["flip"])
 
     ## resolve results for global phasing input
     RV_region = {}
@@ -125,6 +128,7 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
     RV_region["ad_bin"] = ad_bin
     RV_region["dp_bin"] = dp_bin
     RV_region["theta_bin"] = theta_bin
+    RV_region["allele_flip_local"] = allele_flip_local
     
     ## for global phasing record
     RV_region["bin_idx_lst"] = bin_idx_lst
@@ -182,6 +186,7 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
             ad_bin_softcnt = RV_region["ad_bin_softcnt"]
             ad_bin = RV_region["ad_bin"]
             dp_bin = RV_region["dp_bin"]
+            allele_flip_local = RV_region["allele_flip_local"]
 
         else:
             AD_phased = np.vstack((AD_phased, RV_region["AD_phased"]))
@@ -192,6 +197,7 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
             ad_bin_softcnt = np.vstack((ad_bin_softcnt, RV_region["ad_bin_softcnt"]))
             ad_bin = np.vstack((ad_bin, RV_region["ad_bin"]))
             dp_bin = np.vstack((dp_bin, RV_region["dp_bin"]))
+            allele_flip_local = np.append(allele_flip_local, RV_region["allele_flip_local"])
          
     end_t = datetime.datetime.now()
     elapsed_sec = (end_t - start_t).total_seconds()
@@ -201,6 +207,14 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
     update_Xdata = Xdata.copy()
     update_Xdata.layers["AD_phased"] = AD_phased.T
     update_Xdata.var["bin_idx"] = bin_idx_lst
+    update_Xdata.var["allele_flip_local"] = allele_flip_local
+    try:
+        update_Xdata.var["allele_flip_local"].replace({0: False, 1: True}, inplace = True)
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] get allele flip status from local phasing.")
+    
     update_Xdata.obsm["theta_bin"] = theta_bin.T
     update_Xdata = process_bin_id(update_Xdata, region_key, verbose)
 
@@ -350,7 +364,11 @@ def BAF_Global_phasing(Xdata, bin_Xdata):
 
     update_Xdata = Xdata.copy()
     update_Xdata.layers["AD_global_phased"] = AD_global_phased
-
+    update_Xdata.var["allele_flip_global"] = gene_flip
+    print("[XClone hint] get allele flip status from global phasing.")
+    if {'allele_flip_local', 'allele_flip_global'}.issubset(update_Xdata.var.columns):
+        update_Xdata.var["allele_flip"] =  update_Xdata.var["allele_flip_local"] ^ update_Xdata.var["allele_flip_global"]
+        print("[XClone hint] get final allele flip status.")
 
     ## apply global phasing method on AD_phased bins
     ad_bin_softcnt = bin_Xdata.layers["ad_bin_softcnt"]

@@ -41,6 +41,10 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
         adata.obs[depth_key] = np.where(np.isinf(adata.obs["library_alpha"]), adata.obs["counts_ratio"], adata.obs[depth_key])
         ## todo capped again; add in later version[not test yet] 20230106
         # adata.obs[depth_key] = np.where(adata.obs[depth_key] < 0.001*adata.obs["counts_ratio"], adata.obs["counts_ratio"], adata.obs[depth_key])
+    ## check cell quality
+    cell_flag = adata.obs[depth_key] > 0 
+    adata = adata[cell_flag,:]
+    Xmtx = Xmtx[cell_flag,:]
 
     ## generate normalised
     X_baseline = (adata.obs[depth_key].values.reshape(-1, 1) *
