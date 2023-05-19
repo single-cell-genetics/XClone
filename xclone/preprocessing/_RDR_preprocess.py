@@ -96,7 +96,6 @@ def Xdata_RDR_preprocess(Xdata,
 
     Xdata.var['ref_avg'] = ref_Xdata.X.A.mean(axis=0)
 
-    
     ## filter genes based on ref_average counts
     ### if filter_ref_ave is None, skip the filtering step*
     ### if mode == "FILTER", just do the filter step*
@@ -105,6 +104,14 @@ def Xdata_RDR_preprocess(Xdata,
         gene_flag = np.ones((gene_num), dtype=bool)
     else:
         gene_flag = Xdata.var['ref_avg'] > filter_ref_ave
+        if gene_flag.sum() < 3000:
+            # make sure at least 3000 genes， in case low coverage data filter out too much genes
+            quantile_value = 3000/Xdata.shape[1]
+            filter_ref_ave_recomend = np.quantile(Xdata.var['ref_avg'], quantile_value)
+            if filter_ref_ave_recomend > 0:
+                gene_flag = Xdata.var['ref_avg'] > filter_ref_ave_recomend
+            else:
+                gene_flag = Xdata.var['ref_avg'] > 0
     
     # mode="FILTER"
     update_Xdata = Xdata[:, gene_flag].copy()

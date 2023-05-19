@@ -4,10 +4,13 @@ Release History
 Version 0.3.5
 -------------
 - [BAF] add allele flip status for each gene in Local phasing and Global phasing
-- [BAF] update BAF theo ref strategy in wrap BAF module (if refernce cells is limited)
 - [minor debug] baf_bias_mode configs update in BAF module
-- [minor debug] add check cell quality in RDR `extra_preprocess`.[DEVELOP FOR ST]
+- [minor debug] add check cell quality in RDR `extra_preprocess`.[DEVELOP FOR ST](need test more)
 - [Analysis] initialize reference cells detection function (from BAF) (todo)
+- [BAF] update BAF theo ref strategy in wrap BAF module (if refernce cells is limited)
+- [RDR] update RDR guide ratio correct strategy
+- [Main update] default params setting for low coverage datasets
+
 
 
 Version 0.3.4

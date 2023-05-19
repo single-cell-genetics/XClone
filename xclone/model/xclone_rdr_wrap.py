@@ -116,6 +116,7 @@ def run_RDR(RDR_adata,
     
     ## Transformation for smart-seq data
     RDR_adata = xclone.pp.Xtransformation(RDR_adata, transform = smart_transform, Xlayers = ["raw_expr"])
+    ## Consider data coverage before genes filtering (update)
     RDR_adata = xclone.pp.Xdata_RDR_preprocess(RDR_adata, filter_ref_ave = filter_ref_ave, 
     cell_anno_key = cell_anno_key,  ref_celltype = ref_celltype, mode = "FILTER")
     

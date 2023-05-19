@@ -239,7 +239,10 @@ def correct_guide_RDR_cnv(guide_cnv_ratio, threshold = 0.15):
         print("[XClone] warning: correct RDR CNV guiding copy gain ratio")
         print("[XClone] hints: can change guide_qt_lst")
         guide_cnv_ratio[2] = 3
-    
+    if np.bitwise_or((guide_cnv_ratio[1] < 0.5), (guide_cnv_ratio[1] >1.5)):
+        print("[XClone] warning: correct RDR CNV guiding copy neutral ratio")
+        print("[XClone] hints: can change guide_qt_lst")
+        guide_cnv_ratio[1] = 1
     return guide_cnv_ratio
 
 def guide_CNV_states(RDR_Xdata, 
