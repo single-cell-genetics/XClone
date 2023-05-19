@@ -57,20 +57,47 @@ def get_BAF_ref(Xdata, Xlayer = "fill_BAF_phased", out_anno = "ref_BAF_phased",
 
     return Xdata
 
+def get_BAF_ref_limited(Xdata, Xlayer = "fill_BAF_phased", out_anno = "ref_BAF_phased", 
+                anno_key = "cell_type", ref_cell = "unclassified", clipping = False):
+    """
+    update for if ref cells are limited.
+    if variance is high, set the corresponding ref baf as 0.5"""
+    Xmtx_used = Xdata.layers[Xlayer].copy()
+    is_ref_ = Xdata.obs[anno_key] == ref_cell
+    ref_ = Xmtx_used[is_ref_].mean(axis = 0)
+
+    baf_variance = np.var(Xmtx_used[is_ref_], axis=0)
+    Xdata.var["baf_variance"] = baf_variance
+    
+    ## do clipping at ref BAF
+    if clipping:
+        print("do clipping at ref BAF")
+        qt_10 = np.quantile(ref_, 0.1)
+        qt_90 = np.quantile(ref_, 0.9)
+        bd_low = max(qt_10, 0.3)
+        bd_high = min(qt_90, 0.7)
+        ref_ = np.clip(ref_, bd_low, bd_high)
+
+    Xdata.var[out_anno] = ref_
+    flag_ = Xdata.var["baf_variance"] > 0.1
+    print("Set % genes' baf as 0.5" % (flag_.sum()))
+    Xdata.var[out_anno][flag_] = 0.5
+    return Xdata
+
 def gene_specific_BAF(Xdata,
                       theo_normal_states = 0.5,
-                      theo_states= np.array([0.01, 0.99, 1/3, 2/3]), 
+                      theo_states= np.array([0.01, 1/3, 2/3, 0.99]), 
                       specific_BAF = "ref_BAF_phased", 
                       rescale = False):
     """
-    np.array([0.01, 0.99, 0.5, 1/3, 2/3]) ->
-    np.array([[0.01, 0.99, specific-BAF, 1/3, 2/3],
-              [0.01, 0.99, specific-BAF, 1/3, 2/3]])
+    np.array([0.01,  1/3,  0.5, 2/3, 0.99,]) ->
+    np.array([[0.01, 1/3, specific-BAF, 2/3, 0.99],
+              [0.01, 1/3, specific-BAF, 2/3, 0.99]])
 
     support 3 states: copy loss and copy neutral.
-    np.array([0.01, 0.99, 0.5]) ->
-    np.array([[0.01, 0.99, specific-BAF],
-              [0.01, 0.99, specific-BAF]])
+    np.array([0.01, 0.5, 0.99]) ->
+    np.array([[0.01, specific-BAF, 0.99],
+              [0.01, specific-BAF, 0.99]])
 
     and support rescale.
     """
@@ -78,7 +105,6 @@ def gene_specific_BAF(Xdata,
 
     specific_states = Xdata.var[specific_BAF]
     gene_num = Xdata.shape[1]
-    # base_states = np.tile([0.01, 0.99, 1/3, 2/3], gene_num).reshape(gene_num, -1)
     base_states = np.tile(theo_states, gene_num).reshape(gene_num, -1)
     if len(theo_states) == 4:
         used_specific_states = np.insert(base_states, 2, values = specific_states, axis=1)

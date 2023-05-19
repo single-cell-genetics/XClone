@@ -215,28 +215,41 @@ def run_BAF(BAF_adata,
                                                 max_iter = 200)
         guide_theo_states = xclone.model.guide_BAF_theo_states(CNV_states)
 
-    ## if you have limited ref cells, you can set theo_baf as 0.5   *important
-    ref_cell_num = (merge_Xdata.obs[cell_anno_key] == ref_celltype).sum()
-    total_cell_num = merge_Xdata.obs.shape[0]
-    try:
-        ref_prop = ref_cell_num/total_cell_num
-        if  ref_prop <= 0.01:
-            theo_neutral_BAF = 0.5
-            print("[XClone hint] limited ref cells (%s), set theo_BAF as 0.5" % ref_prop)
-    except Exception as e:
-        print("[XClone Warning]", e)
+    # ## if you have limited ref cells, you can set theo_baf as 0.5   *important
+    ## strategy 1: automatically set all to 0.5(may cause some problem)
+    ## strategy 2: set the genes with high variance ref BAF to 0.5 and keep others
+    # ref_cell_num = (merge_Xdata.obs[cell_anno_key] == ref_celltype).sum()
+    # total_cell_num = merge_Xdata.obs.shape[0]
+    # try:
+    #     ref_prop = ref_cell_num/total_cell_num
+    #     if  ref_prop <= 0.01:
+    #         theo_neutral_BAF = 0.5
+    #         print("[XClone hint] limited ref cells (%s), set theo_BAF as 0.5" % ref_prop)
+    # except Exception as e:
+    #     print("[XClone Warning]", e)
 
     if theo_neutral_BAF is not None:
         merge_Xdata.var["theo_neutral_BAF"] = theo_neutral_BAF
         used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
                             theo_states= guide_theo_states, specific_BAF = "theo_neutral_BAF")
     else:
-        merge_Xdata = xclone.model.get_BAF_ref(merge_Xdata, 
+        ref_cell_num = (merge_Xdata.obs[cell_anno_key] == ref_celltype).sum()
+        total_cell_num = merge_Xdata.obs.shape[0]
+        ref_prop = ref_cell_num/total_cell_num
+        if  ref_prop <= 0.01:
+            merge_Xdata = xclone.model.get_BAF_ref_limited(merge_Xdata, 
                                            Xlayer = "fill_BAF_phased", 
                                            out_anno = "ref_BAF_phased",
                                            anno_key = cell_anno_key, 
                                            ref_cell = ref_celltype,
                                            clipping = ref_BAF_clip)
+        else:
+            merge_Xdata = xclone.model.get_BAF_ref(merge_Xdata, 
+                                            Xlayer = "fill_BAF_phased", 
+                                            out_anno = "ref_BAF_phased",
+                                            anno_key = cell_anno_key, 
+                                            ref_cell = ref_celltype,
+                                            clipping = ref_BAF_clip)
 
         used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
                                theo_states= guide_theo_states, specific_BAF = "ref_BAF_phased")
@@ -311,12 +324,23 @@ def run_BAF(BAF_adata,
             used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata_copy, 
                             theo_states= guide_theo_states, specific_BAF = "theo_neutral_BAF")
         else:
-            merge_Xdata_copy = xclone.model.get_BAF_ref(merge_Xdata_copy, 
+            ref_cell_num = (merge_Xdata_copy.obs[cell_anno_key] == ref_celltype).sum()
+            total_cell_num = merge_Xdata_copy.obs.shape[0]
+            ref_prop = ref_cell_num/total_cell_num
+            if  ref_prop <= 0.01:
+                merge_Xdata_copy = xclone.model.get_BAF_ref_limited(merge_Xdata_copy, 
                                            Xlayer = "fill_BAF_phased", 
                                            out_anno = "ref_BAF_phased",
                                            anno_key = cell_anno_key, 
                                            ref_cell = ref_celltype,
                                            clipping = ref_BAF_clip)
+            else:
+                merge_Xdata_copy = xclone.model.get_BAF_ref(merge_Xdata_copy, 
+                                            Xlayer = "fill_BAF_phased", 
+                                            out_anno = "ref_BAF_phased",
+                                            anno_key = cell_anno_key, 
+                                            ref_cell = ref_celltype,
+                                            clipping = ref_BAF_clip)
 
             used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata_copy, 
                                theo_states= guide_theo_states, specific_BAF = "ref_BAF_phased")

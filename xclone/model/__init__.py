@@ -77,7 +77,7 @@ from ._BAF_base import BAF_remove_ref
 
 from .HMM_BB import calculate_Xemm_prob_bb
 from .HMM_BB import generate_bb_logprob
-from .HMM_BB import get_BAF_ref, gene_specific_BAF, specific_BAF
+from .HMM_BB import get_BAF_ref, get_BAF_ref_limited, gene_specific_BAF, specific_BAF
 
 from ._BAF import extrme_count_capping
 from ._BAF import concentration_mapping

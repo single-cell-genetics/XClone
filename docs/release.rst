@@ -8,6 +8,7 @@ Version 0.3.5
 - [minor debug] add check cell quality in RDR `extra_preprocess`.[DEVELOP FOR ST](need test more)
 - [Analysis] initialize reference cells detection function (from BAF) (todo)
 - [BAF] update BAF theo ref strategy in wrap BAF module (if refernce cells is limited)
+- [BAF] test 2 BAF theo ref strategies in wrap BAF module (if refernce cells is limited)
 - [RDR] update RDR guide ratio correct strategy
 - [Main update] default params setting for low coverage datasets
 
