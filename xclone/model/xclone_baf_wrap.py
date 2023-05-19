@@ -216,6 +216,17 @@ def run_BAF(BAF_adata,
         guide_theo_states = xclone.model.guide_BAF_theo_states(CNV_states)
 
     ## if you have limited ref cells, you can set theo_baf as 0.5   *important
+    ref_cell_num = (merge_Xdata.obs[cell_anno_key] == ref_celltype).sum()
+    total_cell_num = merge_Xdata.obs.shape[0]
+    try:
+        ref_prop = ref_cell_num/total_cell_num
+        if  ref_prop <= 0.005:
+            theo_neutral_BAF = 0.5
+    except Exception as e:
+        print("[XClone Warning]", e)
+    else:
+        print("[XClone hint] limited ref cells (%s), set theo_BAF as 0.5" % ref_prop)
+
     if theo_neutral_BAF is not None:
         merge_Xdata.var["theo_neutral_BAF"] = theo_neutral_BAF
         used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
