@@ -57,7 +57,7 @@ def get_BAF_ref(Xdata, Xlayer = "fill_BAF_phased", out_anno = "ref_BAF_phased",
 
     return Xdata
 
-def get_BAF_ref_limited(Xdata, Xlayer = "fill_BAF_phased", out_anno = "ref_BAF_phased", 
+def get_BAF_ref_limited(Xdata, Xlayer = "BAF_phased_KNN_WMA", out_anno = "ref_BAF_phased", 
                 anno_key = "cell_type", ref_cell = "unclassified", clipping = False):
     """
     update for if ref cells are limited.
@@ -79,8 +79,12 @@ def get_BAF_ref_limited(Xdata, Xlayer = "fill_BAF_phased", out_anno = "ref_BAF_p
         ref_ = np.clip(ref_, bd_low, bd_high)
 
     Xdata.var[out_anno] = ref_
-    flag_ = Xdata.var["baf_variance"] > 0.1
-    print("Set % genes' baf as 0.5" % (flag_.sum()))
+    ## Notes: try to keep confident REF_BAF, and change others to be 0.5.
+    flag_ = Xdata.var["baf_variance"] > 0.001
+    ## Notes: the 0.001 variance cutoff here is based on layer `BAF_phased_KNN_WMA`
+    ## need explore other cutoff if use different layer, e.g., `fill_BAF_phased` 
+    ## (with higher variance in general).
+    print("Set %s bins' baf as 0.5" % (flag_.sum()))
     Xdata.var[out_anno][flag_] = 0.5
     return Xdata
 

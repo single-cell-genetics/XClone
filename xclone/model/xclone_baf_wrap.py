@@ -236,9 +236,11 @@ def run_BAF(BAF_adata,
         ref_cell_num = (merge_Xdata.obs[cell_anno_key] == ref_celltype).sum()
         total_cell_num = merge_Xdata.obs.shape[0]
         ref_prop = ref_cell_num/total_cell_num
+        ## todo: maybe combine the ref cell nums and prop 
+        ## (limited ref cells num may affect more.)
         if  ref_prop <= 0.01:
             merge_Xdata = xclone.model.get_BAF_ref_limited(merge_Xdata, 
-                                           Xlayer = "fill_BAF_phased", 
+                                           Xlayer = "BAF_phased_KNN_WMA", #BAF_phased_KNN_WMA
                                            out_anno = "ref_BAF_phased",
                                            anno_key = cell_anno_key, 
                                            ref_cell = ref_celltype,
@@ -329,7 +331,7 @@ def run_BAF(BAF_adata,
             ref_prop = ref_cell_num/total_cell_num
             if  ref_prop <= 0.01:
                 merge_Xdata_copy = xclone.model.get_BAF_ref_limited(merge_Xdata_copy, 
-                                           Xlayer = "fill_BAF_phased", 
+                                           Xlayer = "BAF_phased_KNN_WMA", #BAF_phased_KNN_WMA
                                            out_anno = "ref_BAF_phased",
                                            anno_key = cell_anno_key, 
                                            ref_cell = ref_celltype,
