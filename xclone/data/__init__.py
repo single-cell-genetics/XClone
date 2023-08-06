@@ -7,5 +7,7 @@ from .demo_datasets._datasets import (
     bch869_rdr,
     bch869_baf,
     bch869_baf_50kb,
-    gx109_rdr
+    gx109_rdr,
+    atc2_rdr,
+    atc2_baf
 )

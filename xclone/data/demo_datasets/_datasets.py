@@ -128,7 +128,7 @@ def bch869_baf(file_path: Union[str, Path] = "data/BCH869/BCH869_BAF_adata.h5ad"
 
     Example
     -------
-    >>> import xclones
+    >>> import xclone
     >>> BAF_adata = xclone.data.bch869_baf()
     """
     url = f"{url_datadir}BCH869_scRNA/BCH869_BAF_adata.h5ad"
@@ -244,4 +244,83 @@ def gx109_rdr(file_path: Union[str, Path] = "/data/GX109-T1c/GX109-T1c_RDR_adata
     adata = read(h5ad_file)
     if raw_expr_layer:
         adata.layers["raw_expr"] = adata.X.copy()
+    return adata
+
+def atc2_rdr(file_path: Union[str, Path] = "/data/ATC2/ATC2_RDR_small_adata.zip",
+              extract_path: Union[str, Path] = "/data/ATC2/",
+              raw_expr_layer: bool = True):
+    """ATC2 sample.
+    Preprocessd: xcltk v0.1.15 RDR pipeline.
+    Notes: Used by XClone paper.
+
+    Arguments
+    ---------
+    file_path
+        Path where to save dataset and read it from.
+    extract_path
+        Path to extract zip files to h5ad file.
+    raw_expr_layer
+        bool, add raw_expr layer or not.
+    
+    Returns
+    -------
+    Returns `adata` object
+    
+    Example
+    -------
+    >>> import xclone
+    >>> RDR_adata = xclone.data.atc2_rdr()
+    """
+    h5ad_file = f"./data/ATC2/ATC2_RDR_small_adata.h5ad"
+    
+    if os.path.exists(h5ad_file):
+        print("load the ATC2 rdr data from downloaded file.")
+    else:
+        print("load the ATC2 rdr data from xclone-data github.")
+        url = f"{url_datadir}ATC2_scRNA/ATC2_RDR_small_adata.h5ad.zip"
+        cwd = os.getcwd()
+        extract_path = f'{cwd}{extract_path}'
+        if os.path.exists(extract_path):
+            pass
+        else:
+            dir_make(extract_path)
+        file_path = f'{cwd}{file_path}'
+        download_unzip_file(url, file_path, extract_path)
+
+    adata = read(h5ad_file)
+    if raw_expr_layer:
+        adata.layers["raw_expr"] = adata.X.copy()
+    return adata
+
+def atc2_baf(file_path: Union[str, Path] = "data/ATC2/ATC2_BAF_adata.h5ad"):
+    """A glioma sample BCH869 with histone H3 lysine27-to-methionine mutations (H3K27M-glioma), 
+    where 489 malignant cells and 3 non-tumour cells were probed by smart-seq2.
+    From `Filbin MG et al. (2018) <https://doi.org/10.1126%2Fscience.aao4750>`__.
+    scRNA-seq Source: GSE102130
+    Platform: SMART-seq2
+    Number of cells: 960 in total; 489 in detected clones
+    annotation: Single Cell Portal Study: single-cell analysis in pediatric 
+    midline gliomas with histone H3K27M mutation
+    Genome version: refdata-cellranger-hg19-3.0.0
+    Preprocessd: xcltk v0.1.15 BAF pipeline.
+
+    gene mode
+
+    Arguments
+    ---------
+    file_path
+        Path where to save dataset and read it from.
+    
+    Returns
+    -------
+    Returns `adata` object
+
+    Example
+    -------
+    >>> import xclone
+    >>> BAF_adata = xclone.data.atc2_baf()
+    """
+    url = f"{url_datadir}ATC2_scRNA/ATC2_BAF_adata.h5ad"
+    adata = read(file_path, backup_url=url)
+
     return adata
