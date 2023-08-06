@@ -57,6 +57,13 @@ Alternatively, you can install from this GitHub repository for latest (often dev
 
     pip install -U git+https://github.com/hxj5/xcltk
 
+Documentation
+=============
+https://xclone-cnv.readthedocs.io/en/latest/
+
+`Tutorials with demo dataset (Glioma sample, BCH869) <https://xclone-cnv.readthedocs.io/en/latest/BCH869_XClone_tutorials.html>`_.
+
+
 .. |Compatible| image:: https://img.shields.io/badge/python-3.7-blue
     :target: https://pypi.org/project/xclone
     :alt: Compatible
@@ -73,7 +80,7 @@ Alternatively, you can install from this GitHub repository for latest (often dev
     :target: https://pypi.org/project/xclone
     :alt: PyPI
 
-.. |PyPiDownloads| image:: https://static.pepy.tech/personalized-badge/xclone?period=total&units=international_system&left_color=FFFFFF&right_color=orange&left_text=Downloads
+.. |PyPiDownloads| image:: https://static.pepy.tech/personalized-badge/xclone?period=total&units=international_system
     :target: https://pepy.tech/project/xclone
     :alt: PyPiDownloads
 
