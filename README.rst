@@ -61,7 +61,9 @@ Documentation
 =============
 https://xclone-cnv.readthedocs.io/en/latest/
 
-`Tutorials with demo dataset (Glioma sample, BCH869) <https://xclone-cnv.readthedocs.io/en/latest/BCH869_XClone_tutorials.html>`_.
+`Tutorials with demo dataset (Glioma sample, BCH869) <https://xclone-cnv.readthedocs.io/en/latest/BCH869_XClone_tutorials.html>`_
+
+`Tutorials with demo dataset (Triple-negative breast cancer sample, TNBC1) <https://xclone-cnv.readthedocs.io/en/latest/TNBC1_XClone_tutorials.html>`_
 
 
 .. |Compatible| image:: https://img.shields.io/badge/python-3.7-blue
