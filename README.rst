@@ -34,7 +34,7 @@ We recommend to use Anaconda environment for version control and to avoid potent
     conda create -n xclone python=3.7
     conda activate xclone
 
-XClone package can be conveniently installed via PyPI::
+XClone package can be conveniently (1~2mins) installed via PyPI::
 
     pip install xclone
 
