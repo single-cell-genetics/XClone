@@ -25,7 +25,7 @@ def get_Xmtx(X, genome_mode):
     ------
     params:
     X: csr_mtx /csr_mtx path
-    genome_mode: hg38_genes/hg38_blocks/hg19_genes/hg19_blocks
+    genome_mode: hg38_genes/hg38_blocks/hg19_genes/hg19_blocks/mm10_genes
     default: hg38_genes
     ------
     usage:
@@ -46,6 +46,8 @@ def get_Xmtx(X, genome_mode):
         X_data = X_data[0:32696,:]
     if genome_mode=="hg38_genes":
         X_data = X_data[0:33472,:]
+    if genome_mode=="mm10_genes":
+        X_data = X_data[0:32195,:]
     return X_data.T
 
 def resort_mtx_bychr(mtx_file, features_file, assign_sort_index=None, out_file = None, keep_all = True):
@@ -206,7 +208,7 @@ def xclonedata(X, data_mode,
     X: csr_mtx/csr_mtx path, can be list
     data_mode: 'BAF' OR 'RDR'
     mtx_barcodes_file: barcodes_file path
-    genome_mode: hg38_genes/hg38_blocks/hg19_genes/hg19_blocks
+    genome_mode: hg38_genes/hg38_blocks/hg19_genes/hg19_blocks/mm10_genes
     default: hg38_genes
     
     Example:
