@@ -11,6 +11,7 @@ Version 0.3.5
 - [BAF] test 2 BAF theo ref strategies in wrap BAF module (if refernce cells is limited)
 - [RDR] update RDR guide ratio correct strategy
 - [Main update] default params setting for low coverage datasets
+- [mm10 extension init] update mm10 genes and extend to mm10 application
 
 
 

@@ -1,10 +1,11 @@
 """XClone preprocessing.
 """
 
-
+from ._annotation_prepare import add_cytoband
 from ._annotation_prepare import resort_chr_df, get_chr_arm_df, concat_df
-from ._anno_data import load_anno, load_hg38_genes, load_hg19_genes, load_cc_genes, load_hk_genes
-from ._demo_data import load_TNBC1_BAF, load_TNBC1_RDR
+from ._anno_data import load_anno, load_hg38_genes, load_hg19_genes, load_mm10_genes
+from ._anno_data import load_cc_genes, load_hk_genes
+# from ._demo_data import load_TNBC1_BAF, load_TNBC1_RDR
 
 from ._data import process_barcodes
 from ._data import check_RDR_BAF_anno

@@ -27,6 +27,8 @@ def load_anno(genome_mode):
         stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_genes_hg19_update.txt')
     if genome_mode == "hg19_blocks":
         stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_blocks_hg19_update.txt')
+    if genome_mode == "mm10_genes":
+        stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_genes_mm10.txt')
     return pd.read_table(stream)#encoding='latin-1'
 
 
@@ -57,6 +59,11 @@ def load_hg19_genes():
     load_hg19_genes()
     """
     return load_anno("hg19_genes")['GeneName']
+
+def load_mm10_genes():
+    """Return a genes list of mm10.
+    """
+    return load_anno("mm10_genes")['GeneName']
 
 def load_cc_genes():
     """Return a list of cell cycle genes.

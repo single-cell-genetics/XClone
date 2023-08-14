@@ -5,6 +5,7 @@ preprocessing/preparation.
 # Author: Rongting Huang
 # Date: 2021/05/04
 # update: 2021/07/21
+# extend to mouse annotation: 20230814
 
 
 import pandas as pd
@@ -103,3 +104,37 @@ def concat_df(sort_regions, sort_chr_arm_df):
 
 
 ## chr info prepare
+
+## Part II: For mm10 genes chr_region annotation preprocessing (2023/08/14)
+
+def add_cytoband(sort_genes_region, cytoband, out_file):
+    """
+    Func:
+        add cytoband info in annotated genes.
+    Example:
+    add_cytoband(sort_genes_region, cytoband, out_file)
+    """
+    
+    def cytoband_fun(r_series):
+        """
+        Func:
+        add cytoband info in separate chr region.
+
+        Example:
+        band_results = sort_genes_region.apply(cytoband_fun, axis=1)
+        """
+        chr_specific_band = cytoband[cytoband["chr"] == r_series["chr"]]
+        start_pos = r_series["start"]
+        stop_pos = r_series["stop"]
+        chr_specific_band["start_flag"] = (chr_specific_band["start"] <= start_pos)
+        chr_specific_band["stop_flag"] = (chr_specific_band["stop"] >= stop_pos)
+        flag = chr_specific_band["start_flag"] & chr_specific_band["stop_flag"]
+        band_info = chr_specific_band[flag]["arm_info"]
+        return band_info
+    
+    band_results = sort_genes_region.apply(cytoband_fun, axis=1)
+    band_results_lst = band_results.iloc[:,0].dropna()
+    for i in range(1, band_results.shape[1]):
+        band_results_lst = band_results_lst.append(band_results.iloc[:,i].dropna())
+    sort_genes_region["band"] = band_results_lst
+    sort_genes_region.to_csv(out_file, sep = "\t", index = False)
