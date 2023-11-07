@@ -88,6 +88,7 @@ from ._BAF import BAF_theoretical_value_optimization
 from ._BAF import BAF_smoothing
 from .smoothing import WMA_smooth, KNN_smooth
 from ._BAF_process import get_KNN_connectivities_from_expr
+from ._BAF_process import extra_preprocess_BAF
 
 from ._Gaussian_mixture import get_CNV_states, guide_BAF_theo_states
 

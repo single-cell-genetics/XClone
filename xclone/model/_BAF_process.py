@@ -1,20 +1,27 @@
 ## todo get_KNN_connectivities_from_expr and use different name.
+from .base_utils import normalize
+import scipy as sp
+import scanpy as sc
 
-def extra_preprocess_BAF(adata, Xlayer = "RDR", run_KNN = False, copy=False):
-    """
+def extra_preprocess_BAF(adata, Xlayer = "fill_BAF_phased",
+                         KNN_neighbors = 10,
+                         run_KNN = False, 
+                         copy=False):
+    """s
     """
     adata = adata.copy() if copy else adata
 
     ## generate KNN graph for smoothing across cell neighbourhood
     if run_KNN:
-        import scanpy as sc
         raw_X = adata.X.copy()
         adata.X = adata.layers[Xlayer].copy()
         sc.pp.pca(adata)
-        sc.pp.neighbors(adata, n_neighbors=10, n_pcs=40)
+        sc.pp.neighbors(adata, n_neighbors= KNN_neighbors, n_pcs=40)
         adata.X = raw_X
+        adata.obsp['connectivities'] = normalize(adata.obsp['connectivities'])
 
     return adata if copy else None
+
 
 def get_KNN_connectivities_from_expr(Xdata, expr_adata):
     """

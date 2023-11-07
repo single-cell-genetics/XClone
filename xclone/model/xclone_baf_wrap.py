@@ -60,8 +60,14 @@ def run_BAF(BAF_adata,
     exclude_XY = config.exclude_XY
 
     ## RDR related
+    update_info_from_rdr = config.update_info_from_rdr
     RDR_file = config.RDR_file
     remove_marker_genes = config.remove_marker_genes
+    # ## KNN related
+    KNN_connect_use_key = config.KNN_connect_use_key
+    get_BAF_KNN_connectivities = config.get_BAF_KNN_connectivities
+    KNN_Xlayer = config.KNN_Xlayer
+    KNN_neighbors = config.KNN_neighbors
     
     # BAF settings
     theo_neutral_BAF = config.theo_neutral_BAF
@@ -113,12 +119,20 @@ def run_BAF(BAF_adata,
     ### output after CNV calling
     BAF_final_file = out_data_dir + "BAF_merge_Xdata_KNN_HMM_post.h5ad"
     
-    ### RDR file for BAF module (load preprocessed dataset)
-    ### use RDR connectivities, marker genes, etc.
-    if RDR_file is None:
-        RDR_final_file = out_data_dir + "RDR_adata_KNN_HMM_post.h5ad"
+    if update_info_from_rdr:
+        ### RDR file for BAF module (load preprocessed dataset)
+        ### use RDR connectivities, marker genes, etc.
+        if RDR_file is None:
+            RDR_final_file = out_data_dir + "RDR_adata_KNN_HMM_post.h5ad"
+        else:
+            RDR_final_file = RDR_file
+        
+        remove_marker_genes = False
+        KNN_connect_use_key = "connectivities_expr"
     else:
-        RDR_final_file = RDR_file
+        get_BAF_KNN_connectivities = True
+        KNN_connect_use_key = "connectivities"
+        
 
     ##------------------------
     main_logger = get_logger("Main BAF module")
@@ -132,11 +146,13 @@ def run_BAF(BAF_adata,
         BAF_adata = xclone.pp.exclude_XY_adata(BAF_adata)
         print("[XClone warning] BAF module excelude chr XY analysis.")
     BAF_adata = xclone.pp.check_BAF(BAF_adata, cell_anno_key = cell_anno_key, verbose = verbose)
-
-    RDR_adata = an.read_h5ad(RDR_final_file)
-    BAF_adata = BAF_adata[BAF_adata.obs.index.isin(RDR_adata.obs.index),:]
-    ## check validated RDR and BAF
-    xclone.pp.check_RDR_BAF_cellorder(RDR_adata, BAF_adata)
+    
+    if update_info_from_rdr:
+        RDR_adata = an.read_h5ad(RDR_final_file)
+        BAF_adata = BAF_adata[BAF_adata.obs.index.isin(RDR_adata.obs.index),:]
+        ## check validated RDR and BAF
+        xclone.pp.check_RDR_BAF_cellorder(RDR_adata, BAF_adata)
+    
     ## Remove marker genes
     if remove_marker_genes:
         marker_genes = RDR_adata.uns["rank_marker_genes"]
@@ -171,12 +187,19 @@ def run_BAF(BAF_adata,
     xclone.model.BAF_fillna(merge_Xdata, Xlayer = "BAF_phased", out_layer = "fill_BAF_phased")
 
     ## smoothing
-    merge_Xdata = xclone.model.get_KNN_connectivities_from_expr(merge_Xdata, RDR_adata)
+    if update_info_from_rdr:
+        merge_Xdata = xclone.model.get_KNN_connectivities_from_expr(merge_Xdata, RDR_adata)
+    else:
+        # KNN_Xlayer = "fill_BAF_phased" # can also update the first `KNN_smooth` func.
+        merge_Xdata = xclone.model.extra_preprocess_BAF(merge_Xdata, Xlayer = KNN_Xlayer,
+                         KNN_neighbors = KNN_neighbors,
+                         run_KNN = get_BAF_KNN_connectivities, 
+                         copy=True)
 
     merge_Xdata = xclone.model.KNN_smooth(merge_Xdata, 
                                           run_KNN = False, 
                                           KNN_Xlayer = None, 
-                                          KNN_connect_use = "connectivities_expr",
+                                          KNN_connect_use = KNN_connect_use_key,
                                           layer = "fill_BAF_phased", 
                                           out_layer='BAF_phased_KNN')
     merge_Xdata = xclone.model.WMA_smooth(merge_Xdata, 
@@ -193,7 +216,7 @@ def run_BAF(BAF_adata,
                                           chrom_key = WMA_smooth_key,
                                           verbose=False)
     # merge_Xdata = xclone.model.KNN_smooth(merge_Xdata, 
-    #                                       KNN_connect_use = "connectivities_expr", 
+    #                                       KNN_connect_use = KNN_connect_use_key, 
     #                                       layer="BAF_phased_WMA", 
     #                                       out_layer='BAF_phased_WMA_KNN')
     ## after phasing & smoothing
@@ -273,7 +296,7 @@ def run_BAF(BAF_adata,
     merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
                                              inlayer = "bin_phased_BAF_specific_center_emm_prob_log",
                                              outlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN",
-                                             KNN_connectivities_key = "connectivities_expr",
+                                             KNN_connectivities_key = KNN_connect_use_key,
                                              KNN_smooth = True)
     t = trans_t
     if trans_prob is None:
@@ -293,7 +316,7 @@ def run_BAF(BAF_adata,
     # merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
     #                                          inlayer = "posterior_mtx_log",
     #                                          outlayer = "posterior_mtx_log_KNN",
-    #                                          KNN_connectivities_key = "connectivities_expr",
+    #                                          KNN_connectivities_key = KNN_connect_use_key,
     #                                          KNN_smooth = True)
     
     # merge_Xdata.layers["posterior_mtx"] = np.exp(merge_Xdata.layers["posterior_mtx_log"])
@@ -357,7 +380,7 @@ def run_BAF(BAF_adata,
         merge_Xdata_copy = xclone.model.BAF_smoothing(merge_Xdata_copy,
                                              inlayer = "correct_emm_prob_log",
                                              outlayer = "correct_emm_prob_log_KNN",
-                                             KNN_connectivities_key = "connectivities_expr",
+                                             KNN_connectivities_key = KNN_connect_use_key,
                                              KNN_smooth = True)
         start_prob = np.array([0.3, 0.4, 0.3])                                 
         trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])

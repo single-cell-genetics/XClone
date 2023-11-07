@@ -144,8 +144,16 @@ class BAF_General_config():
         elif self.baf_bias_mode == 1:
             self.CNV_N_components = 5
             self.BAF_add = None
-
+        
+        ## related to RDR
+        self.update_info_from_rdr = True
         self.RDR_file = None
+        self.remove_marker_genes = True
+        self.KNN_connect_use_key = "connectivities_expr"
+        
+        self.get_BAF_KNN_connectivities = False
+        self.KNN_Xlayer = "fill_BAF_phased"
+        
         self.guide_theo_CNV_states = None
         self.theo_neutral_BAF = None
         self.ref_BAF_clip = False
@@ -154,8 +162,7 @@ class BAF_General_config():
         self.gene_specific_concentration = False
         self.concentration_lower = 20
         self.concentration_upper = 100
-        ## related to RDR
-        self.remove_marker_genes = True
+        
         ## loacal phasing
         self.feature_mode = "GENE"
         # self.init_mode = "warm"
