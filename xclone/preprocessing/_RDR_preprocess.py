@@ -95,7 +95,7 @@ def Xdata_RDR_preprocess(Xdata,
     ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
     ref_Xdata = Xdata[ref_flag,:]
 
-    Xdata.var['ref_avg'] = ref_Xdata.X.A.mean(axis=0)
+    Xdata.var[var_key] = ref_Xdata.X.A.mean(axis=0)
 
     ## filter genes based on ref_average counts
     ### if filter_ref_ave is None, skip the filtering step*
@@ -104,22 +104,24 @@ def Xdata_RDR_preprocess(Xdata,
     if filter_ref_ave is None:
         gene_flag = np.ones((gene_num), dtype=bool)
     else:
-        gene_flag = Xdata.var['ref_avg'] > filter_ref_ave
+        gene_flag = Xdata.var[var_key] > filter_ref_ave
         if gene_flag.sum() < min_gene_keep_num:
-            # make sure at least 3000 genes， in case low coverage data filter out too much genes
+            # make sure at least default 3000 genes,in case low coverage data filter out too much genes
             quantile_value = min_gene_keep_num/Xdata.shape[1]
-            filter_ref_ave_recomend = np.quantile(Xdata.var['ref_avg'], quantile_value)
+            if quantile_value > 1:
+                quantile_value = 1
+            filter_ref_ave_recomend = np.quantile(Xdata.var[var_key], quantile_value)
             print("filter_ref_ave_recomend", filter_ref_ave_recomend)
             if filter_ref_ave_recomend > 0:
-                gene_flag = Xdata.var['ref_avg'] > filter_ref_ave_recomend
+                gene_flag = Xdata.var[var_key] > filter_ref_ave_recomend
             else:
-                gene_flag = Xdata.var['ref_avg'] > 0
+                gene_flag = Xdata.var[var_key] > 0
                 print("[XClone hint]: just filter the genes (ref_avg=0)")
     
     # mode="FILTER"
     update_Xdata = Xdata[:, gene_flag].copy()
     ## cell counts_ratio to be compared with learned libratio
-    update_Xdata.obs[obs_key] = update_Xdata.X.A.sum(axis=1) / update_Xdata.var['ref_avg'].sum()
+    update_Xdata.obs[obs_key] = update_Xdata.X.A.sum(axis=1) / update_Xdata.var[var_key].sum()
     
     if mode == "FILTER":
         
@@ -132,7 +134,7 @@ def Xdata_RDR_preprocess(Xdata,
     celltype_ad = rr_ad_celltype_processing(update_Xdata, ref_celltype, cell_anno_key)
     is_ref = celltype_ad.obs[cell_anno_key] == ref_celltype
 
-    celltype_ad.var["ref_avg"] = celltype_ad[is_ref,:].X.toarray()[0]
+    celltype_ad.var[var_key] = celltype_ad[is_ref,:].X.toarray()[0]
 
     rr_cell_ad = rr_ad_cell_processing(update_Xdata, ref_celltype, cell_anno_key)
     update_Xdata.layers["raw_ratio"] = rr_cell_ad.X

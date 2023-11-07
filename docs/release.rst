@@ -12,6 +12,12 @@ Version 0.3.5
 - [RDR] update RDR guide ratio correct strategy
 - [Main update] default params setting for low coverage datasets
 - [mm10 extension init] update mm10 genes and extend to mm10 application
+- [Spatial extension init] add some params for spatial transcriptomics
+- [Spatial filter Genes] set lower `min_gene_keep_num` in RDR module
+- [RDR denoise] add function to use BAF information denoisde RDR layer before combination[test now]
+- [BAF] minor update to get its own KNN `connectivities` instead of `connectivities_expr`
+
+
 
 
 

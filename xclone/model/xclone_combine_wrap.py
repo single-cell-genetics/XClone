@@ -44,6 +44,7 @@ def run_combine(RDR_Xdata,
     
     ## RDR BAF settings
     BAF_denoise = config.BAF_denoise
+    RDR_denoise = config.BAF_denoise
     ## combine settings
     copyloss_correct = config.copyloss_correct
     copyloss_correct_mode = config.copyloss_correct_mode
@@ -96,14 +97,29 @@ def run_combine(RDR_Xdata,
                         Xlayer = BAF_use_Xlayer,
                         extend_layer = "BAF_extend_post_prob",
                         return_prob = False)
-    
-    combine_Xdata = xclone.model.CNV_prob_combination(combine_Xdata,
-                         RDR_layer = "posterior_mtx",
+    if RDR_denoise:
+        combine_Xdata = xclone.model.denoise_rdr_by_baf(combine_Xdata,
+                                                        RDR_layer = "posterior_mtx",
+                                                        BAF_layer = "BAF_extend_post_prob",
+                                                        out_RDR_layer = "rdr_posterior_mtx_denoised")
+        
+        combine_Xdata = xclone.model.CNV_prob_combination(combine_Xdata,
+                         RDR_layer = "rdr_posterior_mtx_denoised",
                          BAF_layer = "BAF_extend_post_prob",
                          copyloss_correct = copyloss_correct,
                          copyloss_correct_mode = copyloss_correct_mode,
                          copygain_correct = copygain_correct,
                          copygain_correct_mode = copygain_correct_mode)
+        
+    else:
+
+        combine_Xdata = xclone.model.CNV_prob_combination(combine_Xdata,
+                            RDR_layer = "posterior_mtx",
+                            BAF_layer = "BAF_extend_post_prob",
+                            copyloss_correct = copyloss_correct,
+                            copyloss_correct_mode = copyloss_correct_mode,
+                            copygain_correct = copygain_correct,
+                            copygain_correct_mode = copygain_correct_mode)
     try:
         combine_Xdata.write(RDR_combine_corrected_file)
     except Exception as e:
@@ -136,9 +152,45 @@ def run_combine(RDR_Xdata,
                          merge_loss, merge_loh, 
                          set_figtitle,
                          out_dir)
-    
+        if RDR_denoise:
+            rdr_denoise_plot(combine_Xdata, dataset_name, 
+                         plot_cell_anno_key, 
+                         set_figtitle,
+                         out_dir)
+
     return combine_Xdata
 
+def rdr_denoise_plot(combine_Xdata,
+                     dataset_name,
+                     plot_cell_anno_key,
+                     set_figtitle = True,
+                     out_dir = None,
+                     **kwargs):
+    """
+    plotting RDR_Denoised.
+    """
+    ## Result output prepare
+    if out_dir is None:
+        cwd = os.getcwd()
+        out_dir = cwd + "/XCLONE_OUT/"
+    
+    out_plot_dir = str(out_dir) + "/plot/"
+    xclone.al.dir_make(out_plot_dir)
+
+    rdr_final_denoise_fig = out_plot_dir + dataset_name + "_RDR_CNV_denoise.png"
+    if set_figtitle:
+        fig_title = dataset_name + " RDR_CNV_denoise"
+
+
+    xclone.pl.CNV_visualization(combine_Xdata, 
+                                Xlayer = "rdr_posterior_mtx_denoised",
+                                states_weight = np.array([1,2,3]), 
+                                weights = True, 
+                                cell_anno_key = plot_cell_anno_key, 
+                                title = fig_title,
+                                save_file = True, 
+                                out_file = rdr_final_denoise_fig,
+                                **kwargs)
 
 def run_combine_plot(combine_Xdata,
             dataset_name,

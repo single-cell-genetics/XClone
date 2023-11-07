@@ -4,6 +4,62 @@ import numpy as np
 import pandas as pd
 import anndata as ad
 
+
+def prob_adata_generate(data_dir, file_lst = None, method = "xclone"):
+    """
+    Example:
+    data_dir = "/groups/cgsd/xianjie/shared/xclone/GBM_eval_20231104/numbat_raw_genes_tsv/"
+    file_lst = [ "GBM.copy_loss.numbat.prob.gene_scale.extract.cell_x_gene.mtx.rds.tsv" , 
+    "GBM.loh.numbat.prob.gene_scale.extract.cell_x_gene.mtx.rds.tsv", 
+    "GBM.copy_gain.numbat.prob.gene_scale.extract.cell_x_gene.mtx.rds.tsv"]
+    xclone.al.prob_adata_generate(data_dir,file_lst, method = "numbat")
+
+    data_dir = "/home/rthuang/groups/rthuang/Results/GBM/xclone_results/analysis/extracted_data/"
+    xclone.al.prob_adata_generate(data_dir)
+    """
+    if method == "numbat":
+        numbat_file = data_dir + file_lst[0]
+        numbat = pd.read_csv(numbat_file, sep = "\t", index_col = 0)
+        data = numbat.values
+        obs = pd.DataFrame({"cell_barcodes": numbat.index})
+        var = pd.DataFrame({"GeneName": numbat.columns})
+        
+        # Create an AnnData object
+        adata = ad.AnnData(X=data, obs=obs, var=var)
+        adata.obs.set_index(adata.obs["cell_barcodes"], inplace=True)
+        
+        prob_lst = []
+        for file_ in file_lst:
+            numbat_file = data_dir+file_
+            prob_ = pd.read_csv(numbat_file, sep = "\t", index_col = 0)
+            prob_lst.append(prob_) 
+    
+        a_combined = np.stack(prob_lst, axis=-1)
+        adata.layers["numbat_prob"] = a_combined
+
+    if method == "xclone":
+        ## establish prob layer   
+        state_lst = ["prob_combine_copyloss/", "prob_combine_loh/", "prob_combine_copyneutral/", "prob_combine_copygain/"]
+        prob_lst = []
+        for state_ in state_lst:
+            prob_file = data_dir + state_ + "matrix.csv"
+            prob_ = pd.read_csv(prob_file, header = None)
+            prob_lst.append(prob_)
+        a_combined = np.stack(prob_lst, axis=-1)
+
+        obs = pd.read_csv(data_dir + "prob_combine_copyloss/" + "cells.csv", header = None)
+        obs.columns = ["cell_barcodes"]
+        var = pd.read_csv(data_dir + "prob_combine_copyloss/" + "Features.csv")
+        # Create an AnnData object
+        adata = ad.AnnData(X=prob_.values, obs=obs, var=var)
+        adata.obs.set_index(adata.obs["cell_barcodes"], inplace=True)
+        adata.layers["xclone_prob"] = a_combined
+    
+    # Print the AnnData object
+    print(adata)
+    return adata
+
+
 def extract_Xdata(Xdata, use_cell_file, use_gene_file):
     """
     Notes:
@@ -37,16 +93,7 @@ def extract_Xdata1(Xdata, GT_df):
     """
     Notes:
     update for BCH869 dataset.
-    
-    Example:
-    --------
-    >>> data_dir = "..."
-    >>> use_cell_file = dat_dir + "GX109.isec.cell.anno.tsv"
-    >>> use_gene_file = dat_dir + "GX109.isec.gene.anno.tsv"
-    >>> RDR_adata = extract_Xdata(RDR_adata,use_cell_file, use_gene_file)
     """
-
-
     use_cell_lst = GT_df.index.tolist()
     use_gene_lst = GT_df.columns.tolist()
     
@@ -86,14 +133,17 @@ def Ground_truth_mtx_generate(Xdata, genes, cells_type = ['Paneth', 'TA']):
     
     return Ground_truth_mtx
 
-def load_ground_truth(file_path,  out_df = True, BCHdataset = True):
+def load_ground_truth(file_path,  out_df = True, BCHdataset = True, tsv_file = False):
     """
     support for load benchmarking ground truth matrix from .rds file.
     develop base on BCH869 example.
     """
-    import pyreadr
-    result = pyreadr.read_r(file_path) 
-    GT_df = result[None]
+    if tsv_file:
+        GT_df = pd.read_csv(file_path, sep = "\t", index_col = 0)
+    else:
+        import pyreadr
+        result = pyreadr.read_r(file_path) 
+        GT_df = result[None]
     if BCHdataset:
         GT_df.index = GT_df.index.str.replace("BCH", "BT_", regex = False).str.replace(".", "-", regex = False)
     Ground_truth_mtx = GT_df.values
@@ -110,9 +160,17 @@ def resort_Ground_truth_mtx(GT_df, Xdata, verbose = True):
     """
     cell_barcodes = pd.DataFrame(Xdata.obs.index, columns = ["cell_barcodes"])
     gene_names = pd.DataFrame(Xdata.var["GeneName"])
-
+    
+    # if GT_df.shape[1] < Xdata.shape[1]:
+    #     GT_df = GT_df.T.merge(gene_names, left_index=True, right_on = "GeneName", how = "left")
+    #     GT_df.set_index(keys = "GeneName", drop = True, inplace = True)
+    #     arr_ = GT_df.index.isin(gene_names["GeneName"])
+    #     arr_ = np.where(arr_ == None, False, arr_)
+    #     GT_df = GT_df[arr_] 
+    # else:
     GT_df = gene_names.merge(GT_df.T, left_on = "GeneName", right_index=True, how = "left")
     GT_df.set_index(keys = "GeneName", drop = True, inplace = True)
+    
     if verbose:
         print("Ground_truth_mtx reorder genes")
     GT_df = cell_barcodes.merge(GT_df.T, left_on = "cell_barcodes", right_index=True, how = "left")
@@ -125,10 +183,20 @@ def resort_Ground_truth_mtx(GT_df, Xdata, verbose = True):
     return Ground_truth_mtx
 
 
-def base_evaluate_map(adata, ground_truth_file):
+def base_evaluate_map(adata, ground_truth_file, tsv_file = False):
     """
     """
-    GT_df = load_ground_truth(ground_truth_file,  out_df = True, BCHdataset = True)
+    GT_df = load_ground_truth(ground_truth_file,  out_df = True, BCHdataset = True, tsv_file = tsv_file)
+    Xdata = extract_Xdata1(adata, GT_df)
+    Ground_truth_mtx = resort_Ground_truth_mtx(GT_df, Xdata)
+    
+    return Ground_truth_mtx, Xdata
+
+def base_evaluate_map1(adata, ground_truth_file, tsv_file = False):
+    """
+    BCHdataset = False
+    """
+    GT_df = load_ground_truth(ground_truth_file,  out_df = True, BCHdataset = False, tsv_file = tsv_file)
     Xdata = extract_Xdata1(adata, GT_df)
     Ground_truth_mtx = resort_Ground_truth_mtx(GT_df, Xdata)
     

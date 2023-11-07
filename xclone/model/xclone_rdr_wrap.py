@@ -66,6 +66,7 @@ def run_RDR(RDR_adata,
 
     # RDR settings
     filter_ref_ave = config.filter_ref_ave
+    min_gene_keep_num = config.min_gene_keep_num
     smart_transform = config.smart_transform
     marker_group_anno_key = config.marker_group_anno_key
     top_n_marker = config.top_n_marker
@@ -135,7 +136,9 @@ def run_RDR(RDR_adata,
 
     ## get base bulk and single cell adata
     RDR_adata, RDR_adata_bulk = xclone.pp.Xdata_RDR_preprocess(RDR_adata, filter_ref_ave = None, 
-    cell_anno_key = cell_anno_key, ref_celltype = ref_celltype)
+                                                               min_gene_keep_num = min_gene_keep_num,
+                                                               cell_anno_key = cell_anno_key, 
+                                                               ref_celltype = ref_celltype)
 
     if fit_GLM_libratio:
         ## fit libratio for each cell based on select normal chrs*

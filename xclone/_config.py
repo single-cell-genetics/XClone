@@ -103,6 +103,7 @@ class RDR_General_config():
         """
         self.smart_transform = False
         self.filter_ref_ave = 0.5
+        self.min_gene_keep_num = 3000
         self.marker_group_anno_key = None
         self.top_n_marker = 15
         self.remove_marker = True
@@ -185,6 +186,7 @@ class Combine_General_config():
         """
         ## combine performing
         self.BAF_denoise = False
+        self.RDR_denoise = False
         self.copyloss_correct = True # default
         self.copyloss_correct_mode = 1
         self.copygain_correct= False # default
@@ -258,6 +260,39 @@ class Smartseq_Config():
         self.exclude_XY = True
         self.remove_guide_XY = True
         # self.KNN_neighbors = 5
+
+
+class Spatial_Config():
+    def __init__(self):
+        """
+        Spatial transcriptmoics specific config settings.
+        default settings.
+        """
+        if self.module == "RDR":
+            # self.spatail_imputation = True
+            self.smart_transform = True
+            self.filter_ref_ave = 1.8
+            self.min_gene_keep_num = 1000
+            ## HMM related
+            self.start_prob = np.array([0.1, 0.8, 0.1])
+
+        if self.module == "BAF":
+            self.extreme_count_cap = False
+            self.gene_specific_concentration = True
+            if self.gene_specific_concentration == True:
+                self.concentration = None
+
+            ## smoothing related
+            self.WMA_window_size = 6
+        
+        if self.module == "Combine":
+            pass
+        
+        ## general settings
+        self.exclude_XY = True
+        self.remove_guide_XY = True
+        # self.KNN_neighbors = 5
+
 
 ## todo: denoise part
 

@@ -134,6 +134,7 @@ def run_BAF(BAF_adata,
     BAF_adata = xclone.pp.check_BAF(BAF_adata, cell_anno_key = cell_anno_key, verbose = verbose)
 
     RDR_adata = an.read_h5ad(RDR_final_file)
+    BAF_adata = BAF_adata[BAF_adata.obs.index.isin(RDR_adata.obs.index),:]
     ## check validated RDR and BAF
     xclone.pp.check_RDR_BAF_cellorder(RDR_adata, BAF_adata)
     ## Remove marker genes

@@ -5,12 +5,13 @@
 
 import numpy as np
 import anndata as ad
+from sklearn.mixture import GaussianMixture
 
 from ..analysis._clustering import XClustering
 
 def denoise_gene_scale(Xdata, Xlayer,
                        neutral_index = 2, 
-                       cnv_index = [0,1,3], 
+                       cnv_index = [0,1,3,4], 
                        GMM_detection = True,
                        gmm_comp = 2,
                        cell_prop_cutoff = 0.05,
@@ -19,8 +20,6 @@ def denoise_gene_scale(Xdata, Xlayer,
     default method: GMM detect the cell proportion identified as CNV states for each gene.
     alternative method: set cell_prop_cutoff.
     """
-    import numpy as np
-    from sklearn.mixture import GaussianMixture
     Xmtx = Xdata.layers[Xlayer]
     argmax_ = np.argmax(Xmtx, axis = -1)
 
@@ -43,6 +42,48 @@ def denoise_gene_scale(Xdata, Xlayer,
         denoise_mtx[:,mask_flag, i] = 0
      
     Xdata.layers[out_layer] = denoise_mtx
+    return Xdata
+
+def denoise_rdr_by_baf(Xdata, 
+                       RDR_layer, 
+                       BAF_layer, 
+                       out_RDR_layer,
+                       cell_prop_cutoff = 0.999
+                       ):
+    """
+    default method: GMM detect the cell proportion identified as allele bias states, and use the states for rdr denoise.
+    """
+    Xmtx = Xdata.layers[BAF_layer]
+    if Xmtx.shape[-1] == 3:
+        b_neutral_index = 1
+    elif Xmtx.shape[-1] == 5:
+        b_neutral_index = 2
+
+
+    argmax_ = np.argmax(Xmtx, axis = -1)
+
+    neutral_sum = (argmax_ == b_neutral_index).sum(axis = 0)
+    total_sum = argmax_.shape[0]
+    proportion_ = neutral_sum/total_sum
+    mask_flag = proportion_ >= cell_prop_cutoff
+    
+    denoise_mtx  = Xdata.layers[RDR_layer].copy()
+    if denoise_mtx.shape[-1] == 3:
+        r_neutral_index = 1
+        r_cnv_index = [0,2]
+    r_argmax_ = np.argmax(denoise_mtx, axis = -1)
+    r_neutral_sum = (r_argmax_ == r_neutral_index).sum(axis = 0)
+    r_total_sum = r_argmax_.shape[0]
+    r_proportion_ = r_neutral_sum/r_total_sum
+    r_mask_flag = r_proportion_ <=0.2
+
+    mask_flag = mask_flag*r_mask_flag
+
+    denoise_mtx[:,mask_flag, r_neutral_index] = 1
+    for i in r_cnv_index:
+        denoise_mtx[:,mask_flag, i] = 0
+    
+    Xdata.layers[out_RDR_layer] = denoise_mtx
     return Xdata
 
 def denoise_by_cluster(Xdata, 
