@@ -67,6 +67,7 @@ def run_RDR(RDR_adata,
     # RDR settings
     filter_ref_ave = config.filter_ref_ave
     min_gene_keep_num = config.min_gene_keep_num
+    multi_refcelltype = config.multi_refcelltype
     smart_transform = config.smart_transform
     marker_group_anno_key = config.marker_group_anno_key
     top_n_marker = config.top_n_marker
@@ -200,6 +201,15 @@ def run_RDR(RDR_adata,
                                               low_dim=False, run_KNN=True, 
                                               KNN_neighbors = KNN_neighbors,
                                               copy=True)
+    
+    if multi_refcelltype:
+        print("multi_refcelltype")
+        # update expected layer
+        RDR_adata = xclone.model.extra_preprocess2(RDR_adata, ref_celltype = ref_celltype, 
+                                   cluster_key=cell_anno_key,
+                                   avg_layer = "ref_avg", 
+                                   depth_key=depth_key, 
+                                   copy=True)
 
     RDR_adata = xclone.model.RDR_smoothing_base(RDR_adata,
                                                 clip = True,
@@ -257,10 +267,17 @@ def run_RDR(RDR_adata,
         rdr_plot_vmin = config.rdr_plot_vmin
         rdr_plot_vmax = config.rdr_plot_vmax
         set_figtitle = config.set_figtitle
+
         if run_verbose:
             print("[XClone plotting]")
         if plot_cell_anno_key is None:
             plot_cell_anno_key = cell_anno_key
+        
+        plot_remove_immune = config.plot_remove_immune
+        plot_immune_celltype = config.plot_immune_celltype
+        if plot_remove_immune:
+            pass
+
         
         run_RDR_plot(RDR_adata, dataset_name, 
                      plot_cell_anno_key, 

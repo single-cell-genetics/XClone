@@ -50,6 +50,7 @@ def run_combine(RDR_Xdata,
     copyloss_correct_mode = config.copyloss_correct_mode
     copygain_correct= config.copygain_correct
     copygain_correct_mode = config.copygain_correct_mode
+    RDR_prior = config.RDR_prior
     
     ## plot settings
     xclone_plot = config.xclone_plot
@@ -109,7 +110,8 @@ def run_combine(RDR_Xdata,
                          copyloss_correct = copyloss_correct,
                          copyloss_correct_mode = copyloss_correct_mode,
                          copygain_correct = copygain_correct,
-                         copygain_correct_mode = copygain_correct_mode)
+                         copygain_correct_mode = copygain_correct_mode,
+                         RDR_prior = RDR_prior)
         
     else:
 
@@ -119,7 +121,8 @@ def run_combine(RDR_Xdata,
                             copyloss_correct = copyloss_correct,
                             copyloss_correct_mode = copyloss_correct_mode,
                             copygain_correct = copygain_correct,
-                            copygain_correct_mode = copygain_correct_mode)
+                            copygain_correct_mode = copygain_correct_mode,
+                            RDR_prior = RDR_prior)
     try:
         combine_Xdata.write(RDR_combine_corrected_file)
     except Exception as e:

@@ -94,6 +94,13 @@ class XCloneGeneral_config():
         self.remove_guide_XY = False
         # KNN smoothing
         self.KNN_neighbors = 10
+        # Plotting
+        # self.plot_cell_anno_key =  None
+        self.plot_remove_immune = True
+        self.plot_immune_celltype = None
+        self.plot_remove_reference = True
+        self.plot_ref_celltype = None
+
 
 class RDR_General_config():
     def __init__(self):
@@ -104,6 +111,7 @@ class RDR_General_config():
         self.smart_transform = False
         self.filter_ref_ave = 0.5
         self.min_gene_keep_num = 3000
+        self.multi_refcelltype = False
         self.marker_group_anno_key = None
         self.top_n_marker = 15
         self.remove_marker = True
@@ -123,6 +131,7 @@ class RDR_General_config():
         self.WMA_window_size = 40
         self.WMA_smooth_key = "chr_arm"
         # WMA_smooth_key may update to predefined segment for simple clones
+        
         ## RDR plotting
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
@@ -199,13 +208,14 @@ class Combine_General_config():
         self.copygain_correct= False # default
         if  self.copygain_correct== False:
             self.copygain_correct_mode = None
+        self.RDR_prior = True
 
         ## combine plotting
-        self.merge_loss = True
-        self.merge_loh = True
-        self.set_figtitle = True
         self.xclone_plot = True
         self.plot_cell_anno_key =  None
+        self.merge_loss = True
+        self.merge_loh = True
+        self.set_figtitle = True  
         
 
 class HMM_Configs():

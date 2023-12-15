@@ -56,7 +56,7 @@ from ._RDR_cnv import fit_CNV_ratio_update
 ## RDR remove ref bio
 from ._RDR_process import NMF_confounder
 ## RDR analysis
-from ._RDR_process import extra_preprocess
+from ._RDR_process import extra_preprocess, extra_preprocess2
 from ._RDR_smoothing import RDR_smoothing_base
 
 ## HMM

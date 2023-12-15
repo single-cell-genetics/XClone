@@ -54,3 +54,5 @@ from .CNV_plot import Combine_CNV_visualization, Complex_Combine_CNV_visualizati
 
 # from .CNV_plot import CNV_combine_visualization, CNV_combine_visualization_complex
 # from .CNV_plot import CNV_LOH_visualization
+
+from .prob_plot import prob_visualization

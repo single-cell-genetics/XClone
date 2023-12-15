@@ -383,7 +383,8 @@ def CNV_prob_combination(Xdata,
                          copyloss_correct = True,
                          copyloss_correct_mode = 1,
                          copygain_correct = True,
-                         copygain_correct_mode = 2):
+                         copygain_correct_mode = 2,
+                         RDR_prior = True):
     """
     Combine RDR prob with BAF prob.
     """
@@ -412,8 +413,12 @@ def CNV_prob_combination(Xdata,
         Xdata.layers["corrected_prob"] = corrected_prob
     else:
         Xdata.layers["corrected_prob"] = Xdata.layers["combine_base_prob"].copy()
+    
+    if RDR_prior:
+        prob1_merge = CNV_prob_merge(Xdata, "corrected_prob")    
+    else:
+        prob1_merge = CNV_prob_merge2(Xdata, "corrected_prob")
 
-    prob1_merge = CNV_prob_merge(Xdata, "corrected_prob")
     Xdata.layers["prob1_merge"] = prob1_merge
 
     return Xdata
@@ -436,6 +441,38 @@ def CNV_prob_merge(Xdata,
     if prob_.shape[-1] == 5:
         copy_loss = prob_[:,:,0,:].sum(axis = -1)
         loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        copy_neutral = prob_[:,:,1,2]
+        copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        copy_gain = prob_[:,:,2,:].sum(axis = -1) + copy_gain_less
+
+    prob_merge = np.stack([copy_loss, loh, copy_neutral, copy_gain], axis = -1)
+    return prob_merge
+
+def CNV_prob_merge2(Xdata,
+                   Xlayer):
+    """
+    BAF prior (for some situations, BAF is more accurate than RDR)
+    Then the final prob should bias to the BAF res.
+    Testing stage [not recommend to all cells]
+    But may try to adjust the functions for applying in some cells/regions. 
+    if use this function: combine module config.RDR_prior set False.
+
+    """
+    prob_ = Xdata.layers[Xlayer].copy()
+    
+    ## BAF 3 states
+    if prob_.shape[-1] == 3:
+        copy_loss = prob_[:,:,0,:].sum(axis = -1)
+        loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        copy_loss = copy_loss + loh
+        copy_neutral = prob_[:,:,1,1] 
+        copy_gain = prob_[:,:,2,:].sum(axis = -1)
+    
+    ## BAF 5 states
+    if prob_.shape[-1] == 5:
+        copy_loss = prob_[:,:,0,:].sum(axis = -1)
+        loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        copy_loss = copy_loss + loh
         copy_neutral = prob_[:,:,1,2]
         copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
         copy_gain = prob_[:,:,2,:].sum(axis = -1) + copy_gain_less

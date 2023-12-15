@@ -41,6 +41,7 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
         adata.obs[depth_key] = np.where(np.isinf(adata.obs["library_alpha"]), adata.obs["counts_ratio"], adata.obs[depth_key])
         ## todo capped again; add in later version[not test yet] 20230106
         # adata.obs[depth_key] = np.where(adata.obs[depth_key] < 0.001*adata.obs["counts_ratio"], adata.obs["counts_ratio"], adata.obs[depth_key])
+    
     ## check cell quality
     cell_flag = adata.obs[depth_key] > 0 
     adata = adata[cell_flag,:]
@@ -83,6 +84,58 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
         ## connectivities normalization
         adata.obsp['connectivities'] = normalize(adata.obsp['connectivities'])
     
+    return adata if copy else None
+
+
+def extra_preprocess2(adata, ref_celltype, cluster_key='cell_type',
+                     avg_layer = "ref_avg", depth_key='counts_ratio', 
+                     copy=True):
+    """
+    Testing stage.[not recommend]
+    If use this, RDR module config.multi_refcelltype set True.
+    """
+    import scipy as sp
+    adata = adata.copy() if copy else adata
+    
+    if sp.sparse.issparse(adata.X):
+        Xmtx = adata.X.A
+    else:
+        Xmtx = adata.X
+
+    if ref_celltype not in list(adata.obs[cluster_key]):
+        print("Error: %s not exist as ref cell type" %(ref_celltype))
+        return None
+        
+    _is_ref = adata.obs[cluster_key] == ref_celltype
+
+    sorted_indices = np.argsort(adata.obsp['connectivities'], axis = -1) # cell*cell
+    sorted_ref_indices = sorted_indices[:, _is_ref] # cell* ref_cell
+    
+    select_num = -1* int(_is_ref.sum()*0.1)
+    # select_num = 30
+    
+    for i in range(sorted_ref_indices.shape[0]):
+        
+        _is_select = sorted_ref_indices[i][select_num:]
+        ref_use = Xmtx[_is_select, :].mean(axis=0)
+        if i == 0:
+            ref_ave = ref_use
+        else:
+            ref_ave = np.vstack((ref_ave, ref_use))
+    
+    adata.layers[avg_layer] = ref_ave
+    # adata.var['ref_avg'] = Xmtx[_is_ref, :].mean(axis=0)
+    # adata.obs['counts_ratio'] = Xmtx.sum(axis=1) / adata.var['ref_avg'].sum()
+
+    ## generate normalised
+    # X_baseline = (adata.obs[depth_key].values.reshape(-1, 1) *
+    #               adata.var[avg_key].values.reshape(1, -1))
+    X_baseline = (adata.obs[depth_key].values.reshape(-1, 1) *
+                  adata.layers[avg_layer])
+    # adata.layers['ref_normalized'] = (Xmtx / X_baseline)
+    # update X_baseline for expected layer
+    adata.layers['expected'] = X_baseline
+
     return adata if copy else None
 
 
