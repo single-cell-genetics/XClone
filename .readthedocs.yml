@@ -1,5 +1,5 @@
 # # Required
-# version: 2
+version: 2
 sphinx:
   configuration: docs/conf.py
 build:
