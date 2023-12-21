@@ -37,6 +37,10 @@ Most required dependencies are automatically installed, e.g.
 - `statsmodels <https://www.statsmodels.org/stable/index.html>`_ for GLM fitting
 - `jupyter <https://jupyter.org/>`_ for running XClone CNV detection within notebooks
 
+And we recommend users install `requests` pacakage before trying tutorials (Jupyter Notebook)::
+    pip install requests
+
+
 If you run into any issues or errors are raised during the installation process, feel free to contact us at GitHub_.
 
 .. _Anaconda: https://www.anaconda.com/

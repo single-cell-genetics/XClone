@@ -22,10 +22,11 @@ Public Datasets
 
 Raw Data matrix (in anndata format) for RDR module and BAF moudle can be downloaded and imported directly (see notebook tutorials). Data download at `demo_data`_.
 
-Examples of XClone and steps for reproducible results are provided in Jupyter Notebook under `examples`_ folder. 
+Examples of XClone and steps for reproducible results are provided in **Jupyter Notebook** under `examples`_ folder. 
+
 For start, please refer to tutorials analyzing `TNBC1`_ and `BCH869`_ datasets, or `TNBC1_tutorial`_ and `BCH869_tutorial`_ records step by step.
 
-.. _examples: https://connecthkuhk-my.sharepoint.com/:f:/g/personal/rthuang_connect_hku_hk/EhB6wYPgnL1MlUGP5sLHOhQBpLv3EFG4kToa0eY7sMZDLw?e=bypaf5
+.. _examples: https://github.com/Rongtingting/xclone-data/tree/main/examples
 .. _TNBC1: ./TNBC1_XClone_tutorials.html
 .. _BCH869: ./BCH869_XClone_tutorials.html
 .. _TNBC1_tutorial: ./TNBC1_XClone_demo_v2.html
