@@ -56,6 +56,7 @@ For further information visit `xclone.org <https://xclone-cnv.readthedocs.io/en/
 
    about
    installation
+   FAQ
    release
    references
 
