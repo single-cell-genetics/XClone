@@ -21,8 +21,8 @@ def tnbc1_rdr(file_path: Union[str, Path] = "data/TNBC1/TNBC1_RDR_adata_demo.h5a
     Genome version: refdata-cellranger-GRCh38-3.0.0
     Preprocessd: xcltk v0.1.15 RDR pipeline.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     
@@ -51,8 +51,8 @@ def tnbc1_baf(file_path: Union[str, Path] = "data/TNBC1/TNBC1_BAF_adata.h5ad"):
     Genome version: refdata-cellranger-GRCh38-3.0.0
     Preprocessd: xcltk v0.1.15 BAF pipeline.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     
@@ -82,8 +82,8 @@ def bch869_rdr(file_path: Union[str, Path] = "data/BCH869/BCH869_RDR_adata_demo.
     Genome version: refdata-cellranger-hg19-3.0.0
     Preprocessd: xcltk v0.1.15 RDR pipeline.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     
@@ -117,8 +117,8 @@ def bch869_baf(file_path: Union[str, Path] = "data/BCH869/BCH869_BAF_adata.h5ad"
 
     gene mode
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     
@@ -150,8 +150,8 @@ def bch869_baf_50kb(file_path: Union[str, Path] = "data/BCH869/BCH869_BAF_adata_
 
     50kb block mode
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     
@@ -176,8 +176,11 @@ import os
 
 def download_unzip_file(url, file_path, extract_path):
     """
-    Example:
-    --------
+    Parameters
+    ----------
+
+    Example
+    -------
     url = "http://example.com/example.zip"
     file_path = "/path/to/save/example.zip"
     extract_path = "/path/to/extract"
@@ -207,8 +210,8 @@ def gx109_rdr(file_path: Union[str, Path] = "/data/GX109-T1c/GX109-T1c_RDR_adata
     Notes: Released by XClone paper, there is a curated annotation 
     that contains 5400 cells from 4 different cell types.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     extract_path
@@ -253,8 +256,8 @@ def atc2_rdr(file_path: Union[str, Path] = "/data/ATC2/ATC2_RDR_small_adata.zip"
     Preprocessd: xcltk v0.1.15 RDR pipeline.
     Notes: Used by XClone paper.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     extract_path
@@ -293,21 +296,14 @@ def atc2_rdr(file_path: Union[str, Path] = "/data/ATC2/ATC2_RDR_small_adata.zip"
     return adata
 
 def atc2_baf(file_path: Union[str, Path] = "data/ATC2/ATC2_BAF_adata.h5ad"):
-    """A glioma sample BCH869 with histone H3 lysine27-to-methionine mutations (H3K27M-glioma), 
-    where 489 malignant cells and 3 non-tumour cells were probed by smart-seq2.
-    From `Filbin MG et al. (2018) <https://doi.org/10.1126%2Fscience.aao4750>`__.
-    scRNA-seq Source: GSE102130
-    Platform: SMART-seq2
-    Number of cells: 960 in total; 489 in detected clones
-    annotation: Single Cell Portal Study: single-cell analysis in pediatric 
-    midline gliomas with histone H3K27M mutation
-    Genome version: refdata-cellranger-hg19-3.0.0
+    """ATC2 sample.
     Preprocessd: xcltk v0.1.15 BAF pipeline.
+    Notes: Used by XClone paper.
 
     gene mode
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     file_path
         Path where to save dataset and read it from.
     
@@ -323,4 +319,90 @@ def atc2_baf(file_path: Union[str, Path] = "data/ATC2/ATC2_BAF_adata.h5ad"):
     url = f"{url_datadir}ATC2_scRNA/ATC2_BAF_adata.h5ad"
     adata = read(file_path, backup_url=url)
 
+    return adata
+
+def gbm10x_rdr(file_path: Union[str, Path] = "/data/GBM_10XsnRNA/GBM_10XsnRNA_RDR_small_adata.zip",
+              extract_path: Union[str, Path] = "/data/GBM_10XsnRNA/",
+              raw_expr_layer: bool = True):
+    """GBM_10XsnRNA sample.
+    Preprocessd: xcltk v0.1.15 RDR pipeline.
+    Notes: Used by XClone paper.
+
+    Parameters
+    ----------
+    file_path
+        Path where to save dataset and read it from.
+    extract_path
+        Path to extract zip files to h5ad file.
+    raw_expr_layer
+        bool, add raw_expr layer or not.
+    
+    Returns
+    -------
+    Returns `adata` object
+    
+    Example
+    -------
+    >>> import xclone
+    >>> RDR_adata = xclone.data.gbm10x_rdr()
+    """
+    h5ad_file = f"./data/GBM_10XsnRNA/GBM_10XsnRNA_RDR_small_adata.h5ad"
+    
+    if os.path.exists(h5ad_file):
+        print("load the GBM_10XsnRNA rdr data from downloaded file.")
+    else:
+        print("load the GBM_10XsnRNA rdr data from xclone-data github.")
+        url = f"{url_datadir}GBM_10XsnRNA/GBM_10XsnRNA_RDR_small_adata.zip"
+        cwd = os.getcwd()
+        extract_path = f'{cwd}{extract_path}'
+        if os.path.exists(extract_path):
+            pass
+        else:
+            dir_make(extract_path)
+        file_path = f'{cwd}{file_path}'
+        download_unzip_file(url, file_path, extract_path)
+
+    adata = read(h5ad_file)
+    if raw_expr_layer:
+        adata.layers["raw_expr"] = adata.X.copy()
+    return adata
+
+def gbm10x_baf(file_path: Union[str, Path] = "/data/GBM_10XsnRNA/GBM_10XsnRNA_BAF_adata.zip",
+                extract_path: Union[str, Path] = "/data/GBM_10XsnRNA/"):
+    """GBM_10XsnRNA sample.
+    Preprocessd: xcltk v0.1.15 BAF pipeline.
+    Notes: Used by XClone paper.
+
+    gene mode
+
+    Parameters
+    ----------
+    file_path
+        Path where to save dataset and read it from.
+    
+    Returns
+    -------
+    Returns `adata` object
+
+    Example
+    -------
+    >>> import xclone
+    >>> BAF_adata = xclone.data.gbm10x_baf()
+    """
+    h5ad_file = f"./data/GBM_10XsnRNA/GBM_10XsnRNA_BAF_adata.h5ad"
+    if os.path.exists(h5ad_file):
+        print("load the GBM_10XsnRNA baf data from downloaded file.")
+    else:
+        print("load the GBM_10XsnRNA baf data from xclone-data github.")
+        url = f"{url_datadir}GBM_10XsnRNA/GBM_10XsnRNA_BAF_adata.zip"
+        cwd = os.getcwd()
+        extract_path = f'{cwd}{extract_path}'
+        if os.path.exists(extract_path):
+            pass
+        else:
+            dir_make(extract_path)
+        file_path = f'{cwd}{file_path}'
+        download_unzip_file(url, file_path, extract_path)
+    
+    adata = read(h5ad_file)
     return adata

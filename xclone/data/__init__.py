@@ -9,5 +9,7 @@ from .demo_datasets._datasets import (
     bch869_baf_50kb,
     gx109_rdr,
     atc2_rdr,
-    atc2_baf
+    atc2_baf,
+    gbm10x_rdr,
+    gbm10x_baf
 )
