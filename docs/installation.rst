@@ -38,13 +38,15 @@ Most required dependencies are automatically installed, e.g.
 - `jupyter <https://jupyter.org/>`_ for running XClone CNV detection within notebooks
 
 And we recommend users install `requests` pacakage before trying tutorials (Jupyter Notebook)::
+    
     pip install requests
 
 
-If you run into any issues or errors are raised during the installation process, feel free to contact us at GitHub_.
+If you run into any issues or errors are raised during the installation process, please refer to FAQ_ or feel free to contact us at GitHub_.
 
 .. _Anaconda: https://www.anaconda.com/
 .. _xcltk: https://pypi.org/project/xcltk/
 .. _GitHub: https://github.com/single-cell-genetics/XClone
+.. _FAQ: https://xclone-cnv.readthedocs.io/en/latest/FAQ.html
 .. _`Getting Started`: getting_started
 .. _`Prepare data and preprocessing`: preprocessing

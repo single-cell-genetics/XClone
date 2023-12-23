@@ -63,7 +63,16 @@ https://xclone-cnv.readthedocs.io/en/latest/
 
 `Tutorials on demo dataset (Triple-negative breast cancer sample, TNBC1) <https://xclone-cnv.readthedocs.io/en/latest/TNBC1_XClone_tutorials.html>`_
 
-`Tutorials on demo dataset (Anaplastic thyroid cancer sample, ATC2) <https://github.com/Rongtingting/xclone-data/blob/main/examples/ATC2_XClone_demo.ipynb>`_
+Download the **Jupyter Notebooks** by clicking the following links:
+
+`Notebook on demo dataset (Glioma sample, BCH869) <https://github.com/Rongtingting/xclone-data/blob/main/examples/BCH869_XClone_tutorials.ipynb>`_
+
+`Notebook on demo dataset (Triple-negative breast cancer sample, TNBC1) <https://github.com/Rongtingting/xclone-data/blob/main/examples/TNBC1_XClone_tutorials.ipynb>`_
+
+`Notebook on demo dataset (Anaplastic thyroid cancer sample, ATC2) <https://github.com/Rongtingting/xclone-data/blob/main/examples/ATC2_XClone_demo.ipynb>`_
+
+`Notebook on demo dataset (Astrocytoma sample, GBM_10XsnRNA) <https://github.com/Rongtingting/xclone-data/tree/main/examples/GBM_10XsnRNA_XClone_demo.ipynb>`_
+
 
 
 .. |Compatible| image:: https://img.shields.io/badge/python-3.7-blue
