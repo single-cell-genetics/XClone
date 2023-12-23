@@ -377,6 +377,65 @@ def copygain_corrected(Xdata, Xlayer, mode = 1):
             prob_[:,:,1,3] = 0
     return prob_
 
+def WGD_warning(Xdata,
+                Xlayer = "combine_base_prob",
+                genome_level = "chr_arm", 
+                prop_value_threshold = 0.9,
+                cell_prop_threshold = 30,
+                ):
+    """
+    WGD warning from the `combine_base_prob` signal.
+
+    Parameters
+    ----------
+    prop_value_threshold: 
+        if WGD signal in any chr_arm higher than 
+        threshold, this cell has WGD signal.
+    cell_prop_threshold:
+        if cells with WGD signal more than threshold,
+        xclone raise the WGD warning for this dataset.
+
+    """
+    prob_ = Xdata.layers[Xlayer].copy()
+    prob = prob_.reshape(prob_.shape[0], prob_.shape[1], -1)
+    max_indices = np.argmax(prob, axis=2)
+    
+    if prob_.shape[-1] == 3:
+        WGD_index = 1
+    if prob_.shape[-1] == 5:
+        WGD_index = 2
+    
+    WGD_bool_mtx = max_indices == WGD_index
+    Xdata.layers["WGD_bool"] = WGD_bool_mtx
+    
+#     prop_cell = (max_indices == WGD_index).sum(axis=1)/max_indices.shape[1]
+    
+    Xdata = caluculate_WGD_proportion(Xdata, region_key = genome_level)
+    cells_with_value_over_threshold = np.any(Xdata.obsm["WGD_prop"] > prop_value_threshold, axis=1)
+    if cells_with_value_over_threshold.sum() > cell_prop_threshold:
+        print("[XClone Warning]", "WGD warning,pls check RDR and BAF module for double comfirmation.")
+    return Xdata
+    
+
+def caluculate_WGD_proportion(Xdata, 
+                             region_key = "chr_arm"):
+    """
+    caluculate_WGD_proportion for each chr_arm.
+    """
+    prop_arrays = []
+    region_brk_item = Xdata.var[region_key].drop_duplicates(keep="first")
+    for brk_ in region_brk_item:
+        flag_ = Xdata.var[region_key] == brk_
+        tmp_Xdata = Xdata[:, flag_]
+        prop_chrarm_cell = tmp_Xdata.layers["WGD_bool"].sum(axis=1)/tmp_Xdata.layers["WGD_bool"].shape[1]
+        prop_arrays.append(prop_chrarm_cell)
+
+    # Now vertically stack the arrays from the list
+    stacked_prop_arrays = np.vstack(prop_arrays)
+    Xdata.obsm["WGD_prop"] = stacked_prop_arrays.T
+    return Xdata
+
+
 def CNV_prob_combination(Xdata,
                          RDR_layer = "posterior_mtx",
                          BAF_layer = "BAF_extend_post_prob",

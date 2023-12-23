@@ -215,8 +215,13 @@ class Combine_General_config():
         self.plot_cell_anno_key =  None
         self.merge_loss = True
         self.merge_loh = True
-        self.set_figtitle = True  
+        self.set_figtitle = True
         
+        ## function in combine module
+        self.WGD_detection = True
+        self.WGD_detect_genome_level = "chr_arm"
+        self.WGD_prop_value_threshold = 0.9
+        self.WGD_cell_prop_threshold = 50
 
 class HMM_Configs():
     def __init__(self):

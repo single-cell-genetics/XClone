@@ -102,6 +102,8 @@ from .XClone_combine import bin_to_gene_mapping
 from .XClone_combine import CNV_prob_combination
 from .XClone_combine import CNV_prob_merge_for_plot
 
+from .XClone_combine import WGD_warning
+
 ## post-step[analysis for specific dataset]
 from ._denoise import denoise_gene_scale, merge_denoise_prob
 from ._denoise import denoise_by_cluster

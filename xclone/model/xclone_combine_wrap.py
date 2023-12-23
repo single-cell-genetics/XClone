@@ -51,6 +51,7 @@ def run_combine(RDR_Xdata,
     copygain_correct= config.copygain_correct
     copygain_correct_mode = config.copygain_correct_mode
     RDR_prior = config.RDR_prior
+    WGD_detection = config.WGD_detection
     
     ## plot settings
     xclone_plot = config.xclone_plot
@@ -123,6 +124,17 @@ def run_combine(RDR_Xdata,
                             copygain_correct = copygain_correct,
                             copygain_correct_mode = copygain_correct_mode,
                             RDR_prior = RDR_prior)
+    
+    if WGD_detection:
+        print("[XClone WGD detection performing]")
+        prop_value_threshold = config.WGD_prop_value_threshold
+        cell_prop_threshold = config.WGD_cell_prop_threshold
+        genome_level = config.WGD_detect_genome_level
+        xclone.model.WGD_warning(combine_Xdata, 
+                                 Xlayer = "combine_base_prob", 
+                                 genome_level = genome_level, 
+                                 prop_value_threshold = prop_value_threshold,
+                                 cell_prop_threshold = cell_prop_threshold)
     try:
         combine_Xdata.write(RDR_combine_corrected_file)
     except Exception as e:
