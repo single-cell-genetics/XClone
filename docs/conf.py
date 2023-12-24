@@ -68,6 +68,8 @@ extensions = [
     # "edit_on_github",
 ]
 bibtex_bibfiles = ['references.bib']
+# Use the APA style
+bibtex_reference_style = 'apa-annotated-bibliography.csl'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
