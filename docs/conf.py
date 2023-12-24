@@ -33,9 +33,7 @@ from urllib.request import urlretrieve
 notebooks_url = "https://github.com/Rongtingting/xclone-data/raw/main/examples/"
 notebooks = [
     "TNBC1_XClone_tutorials.ipynb",
-    "BCH869_XClone_tutorials.ipynb",
-    "TNBC1_XClone_demo_v2.ipynb",
-    "BCH869_XClone_demo_v2.ipynb"
+    "BCH869_XClone_tutorials.ipynb"
 ]
 for nb in notebooks:
     try:
@@ -66,8 +64,10 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx_autodoc_typehints",
     "nbsphinx",
+    'sphinxcontrib.bibtex',
     # "edit_on_github",
 ]
+bibtex_bibfiles = ['references.bib']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

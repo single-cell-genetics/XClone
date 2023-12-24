@@ -16,7 +16,8 @@ Version 0.3.5
 - [Spatial filter Genes] set lower `min_gene_keep_num` in RDR module
 - [RDR denoise] add function to use BAF information denoisde RDR layer before combination[test now]
 - [BAF] minor update to get its own KNN `connectivities` instead of `connectivities_expr`
-- [RDR] Reference cell usage strategy update (for multiple celltyps as reference)
+- [RDR] Reference cell usage strategy update (for multiple celltyps as reference)[init]
+- [Combine] WGD warning function in the combine module.
 
 
 

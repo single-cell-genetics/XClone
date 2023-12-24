@@ -6,7 +6,7 @@ typing_extensions
 importlib_metadata
 sphinx_rtd_theme>=0.3
 sphinx_autodoc_typehints
-
+sphinxcontrib-bibtex
 # converting notebooks to html
 ipykernel
 sphinx

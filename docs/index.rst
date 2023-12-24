@@ -35,6 +35,7 @@ Latest news
 References
 ==========
 
+For details of the method, please checkout our paper :cite:`huang2023xclone`.
 
 
 Support
@@ -70,5 +71,3 @@ For further information visit `xclone.org <https://xclone-cnv.readthedocs.io/en/
    preprocessing
    TNBC1_XClone_tutorials
    BCH869_XClone_tutorials
-   TNBC1_XClone_demo_v2
-   BCH869_XClone_demo_v2
