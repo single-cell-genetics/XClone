@@ -55,9 +55,15 @@ Alternatively, you can install from this GitHub repository for latest (often dev
 
     pip install -U git+https://github.com/hxj5/xcltk
 
+
+User Guide
+==========
+
+For a complete guide, please see `XClone Documentation <https://xclone-cnv.readthedocs.io/en/latest/>`_.
+
+
 Documentation
 =============
-https://xclone-cnv.readthedocs.io/en/latest/
 
 `Tutorials on demo dataset (Glioma sample, BCH869) <https://xclone-cnv.readthedocs.io/en/latest/BCH869_XClone_tutorials.html>`_
 
