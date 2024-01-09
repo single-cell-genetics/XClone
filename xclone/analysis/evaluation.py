@@ -202,7 +202,7 @@ def base_evaluate_map1(adata, ground_truth_file, tsv_file = False):
     
     return Ground_truth_mtx, Xdata
 
-def roc_auc_evaluate(Ground_truth_mtx, Xdata, Xlayer = "XC_denoise", state_idx = 0, ROC_show = False):
+def roc_auc_evaluate(Ground_truth_mtx, Xdata, Xlayer = "XC_denoise", state_idx = 0, ROC_show = False, dpi = 300, save_fig = None):
     """
     ref: # https://github.com/huangyh09/foundation-data-science/blob/main/w10-classification/P3_ROC_NaiveBayes.ipynb
     
@@ -248,8 +248,9 @@ def roc_auc_evaluate(Ground_truth_mtx, Xdata, Xlayer = "XC_denoise", state_idx =
         plt.ylabel("True positive rate (sensitivity)")
         plt.title("ROC curve")
         plt.legend()
+        if save_fig:
+            plt.savefig(save_fig, bbox_inches='tight', dpi=dpi)
         plt.show()
-
     return roc_auc
 
 def fast_evaluate(GT_dat_dir, Combine_adata, Xlayer = "XC_denoise", dataset_name = "BCH869", update = False):

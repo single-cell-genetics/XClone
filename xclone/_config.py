@@ -43,10 +43,13 @@ class PreprocessingConfig():
         dataset_name = "XClone_scDATA",
         module = "RDR",
         cell_anno_file = None,
+        set_spatial: bool = False,
+        spot_position_file = None,
         rdr_data_dir = None,
         baf_data_dir = None):
         
         self.module = module
+        self.set_spatial = set_spatial
         self.rdr_data_dir = rdr_data_dir
         self.baf_data_dir = baf_data_dir
         self.dataset_name = dataset_name
@@ -63,6 +66,9 @@ class PreprocessingConfig():
             self.cell_anno_file = cell_anno_file
             self.cell_anno_key = "cell_type"
             self.genome_mode = "hg38_genes"
+            
+            if self.set_spatial:
+                self.spot_position_file = spot_position_file
 
         if self.module == "BAF":
             self.AD_file = self.baf_data_dir + "xcltk.AD.mtx"
@@ -73,6 +79,8 @@ class PreprocessingConfig():
             self.cell_anno_file = cell_anno_file
             self.cell_anno_key = "cell_type"
             self.genome_mode = "hg38_genes"
+            if self.set_spatial:
+                self.spot_position_file = spot_position_file
 
         if self.module == "Combine":
             self.RDR_adata_file = self.rdr_data_dir + "RDR_adata_KNN_HMM_post.h5ad"
@@ -113,6 +121,7 @@ class RDR_General_config():
         self.min_gene_keep_num = 3000
         self.multi_refcelltype = False
         self.marker_group_anno_key = None
+        self.get_marker_genes = True
         self.top_n_marker = 15
         self.remove_marker = True
         self.fit_GLM_libratio = False # default use counts ratio
@@ -292,11 +301,13 @@ class Spatial_Config():
         """
         if self.module == "RDR":
             # self.spatail_imputation = True
-            self.smart_transform = True
-            self.filter_ref_ave = 1.8
-            self.min_gene_keep_num = 1000
+            self.smart_transform = False
+            self.spatial_transform = True
+            self.filter_ref_ave = 0.5
+            self.min_gene_keep_num = 1500
             ## HMM related
-            self.start_prob = np.array([0.1, 0.8, 0.1])
+            # self.start_prob = np.array([0.1, 0.8, 0.1])
+            self.start_prob = np.array([0.3, 0.4, 0.3])
 
         if self.module == "BAF":
             self.extreme_count_cap = False
@@ -327,6 +338,7 @@ class XCloneConfig():
         self,
         dataset_name: str = "XClone_scDATA",
         set_smartseq: bool = False,
+        set_spatial: bool = False,
         module: str = "RDR",
         baf_bias_mode = 1,
         plot_suffix: str = "",
@@ -340,6 +352,7 @@ class XCloneConfig():
         """
         self.dataset_name = dataset_name
         self.set_smartseq = set_smartseq
+        self.set_spatial = set_spatial
         if module in ["RDR", "BAF", "Combine"]:
             pass
         else:
@@ -363,6 +376,9 @@ class XCloneConfig():
         
         if self.set_smartseq:
             Smartseq_Config.__init__(self)
+        if self.set_spatial:
+            Spatial_Config.__init__(self)
+
 
         # other general config
         self.plot_suffix = plot_suffix

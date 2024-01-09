@@ -2,9 +2,11 @@
 
 # Author: Rongting Huang
 # Date: 2022-12-03
-# update: 2022-12-03
+# update: 2023-12-28
 
 import xclone
+import anndata as an
+from pathlib import Path
 
 def load_Xdata(module = "RDR", 
                rdr_data_dir = None,
@@ -53,7 +55,20 @@ def load_Xdata(module = "RDR",
                                          genome_mode = genome_mode,
                                          data_notes = dataset_name)
         RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key = "cell", 
-                                         cell_anno_key = cell_anno_key, sep =",") 
+                                         cell_anno_key = cell_anno_key, sep =",")
+        ## spatial 
+        set_spatial = config.set_spatial
+        if set_spatial:
+            spot_position_file = config.spot_position_file
+            if spot_position_file is None:
+                print("[XClone warning: No position annotation provided in spatial data.]")
+            else:
+                if Path(spot_position_file).is_file():
+                    RDR_adata = xclone.pp.extra_anno(RDR_adata, spot_position_file, barcodes_key = "barcode", 
+                                        cell_anno_key = "in_tissue", sep =",")
+                else:
+                    raise ValueError(f"[XClone error] Position file '{spot_position_file}' not exists")
+                
         return RDR_adata
 
     if module == "BAF":
@@ -73,11 +88,25 @@ def load_Xdata(module = "RDR",
         BAF_adata = xclone.pp.extra_anno(BAF_adata, anno_file, barcodes_key = "cell", 
                                          cell_anno_key = cell_anno_key, sep =",")
         
+        ## spatial 
+        set_spatial = config.set_spatial
+        if set_spatial:
+            spot_position_file = config.spot_position_file
+            if spot_position_file is None:
+                print("[XClone warning: No position annotation provided in spatial data.]")
+            else:
+                if Path(spot_position_file).is_file():
+                    BAF_adata = xclone.pp.extra_anno(BAF_adata, spot_position_file, barcodes_key = "barcode", 
+                                        cell_anno_key = "in_tissue", sep =",")
+                else:
+                    raise ValueError(f"[XClone error] Position file '{spot_position_file}' not exists")       
+                
+        
         return BAF_adata
 
     if module == "Combine":
         print("[XClone Combine data loading]************************")
-        import anndata as an
+        
         RDR_Xdata = an.read_h5ad(config.RDR_adata_file)
         BAF_merge_Xdata = an.read_h5ad(config.BAF_adata_file)
         ## check

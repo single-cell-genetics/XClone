@@ -20,7 +20,7 @@ from ._data import check_RDR_BAF_cellorder, check_data_combine
 
 
 # RDR
-from ._transformation import Xtransformation
+from ._transformation import Xtransformation, Spatial_Xtransformation
 from ._RDR_preprocess import Xdata_RDR_preprocess, gene_length_scale
 ## RDR genes
 from ._RDR_genes import get_markers

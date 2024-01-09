@@ -142,6 +142,12 @@ def run_BAF(BAF_adata,
     if run_verbose:
         print("[XClone BAF module running]************************")
     
+    ## check ref_celltype
+    if ref_celltype in BAF_adata.obs[cell_anno_key].values:
+        pass
+    else:
+        raise ValueError(f"[XClone error] Item '{ref_celltype}' not found in the BAF_adata's annotation.")
+    
     if exclude_XY:
         BAF_adata = xclone.pp.exclude_XY_adata(BAF_adata)
         print("[XClone warning] BAF module excelude chr XY analysis.")

@@ -17,7 +17,10 @@ Version 0.3.5
 - [RDR denoise] add function to use BAF information denoisde RDR layer before combination[test now]
 - [BAF] minor update to get its own KNN `connectivities` instead of `connectivities_expr`
 - [RDR] Reference cell usage strategy update (for multiple celltyps as reference)[init]
-- [Combine] WGD warning function in the combine module.
+- [Combine] Special WGD warning function in the combine module.
+- [Spatial] add spatial coordinates in adata.
+- [Spatial] debug some preprocessins issues to adapt to spatial cases.
+
 
 
 

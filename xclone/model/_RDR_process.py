@@ -44,8 +44,8 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
     
     ## check cell quality
     cell_flag = adata.obs[depth_key] > 0 
-    adata = adata[cell_flag,:]
-    Xmtx = Xmtx[cell_flag,:]
+    adata = adata[cell_flag,:].copy()
+    Xmtx = Xmtx[cell_flag,:].copy()
 
     ## generate normalised
     X_baseline = (adata.obs[depth_key].values.reshape(-1, 1) *

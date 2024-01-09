@@ -101,6 +101,7 @@ def Xdata_RDR_preprocess(Xdata,
     ### if filter_ref_ave is None, skip the filtering step*
     ### if mode == "FILTER", just do the filter step*
     gene_num = Xdata.var.shape[0]
+    cell_num = Xdata.obs.shape[0]
     if filter_ref_ave is None:
         gene_flag = np.ones((gene_num), dtype=bool)
     else:
@@ -124,9 +125,16 @@ def Xdata_RDR_preprocess(Xdata,
     update_Xdata.obs[obs_key] = update_Xdata.X.A.sum(axis=1) / update_Xdata.var[var_key].sum()
     
     if mode == "FILTER":
-        
+        ## filter genes
         print("[XClone-RDR preprocessing] Filter out %d genes / %d total genes, remain %d genes" 
                %(gene_num - gene_flag.sum(), gene_num, gene_flag.sum()))
+        
+        ## filter cells/spots with no counts
+        cell_flag = update_Xdata.obs[obs_key] > 0
+        update_Xdata = update_Xdata[cell_flag, :]
+
+        print("[XClone-RDR preprocessing] Filter out %d cells / %d total cells, remain %d cells" 
+               %(cell_num - cell_flag.sum(), cell_num, cell_flag.sum()))
         return update_Xdata
     
     # mode="ALL"
@@ -138,6 +146,7 @@ def Xdata_RDR_preprocess(Xdata,
 
     rr_cell_ad = rr_ad_cell_processing(update_Xdata, ref_celltype, cell_anno_key)
     update_Xdata.layers["raw_ratio"] = rr_cell_ad.X
+    update_Xdata.layers["test_ratio"] = rr_cell_ad.layers["test_ratio"]
 
     return update_Xdata, celltype_ad
 
@@ -201,7 +210,10 @@ def rr_ad_cell_processing(Xdata, ref_celltype, cell_anno_key):
     # raw_ratio = np.log((obs_Xdata.X.A + 0.1) / (cell_lib*ref_norm)) ## add small value 0.1 for visualization
     raw_ratio = np.log((obs_Xdata.X.A + 1e-8) / (cell_lib*ref_norm)) ## add small value 1e-6 for visualization
 
+    test_ratio = np.log((np.sqrt(obs_Xdata.X.A + 1) + np.sqrt(obs_Xdata.X.A) + 1e-8) / (cell_lib*ref_norm))
+
     rr_cell_ad = ad.AnnData(raw_ratio, var=obs_Xdata.var.copy(), obs = obs_Xdata.obs.copy())
+    rr_cell_ad.layers["test_ratio"] = test_ratio
     
     print("output anndata is not sparse matrix.")
     return rr_cell_ad

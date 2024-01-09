@@ -70,6 +70,7 @@ def run_RDR(RDR_adata,
     multi_refcelltype = config.multi_refcelltype
     smart_transform = config.smart_transform
     marker_group_anno_key = config.marker_group_anno_key
+    get_marker_genes = config.get_marker_genes
     top_n_marker = config.top_n_marker
     remove_marker = config.remove_marker
     fit_GLM_libratio = config.fit_GLM_libratio
@@ -115,17 +116,33 @@ def run_RDR(RDR_adata,
     RDR_adata = xclone.pp.check_RDR(RDR_adata, 
     cell_anno_key = cell_anno_key, 
     cell_detection_rate = 0.05, verbose = verbose)
+
+    ## check ref_celltype
+    if ref_celltype in RDR_adata.obs[cell_anno_key].values:
+        pass
+    else:
+        raise ValueError(f"[XClone error] Item '{ref_celltype}' not found in the RDR_adata's annotation.")
     
     ## Transformation for smart-seq data
     RDR_adata = xclone.pp.Xtransformation(RDR_adata, transform = smart_transform, Xlayers = ["raw_expr"])
+    
+    if config.set_spatial:
+        spatial_transform = config.spatial_transform
+        RDR_adata = xclone.pp.Spatial_Xtransformation(RDR_adata, transform = spatial_transform, Xlayers = ["raw_expr"])
+    
     ## Consider data coverage before genes filtering (update)
-    RDR_adata = xclone.pp.Xdata_RDR_preprocess(RDR_adata, filter_ref_ave = filter_ref_ave, 
-    cell_anno_key = cell_anno_key,  ref_celltype = ref_celltype, mode = "FILTER")
+    RDR_adata = xclone.pp.Xdata_RDR_preprocess(RDR_adata, 
+                                               filter_ref_ave = filter_ref_ave, 
+                                               min_gene_keep_num = min_gene_keep_num,
+                                               cell_anno_key = cell_anno_key,  
+                                               ref_celltype = ref_celltype, 
+                                               mode = "FILTER")
     
     ## marker genes
     if marker_group_anno_key is None:
         marker_group_anno_key = cell_anno_key
-    marker_genes = xclone.pp.get_markers(RDR_adata,
+    if get_marker_genes:
+        marker_genes = xclone.pp.get_markers(RDR_adata,
                                          top_n = top_n_marker,
                                          target_sum=1e4,
                                          rank_group = marker_group_anno_key,
@@ -168,6 +185,13 @@ def run_RDR(RDR_adata,
     else:
         libsize_key = "counts_ratio"
         depth_key = "counts_ratio"
+    
+    ## check cell quality- debug in sapatial transcriptomics, 
+    ## after last step in `xclone.pp.Xdata_RDR_preprocess` 
+    ## may get 0 "counts ratio" again in ST data.
+    cell_flag = RDR_adata.obs[libsize_key] > 0 
+    RDR_adata = RDR_adata[cell_flag,:].copy()
+
     ## fit gene-specific dispersion based on reference celltype
     if dispersion_celltype is None:
         dispersion_celltype = ref_celltype
