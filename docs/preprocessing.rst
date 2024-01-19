@@ -5,7 +5,7 @@ XClone preprocessing
 XClone takes three cell by gene matrices as input: allele-specific AD and DP matrices and 
 the total read depth matrix.
 XClone preprocessing pipeline is aimed to generate the three matrices from **SAM/BAM/CRAM** files.
-We recommend you use xcltk_ as the preprocessing pipeline. Before that, you need :ref:`prepare the data <Preparing data>`.
+We recommend you use xcltk_ as the `preprocessing pipeline`_. Before that, you need :ref:`prepare the data <Preparing data>`.
 
 * Step1: :ref:`Install xcltk <xcltk installation>` and run xctlkt :ref:`RDR module <xcltk RDR>` and :ref:`BAF module <xcltk BAF>`, independently.
 * Step2: :ref:`Load xctlkt RDR module <rdr load>`.
@@ -202,5 +202,6 @@ See `xcltk_preprocess`_ for details of how to prepare BAF and RDR data.
 
 
 .. _xcltk: https://pypi.org/project/xcltk/
+.. _preprocessing pipeline: https://github.com/hxj5/xcltk/tree/master/preprocess
 .. _xcltk_preprocess: https://github.com/hxj5/xcltk/tree/master/preprocess
 
