@@ -46,3 +46,6 @@ from ._efficiency import efficiency_preview
 from ._Xdata_manipulation import Xdata_region_selection, Xdata_cell_selection
 
 from .xclone_preprocess_wrap import load_Xdata
+
+## spatial
+# from._spatial_data import load_visium

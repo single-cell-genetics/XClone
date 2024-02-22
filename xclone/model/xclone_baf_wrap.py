@@ -127,9 +127,10 @@ def run_BAF(BAF_adata,
         else:
             RDR_final_file = RDR_file
         
-        remove_marker_genes = False
+        remove_marker_genes = True
         KNN_connect_use_key = "connectivities_expr"
     else:
+        remove_marker_genes = False
         get_BAF_KNN_connectivities = True
         KNN_connect_use_key = "connectivities"
         
