@@ -526,6 +526,92 @@ def run_BAF_plot(merge_Xdata,
     sub_logger.info("BAF plot module finished (%d seconds)" % (time_passed.total_seconds()))
     return None
 
+
+def run_BAF_complex_plot(merge_Xdata,
+                 dataset_name,
+                 plot_cell_anno_key,
+                 set_figtitle = True,
+                 out_dir = None,
+                 **kwargs):
+    """
+    """
+    ## Result output prepare
+    if out_dir is None:
+        cwd = os.getcwd()
+        out_dir = cwd + "/XCLONE_OUT/"
+    
+    out_plot_dir = str(out_dir) + "/plot/"
+    xclone.al.dir_make(out_plot_dir)
+
+    fig_title = ""
+    baf_smooth_fig = out_plot_dir + dataset_name + "_BAF_smooth.png"
+    baf_final_fig1 = out_plot_dir + dataset_name + "_BAF_CNV.png"
+    baf_final_fig2 = out_plot_dir + dataset_name + "_BAF_CNV_denoise.png"
+    baf_final_fig3 = out_plot_dir + dataset_name + "_BAF_CNV_3states.png"
+    baf_final_fig4 = out_plot_dir + dataset_name + "_BAF_CNV_3states_denoise.png"
+
+    sub_logger = get_logger("BAF plot module")
+    sub_logger.info("BAF plot module started")
+    start_time = datetime.now(timezone.utc)
+
+    if set_figtitle:
+        fig_title = dataset_name + " BAF smooth"
+    xclone.pl.BAF_smooth_complex_visualization(merge_Xdata, Xlayer = "BAF_phased_KNN_WMA", 
+                                       cell_anno_key = plot_cell_anno_key, 
+                                       clusters_display_name = plot_cell_anno_key,
+                                       change_colorbar = False, 
+                                       colorbar_name = "BAF",
+                                       title = fig_title,
+                                       save_file = True, 
+                                       out_file = baf_smooth_fig,
+                                       **kwargs)
+    if set_figtitle:
+        fig_title = dataset_name + " BAF module"
+    xclone.pl.Complex_BAF_CNV_visualization(merge_Xdata, weights = False, 
+                                    cell_anno_key = plot_cell_anno_key, 
+                                    clusters_display_name = plot_cell_anno_key, 
+                                    title = fig_title,
+                                    save_file = True, 
+                                    out_file = baf_final_fig1,
+                                    **kwargs)
+                                    
+    
+    if "denoised_posterior_mtx" in merge_Xdata.layers:
+        xclone.pl.Complex_BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_posterior_mtx",
+                                        weights = False, 
+                                        cell_anno_key = plot_cell_anno_key, 
+                                        clusters_display_name = plot_cell_anno_key,
+                                        title = fig_title + " (denoise)",
+                                        save_file = True, 
+                                        out_file = baf_final_fig2,
+                                        **kwargs)
+    
+    if "add_posterior_mtx" in merge_Xdata.layers:
+        xclone.pl.Complex_BAF_CNV_visualization(merge_Xdata, Xlayer = "add_posterior_mtx",
+                                        weights = False, 
+                                        cell_anno_key = plot_cell_anno_key, 
+                                        clusters_display_name = plot_cell_anno_key,
+                                        title = fig_title,
+                                        save_file = True, 
+                                        out_file = baf_final_fig3,
+                                        **kwargs)
+    if "denoised_add_posterior_mtx" in merge_Xdata.layers:
+        xclone.pl.Complex_BAF_CNV_visualization(merge_Xdata, Xlayer = "denoised_add_posterior_mtx",
+                                        weights = False, 
+                                        cell_anno_key = plot_cell_anno_key, 
+                                        clusters_display_name = plot_cell_anno_key,
+                                        title = fig_title + " (denoise)",
+                                        save_file = True, 
+                                        out_file = baf_final_fig4,
+                                        **kwargs)
+
+    
+    end_time = datetime.now(timezone.utc)
+    time_passed = end_time - start_time
+    sub_logger.info("BAF plot module finished (%d seconds)" % (time_passed.total_seconds()))
+    return None
+
+
 def plot_BAF_module():
     """
     all plots for BAF module.

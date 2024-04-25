@@ -294,6 +294,8 @@ def extra_anno(Xdata, anno_file,
     if isinstance(cell_anno_key, list):
         for key_ in cell_anno_key:
             anno_data_update[key_] = anno_data_update[key_].astype('category')
+    elif cell_anno_key is None:
+        pass
     else:
         anno_data_update[cell_anno_key] = anno_data_update[cell_anno_key].astype('category')
     

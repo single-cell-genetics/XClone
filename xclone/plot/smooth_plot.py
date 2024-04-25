@@ -48,7 +48,8 @@ def RDR_smooth_visualization(Xdata, cell_anno_key = "cell_type",
 
 def smooth_visualization2(Xdata, cell_anno_key = ["cell_type", "Clone"],
                           clusters_display_name = ["Celltype", "Clone"],
-                          Xlayer = "RDR_smooth",vmin=-0.7, vmax=0.7, **kwargs):
+                          Xlayer = "RDR_smooth",vmin=-0.7, vmax=0.7, 
+                          colorbar_name = "RDR smooth (log)", **kwargs):
     """
     can setting colorbar;
     XXheatmap
@@ -56,18 +57,23 @@ def smooth_visualization2(Xdata, cell_anno_key = ["cell_type", "Clone"],
     re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key =cell_anno_key)
     XXheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
               clusters_display_name = clusters_display_name,
-              vmin=vmin, vmax=vmax, **kwargs)
+              vmin=vmin, vmax=vmax, 
+              colorbar_name = colorbar_name, **kwargs)
 
-def smooth_visualization3(Xdata, cell_anno_key = ["cell_type", "Clone"],
+def RDR_smooth_complex_visualization(Xdata, cell_anno_key = ["cell_type", "Clone"],
                           clusters_display_name = ["Celltype", "Clone"],
-                          Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, **kwargs):
+                          Xlayer = "RDR_smooth", vmin=-0.7, vmax=0.7, 
+                          colorbar_name = "RDR smooth (log)", **kwargs):
     """
+    update from `smooth_visualization3`
     default: change color_bar
+
     """
     re_Xdata = reorder_data_by_cellanno(Xdata, cell_anno_key =cell_anno_key)
     XXheatmap(re_Xdata, Xlayer = Xlayer, cell_anno_key = cell_anno_key, 
               clusters_display_name = clusters_display_name,
               vmin=vmin, vmax=vmax, colorbar_ticks = [vmin, 0, vmax], 
+              colorbar_name = colorbar_name,
               colorbar_label = ["copy loss",  "copy neutral",  "copy gain"],
               **kwargs)
 

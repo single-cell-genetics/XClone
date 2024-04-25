@@ -111,11 +111,11 @@ from ._denoise import denoise_rdr_by_baf
 
 ## wrap
 from .xclone_rdr_wrap import preview_RDR
-from .xclone_rdr_wrap import run_RDR, run_RDR_plot
+from .xclone_rdr_wrap import run_RDR, run_RDR_plot, run_RDR_complex_plot
 from .xclone_rdr_wrap import plot_processed_RDR
 
 from .xclone_baf_wrap import preview_BAF
-from .xclone_baf_wrap import run_BAF, run_BAF_plot
+from .xclone_baf_wrap import run_BAF, run_BAF_plot, run_BAF_complex_plot
 from .xclone_baf_wrap import plot_processed_BAF
 
 from .xclone_combine_wrap import run_combine, run_combine_plot

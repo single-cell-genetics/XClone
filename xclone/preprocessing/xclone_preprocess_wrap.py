@@ -65,7 +65,7 @@ def load_Xdata(module = "RDR",
             else:
                 if Path(spot_position_file).is_file():
                     RDR_adata = xclone.pp.extra_anno(RDR_adata, spot_position_file, barcodes_key = "barcode", 
-                                        cell_anno_key = "in_tissue", sep =",")
+                                        cell_anno_key = None, sep =",")
                 else:
                     raise ValueError(f"[XClone error] Position file '{spot_position_file}' not exists")
                 
@@ -97,7 +97,7 @@ def load_Xdata(module = "RDR",
             else:
                 if Path(spot_position_file).is_file():
                     BAF_adata = xclone.pp.extra_anno(BAF_adata, spot_position_file, barcodes_key = "barcode", 
-                                        cell_anno_key = "in_tissue", sep =",")
+                                        cell_anno_key = None, sep =",")
                 else:
                     raise ValueError(f"[XClone error] Position file '{spot_position_file}' not exists")       
                 

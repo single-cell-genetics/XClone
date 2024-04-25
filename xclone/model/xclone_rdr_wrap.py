@@ -366,6 +366,65 @@ def run_RDR_plot(RDR_adata,
     sub_logger.info("RDR plot module finished (%d seconds)" % (time_passed.total_seconds()))
     return None
 
+
+def run_RDR_complex_plot(RDR_adata,
+            dataset_name,
+            plot_cell_anno_key,
+            set_figtitle = True,
+            rdr_plot_vmin = -0.7,
+            rdr_plot_vmax = 0.7,
+            out_dir = None,
+            **kwargs):
+    """
+    """
+    ## Result output prepare
+    if out_dir is None:
+        cwd = os.getcwd()
+        out_dir = cwd + "/XCLONE_OUT/"
+    
+    out_plot_dir = str(out_dir) + "/plot/"
+    xclone.al.dir_make(out_plot_dir)
+
+    # default:XClone
+    fig_title = ""
+    rdr_smooth_fig = out_plot_dir + dataset_name + "_RDR_smooth.png"
+    rdr_final_fig = out_plot_dir + dataset_name + "_RDR_CNV.png"
+
+    sub_logger = get_logger("RDR plot module")
+    sub_logger.info("RDR plot module started")
+    start_time = datetime.now(timezone.utc)
+    
+    if set_figtitle:
+        fig_title = dataset_name + " RDR_smooth (log scale ratio)"
+
+    xclone.pl.RDR_smooth_complex_visualization(RDR_adata, 
+                                       Xlayer = "RDR_smooth", 
+                                       cell_anno_key = plot_cell_anno_key,
+                                       clusters_display_name = plot_cell_anno_key, 
+                                       change_colorbar = False,
+                                       vmin = rdr_plot_vmin, vmax = rdr_plot_vmax,
+                                       title = fig_title,
+                                       save_file = True, 
+                                       out_file = rdr_smooth_fig,
+                                       **kwargs)
+    if set_figtitle:
+        fig_title = dataset_name + " RDR module"
+    
+    xclone.pl.Complex_CNV_visualization(RDR_adata, 
+                                states_weight = np.array([1,2,3]), 
+                                weights = True, 
+                                cell_anno_key = plot_cell_anno_key, 
+                                clusters_display_name = plot_cell_anno_key, 
+                                title = fig_title,
+                                save_file = True, 
+                                out_file = rdr_final_fig,
+                                **kwargs)
+    
+    end_time = datetime.now(timezone.utc)
+    time_passed = end_time - start_time
+    sub_logger.info("RDR plot module finished (%d seconds)" % (time_passed.total_seconds()))
+    return None
+
 def plot_RDR_module():
     """
     all plots for RDR module.

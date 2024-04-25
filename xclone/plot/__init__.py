@@ -39,8 +39,8 @@ from ._explore import visualize_count
 
 ## smoothing plotting
 from .smooth_plot import raw_ratio_visualization
-from .smooth_plot import smooth_visualization, RDR_smooth_visualization, BAF_smooth_visualization, BAF_smooth_complex_visualization
-from .smooth_plot import smooth_visualization2, smooth_visualization3
+from .smooth_plot import smooth_visualization, RDR_smooth_visualization, RDR_smooth_complex_visualization, BAF_smooth_visualization, BAF_smooth_complex_visualization
+from .smooth_plot import smooth_visualization2
 
 ## CNV plotting
 ### update
