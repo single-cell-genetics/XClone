@@ -20,6 +20,7 @@ Version 0.3.5
 - [Combine] Special WGD warning function in the combine module.
 - [Spatial] add spatial coordinates in adata.
 - [Spatial] debug some preprocessins issues to adapt to spatial cases.
+- [preprocessing] change default anno header from "cell" to "barcode"
 
 
 

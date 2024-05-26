@@ -54,7 +54,7 @@ def load_Xdata(module = "RDR",
                                          regions_anno_file,
                                          genome_mode = genome_mode,
                                          data_notes = dataset_name)
-        RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key = "cell", 
+        RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key = "barcode", 
                                          cell_anno_key = cell_anno_key, sep =",")
         ## spatial 
         set_spatial = config.set_spatial
@@ -85,7 +85,7 @@ def load_Xdata(module = "RDR",
                                          regions_anno_file,
                                          genome_mode = genome_mode,
                                          data_notes = dataset_name)
-        BAF_adata = xclone.pp.extra_anno(BAF_adata, anno_file, barcodes_key = "cell", 
+        BAF_adata = xclone.pp.extra_anno(BAF_adata, anno_file, barcodes_key = "barcode", 
                                          cell_anno_key = cell_anno_key, sep =",")
         
         ## spatial 
