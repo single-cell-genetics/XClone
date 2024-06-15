@@ -11,7 +11,7 @@ Top Questions
 Input and Output
 ----------------
 
-CNV Modules
+CNA Modules
 -----------
 
 Parameters
@@ -19,6 +19,8 @@ Parameters
 
 Version 0.3.4 specific issues
 -----------------------------
+Not support python >3.7.
+Recommend XClone version 0.3.6 for Python >3.7 environment.
 
 FileNotFoundError
 ~~~~~~~~~~~~~~~~~
@@ -74,7 +76,9 @@ You may download the `anno_data` from the following URL and place the files unde
 Version 0.3.5 specific issues
 -----------------------------
 
-Not reproted so far.
+Not support python >3.7.
+Recommend XClone version 0.3.6 for Python >3.7 environment.
+No other issues reproted so far.
 
 
 Dependency
@@ -88,6 +92,8 @@ You may encounter an error indicating that the `requests` module is not found (i
 .. code-block:: bash
 
     pip install requests
+
+This Dependency issues solved in XClone version 0.3.6.
 
 ModuleNotFoundError: No module named 'importlib.metadata'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -178,4 +184,4 @@ The most import step you may try is:
 
     pip install scanpy
 
-
+This Dependency issues solved in XClone version 0.3.6.

@@ -19,7 +19,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 reqs = ['numpy>=1.18', 'scipy', 'matplotlib', 'anndata',
-        'statsmodels', 'scanpy', 'h5py', 'palettable']
+        'statsmodels', 'scanpy', 'h5py', 'palettable', 'requests', 'importlib-metadata']
 
 # seaborn
 

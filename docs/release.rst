@@ -1,6 +1,14 @@
 Release History
 ===============
 
+Version 0.3.6
+-------------
+- update Dependency for installation
+- [Python version supporting] XClone support Python >3.7
+  adding a nonzero scalar to a sparse array is not supported by `scipy` in Python > 3.7 (which exists in RDR_smothing functions).
+
+
+
 Version 0.3.5
 -------------
 - [BAF] add allele flip status for each gene in Local phasing and Global phasing

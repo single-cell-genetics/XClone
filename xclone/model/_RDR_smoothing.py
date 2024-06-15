@@ -5,6 +5,8 @@
 # update: 2022/07/26
 
 import numpy as np
+import scanpy as sc
+import scipy.sparse as sp
 from .smoothing import WMA_smooth, KNN_smooth
 
 ## Smoothing strategy
@@ -25,12 +27,37 @@ def RDR_smoothing_base(Xdata,
     """
     ## preprocess
     ## normalization [follow scanpy pipeline]
+    # Xdata_norm.X = np.log(Xdata_norm.X/Xdata_norm.X.sum(1) * 10000 + 1) 
+    # Notes: this only supported by python<3.7 if issparse
+    # sc.pp.normalize_total from the Scanpy library supports both dense and sparse matrices. 
+    
     Xdata_norm = Xdata.copy()
-    Xdata_norm.X = np.log(Xdata_norm.X/Xdata_norm.X.sum(1) * 10000 + 1)
-
     _is_ref = Xdata_norm.obs[cell_anno_key] == ref_celltype
-    Xdata_norm.var['ref_mean'] = Xdata_norm[_is_ref, :].X.mean(0)
-    Xdata_norm.var['ref_var'] = Xdata_norm[_is_ref, :].X.var(0)
+
+    # Normalize and log transform using scanpy functions
+    sc.pp.normalize_total(Xdata_norm, target_sum=10000)
+    sc.pp.log1p(Xdata_norm)
+
+    # Check if Xdata_norm.X is a sparse matrix
+    if sp.issparse(Xdata_norm.X):
+        # # Perform operations in a way that supports sparse matrices
+        # sums = np.array(Xdata_norm.X.sum(axis=1)).flatten()
+        # Xdata_norm.X = Xdata_norm.X.multiply(1 / sums[:, None])
+        # Xdata_norm.X = Xdata_norm.X.multiply(10000)
+        # # Create a sparse matrix of ones with the same shape
+        # ones_sparse = sp.csr_matrix(np.ones(Xdata_norm.X.shape))
+        # # Add the sparse matrix of ones to the original sparse matrix
+        # Xdata_norm.X = Xdata_norm.X + ones_sparse
+        # Xdata_norm.X.data = np.log(Xdata_norm.X.data)
+        
+        Xdata_norm.var['ref_mean'] = np.array(Xdata_norm[_is_ref, :].X.mean(axis=0)).flatten()
+        ref_data_dense = Xdata_norm[_is_ref, :].X.toarray()
+        Xdata_norm.var['ref_var'] = ref_data_dense.var(axis=0)
+    else:
+        # Xdata_norm.X = np.log(Xdata_norm.X / Xdata_norm.X.sum(axis=1) * 10000 + 1)
+        Xdata_norm.var['ref_mean'] = Xdata_norm[_is_ref, :].X.mean(0)
+        Xdata_norm.var['ref_var'] = Xdata_norm[_is_ref, :].X.var(0)
+      
 
     adata_tmp = Xdata_norm.copy()
     adata_tmp.X = adata_tmp.X - Xdata_norm.var['ref_mean'].values.reshape(1, -1)
