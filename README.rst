@@ -5,7 +5,7 @@
 XClone
 ======
 
-Inference of Clonal Copy Number Variation in Single Cells
+Inference of Clonal Copy Number Alterations in Single Cells
 
 XClone is an algorithm to infer allele- and haplotype-specific copy numbers 
 in individual cells from low-coverage and sparse single-cell RNA sequencing data 
@@ -28,10 +28,12 @@ Installation
 Main Module
 -----------
 
-XClone requires Python 3.7 (recommend 3.7 for stable performance). 
+XClone requires Python 3.7 or Python >=3.9 (Recommend 3.9 for stable performance in latest version). 
+Details of the environment requirements, see `XClone FAQs <https://xclone-cnv.readthedocs.io/en/latest/FAQ.html#python-environment>`_.
+
 We recommend to use Anaconda environment for version control and to avoid potential conflicts::
 
-    conda create -n xclone python=3.7
+    conda create -n xclone python=3.9
     conda activate xclone
 
 XClone package can be conveniently (1~2mins) installed via PyPI::

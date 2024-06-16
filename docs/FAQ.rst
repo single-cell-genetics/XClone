@@ -26,15 +26,15 @@ For detailed information about Python environments, refer to the `Python environ
 XClone versions 0.3.4 and 0.3.5 perform optimally on Python 3.7 (not >3.7 due to dependency issues). We recommend using conda to manage the environment. 
 You can use the following environment files to create a suitable conda environment for running XClone:
 
-- [xclone0.3.4Python3.7_env.yml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.4Python3.7_env.yml)
-- [xclone0.3.5Python3.7_env.yml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.5Python3.7_env.yml)
+- `xclone0.3.4Python3.7_env.yml <https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.4Python3.7_env.yml>`__
+- `xclone0.3.5Python3.7_env.yml <https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.5Python3.7_env.yml>`__
 
 
 XClone version 0.3.6 works well with Python 3.7 and Python >=3.9 (excluding 3.8 due to dependency issues).
 
 We strongly recommend using Python >=3.9 for XClone versions >=0.3.6.
 
-You can refer to the [xclone0.3.6Python3.9_env.yml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.6Python3.9_env.yml).
+You can refer to the `xclone0.3.6Python3.9_env.yml <https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.6Python3.9_env.yml>`__.
 
 Creating a Conda environment from a `.yml` file is straightforward. Below are the steps to create an environment using the provided `xclone0.3.6Python3.9_env.yml` file.
 
@@ -90,7 +90,8 @@ By following these steps, you should be able to create and activate a Conda envi
 Dependency requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-For dependency requirements recommended by Poetry, see [xclone0.3.6Python3.9Project.toml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.6Python3.9Project.toml).
+For dependency requirements recommended by Poetry, see `xclone0.3.6Python3.9Project.toml <https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.6Python3.9Project.toml>`__.
+
 
 
 XClone Version 0.3.5 specific issues
