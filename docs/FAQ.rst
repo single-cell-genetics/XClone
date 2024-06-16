@@ -74,15 +74,15 @@ Steps to Create a Conda Environment from a `.yml` File
 
    The name of the environment (`xclone_advancepy39`) is derived from the `name` field in the `.yml` file.
 
-### Verification
+6. **Verification**
+   
+   After creating and activating the environment, you can verify the installation by checking the installed packages:
 
-After creating and activating the environment, you can verify the installation by checking the installed packages:
+   .. code-block:: sh
 
-.. code-block:: sh
+      conda list
 
-   conda list
-
-This command will display all the packages and their versions installed in your Conda environment.
+   This command will display all the packages and their versions installed in your Conda environment.
 
 By following these steps, you should be able to create and activate a Conda environment based on the specifications provided in the `xclone0.3.6Python3.9_env.yml` file.
 

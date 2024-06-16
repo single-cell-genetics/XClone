@@ -7,11 +7,11 @@
 
 
 .. :Author: Rongting Huang
-.. :Version: 0.3.0
-.. :Last viewed: Oct 20, 2022
+.. :Version: 0.3.6
+.. :Last viewed: Jun 16, 2024
 
 ===========================================================================================================
-XClone: detection of allele-specific subclonal copy number variations from single-cell transcriptomic data
+XClone: detection of allele-specific subclonal copy number alterations from single-cell transcriptomic data
 ===========================================================================================================
 
 .. image:: ./image/XClone_overview_150dpi.png
@@ -21,11 +21,11 @@ XClone: detection of allele-specific subclonal copy number variations from singl
 
 XClone's key features
 ======================
-* XClone has two modules of information: the read depth ratio (RDR) module and the B-allele frequency (BAF) module, where each of the modules has its own CNV states and noise models for likelihood function. 
+* XClone has two modules of information: the read depth ratio (RDR) module and the B-allele frequency (BAF) module, where each of the modules has its own CNA states and noise models for likelihood function. 
 
-* XClone introduces two orthogonal methods for smoothing the probabilities of assigning CNV states for each feature in each cell.
+* XClone introduces two orthogonal methods for smoothing the probabilities of assigning CNA states for each feature in each cell.
 
-* XClone introduces a post-step for combining the CNV states computed from the RDR and BAF modules.
+* XClone introduces a post-step for combining the CNA states computed from the RDR and BAF modules.
 
 
 Latest news
