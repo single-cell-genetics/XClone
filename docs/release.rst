@@ -3,9 +3,13 @@ Release History
 
 Version 0.3.6
 -------------
-- update Dependency for installation
-- [Python version supporting] XClone support Python >3.7
+- [installation] update Dependency for installation
+- [FAQ] Comprehensive tutorials on installation and Dependency
+- [Python version supporting] XClone support Python "==3.7 or >=3.9"
   adding a nonzero scalar to a sparse array is not supported by `scipy` in Python > 3.7 (which exists in RDR_smothing functions).
+- [analysis] minor update in Clone function `XClustering`
+- 
+
 
 
 

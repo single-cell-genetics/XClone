@@ -17,5 +17,6 @@ from .evaluation import get_confusion, get_confuse_mat_df
 from .evaluation import change_res_resolution
 
 from ._clustering import XClustering, Cluster_mapping
+from ._clustering import XClustering2
 
 from ._spatial import CalculateSampleCNVProb, CalculateSampleBAF

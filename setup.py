@@ -1,5 +1,5 @@
 """
-xclone - Inference of clonal Copy Number Variation in single cells
+xclone - Inference of clonal Copy Number Alterations in single cells
 See: https://github.com/single-cell-genetics/XClone
 """
 
@@ -31,7 +31,7 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version=__version__,
 
-    description='Inference of clonal Copy Number Variation in single cells',
+    description='Inference of clonal Copy Number Alterations in single cells',
     long_description=long_description,
 
     # The project's main homepage.

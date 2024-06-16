@@ -1,19 +1,65 @@
 """Base functions for XClone clustering analysis.
 """
 
-def XClustering(Xdata, Xlayer, PCA_comp = 30, n_clusters = 5, method = "k-means"):
+def XClustering(Xdata, 
+                Xlayer, 
+                n_clusters = 5, 
+                method = "k-means", 
+                reshape = True, 
+                argmaxprob = False,
+                PCA = True, 
+                PCA_comp = 30):
     """
+
     """
     from sklearn.decomposition import PCA
     from sklearn.cluster import KMeans
     from sklearn.cluster import AgglomerativeClustering
     import umap
-    
-    cell_num = Xdata.shape[0]
-    X_use = Xdata.layers[Xlayer].reshape(cell_num, -1)
+
+    if reshape:
+        cell_num = Xdata.shape[0]
+        X_use = Xdata.layers[Xlayer].reshape(cell_num, -1)
+    elif argmaxprob:
+        X_use = np.argmax(Xdata.layers[Xlayer], axis=2)
+    else:
+        X_use = Xdata.layers[Xlayer]
+        
     
     ## PCA
-    reduced_data = PCA(n_components=PCA_comp).fit_transform(X_use)
+    if PCA:
+        data = PCA(n_components=PCA_comp).fit_transform(X_use)
+    else:
+        data = X_use.copy()
+
+    
+    ## Clustering
+    if method == "k-means":
+        kmeans = KMeans(init="k-means++", n_clusters=n_clusters, n_init=4)
+        kmeans.fit(data)
+        Z = kmeans.predict(data)
+        
+    if method == "Hierarchical":
+        clustering = AgglomerativeClustering(n_clusters = n_clusters).fit(data)
+        Z = clustering.labels_
+    
+    ## UMAP
+    reducer = umap.UMAP()
+    embedding = reducer.fit_transform(data)
+    
+    
+    return Z, embedding
+
+
+
+def XClustering2(Xdata, Xlayer, PCA_comp = 30, n_clusters = 5, method = "k-means"):
+    from sklearn.cluster import KMeans
+    from sklearn.cluster import AgglomerativeClustering
+    import umap
+    import numpy as np
+
+    X_use = np.argmax(Xdata.layers[Xlayer], axis=2)
+    reduced_data = X_use.copy()
     
     ## Clustering
     if method == "k-means":
@@ -31,6 +77,11 @@ def XClustering(Xdata, Xlayer, PCA_comp = 30, n_clusters = 5, method = "k-means"
     
     
     return Z, embedding
+
+
+
+
+
 
 def Cluster_mapping(Xdata,
                     pre_anno,

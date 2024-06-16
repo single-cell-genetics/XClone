@@ -17,10 +17,95 @@ CNA Modules
 Parameters
 ----------
 
-Version 0.3.4 specific issues
------------------------------
-Not support python >3.7.
-Recommend XClone version 0.3.6 for Python >3.7 environment.
+
+Python Environment
+------------------
+
+For detailed information about Python environments, refer to the `Python environments issue <https://github.com/single-cell-genetics/XClone/issues/6>`_.
+
+XClone versions 0.3.4 and 0.3.5 perform optimally on Python 3.7 (not >3.7 due to dependency issues). We recommend using conda to manage the environment. 
+You can use the following environment files to create a suitable conda environment for running XClone:
+
+- [xclone0.3.4Python3.7_env.yml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.4Python3.7_env.yml)
+- [xclone0.3.5Python3.7_env.yml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.5Python3.7_env.yml)
+
+
+XClone version 0.3.6 works well with Python 3.7 and Python >=3.9 (excluding 3.8 due to dependency issues).
+
+We strongly recommend using Python >=3.9 for XClone versions >=0.3.6.
+
+You can refer to the [xclone0.3.6Python3.9_env.yml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.6Python3.9_env.yml).
+
+Creating a Conda environment from a `.yml` file is straightforward. Below are the steps to create an environment using the provided `xclone0.3.6Python3.9_env.yml` file.
+
+Steps to Create a Conda Environment from a `.yml` File
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1. **Download the `.yml` file:**
+
+   First, download the `xclone0.3.6Python3.9_env.yml` file from the GitHub repository or ensure it's available locally.
+
+2. **Open a terminal or command prompt:**
+
+   Ensure you have Conda installed. If not, you can download it from the `Anaconda website <https://www.anaconda.com/products/distribution>`__ or use `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`__ for a lighter version.
+
+3. **Navigate to the directory containing the `.yml` file:**
+
+   .. code-block:: sh
+
+      cd path/to/your/yml/file
+
+4. **Create the Conda environment:**
+
+   Use the `conda env create` command to create an environment from the `.yml` file:
+
+   .. code-block:: sh
+
+      conda env create -f xclone0.3.6Python3.9_env.yml
+
+5. **Activate the environment:**
+
+   After the environment is created, activate it using:
+
+   .. code-block:: sh
+
+      conda activate xclone_advancepy39
+
+
+   The name of the environment (`xclone_advancepy39`) is derived from the `name` field in the `.yml` file.
+
+### Verification
+
+After creating and activating the environment, you can verify the installation by checking the installed packages:
+
+.. code-block:: sh
+
+   conda list
+
+This command will display all the packages and their versions installed in your Conda environment.
+
+By following these steps, you should be able to create and activate a Conda environment based on the specifications provided in the `xclone0.3.6Python3.9_env.yml` file.
+
+
+Dependency requirements
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+For dependency requirements recommended by Poetry, see [xclone0.3.6Python3.9Project.toml](https://github.com/Rongtingting/xclone-data/blob/main/XClone_env/xclone0.3.6Python3.9Project.toml).
+
+
+XClone Version 0.3.5 specific issues
+------------------------------------
+
+Only support python == 3.7.
+Recommend XClone version 0.3.6 for Python >=3.9 environment.
+No other issues reproted so far.
+
+
+
+XClone Version 0.3.4 specific issues
+------------------------------------
+Only support python == 3.7.
+Recommend XClone version 0.3.6 for Python >=3.7 environment.
 
 FileNotFoundError
 ~~~~~~~~~~~~~~~~~
@@ -73,12 +158,6 @@ You may download the `anno_data` from the following URL and place the files unde
 `https://github.com/single-cell-genetics/XClone/tree/master/xclone/data/anno_data`
 
 
-Version 0.3.5 specific issues
------------------------------
-
-Not support python >3.7.
-Recommend XClone version 0.3.6 for Python >3.7 environment.
-No other issues reproted so far.
 
 
 Dependency
@@ -93,7 +172,8 @@ You may encounter an error indicating that the `requests` module is not found (i
 
     pip install requests
 
-This Dependency issues solved in XClone version 0.3.6.
+This Dependency issues solved in XClone version >=0.3.6.
+
 
 ModuleNotFoundError: No module named 'importlib.metadata'
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -184,4 +264,8 @@ The most import step you may try is:
 
     pip install scanpy
 
-This Dependency issues solved in XClone version 0.3.6.
+This Dependency issues solved in XClone version >=0.3.6 (for Python >=3.9).
+
+For XClone version 0.3.6 (Python ==3.7), the ModuleNotFoundError: No module named 'importlib.metadata' error indicates that the importlib.metadata module is not found, 
+which is unexpected given that importlib-metadata is included in setup.py and installed. This issue is likely due to the importlib.metadata module being available only in Python 3.8 and later. 
+Since you are using Python 3.7, you need to install the backport package importlib-metadata.
