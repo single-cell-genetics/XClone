@@ -25,6 +25,7 @@ from pathlib import Path
 HERE = Path(__file__).parent
 sys.path.insert(0, f"{HERE.parent.parent}")
 sys.path.insert(0, os.path.abspath("_ext"))
+sys.path.insert(0, os.path.abspath('../xclone'))
 
 # -- Retrieve notebooks ------------------------------------------------
 
@@ -89,7 +90,7 @@ master_doc = 'index'
 # General information about the project.
 project = "XClone"
 author = "Rongting Huang"
-title = "XClone detects allelic CNVs in scRNA-seq data"
+title = "XClone detects allelic CNAs in scRNA-seq data"
 copyright = f"{datetime.now():%Y}, {author}"
 
 # Disable pdf and epub generation
@@ -305,7 +306,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'XClone', u'XClone Documentation',
-   u'Rongting Huang', 'XClone', 'One line description of project.',
+   u'Rongting Huang', 'XClone', 'Inference of clonal Copy Number Alterations in single cells.',
    'CNV'),
 ]
 

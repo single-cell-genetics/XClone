@@ -176,7 +176,47 @@ def visualize_cell_BAF(Xdata,
                        default_show = False,
                         **kwargs):
     """
-    BAF visualization.
+    Visualize B-allele frequency (BAF) for the provided data.
+
+    This function visualizes the BAF values for cells, optionally allowing for chromosome-specific visualization,
+    reordering by cell type, and applying a shrinkage transformation to the BAF values.
+
+    Parameters
+    ----------
+
+        Xdata : anndata.AnnData
+            The annotated data matrix containing BAF values.
+        Xlayer : str, optional
+            The layer in `Xdata` to be used for visualization. Default is "BAF".
+        cell_anno_key : str, optional
+            The key for the cell annotation used to reorder cells for visualization. Default is "cell_type".
+        chr_anno_key : str, optional
+            The key for the chromosome annotation in `Xdata.var`. Default is "chr".
+        chr_lst : list of str, optional
+            The list of chromosomes to visualize. Default is None, which visualizes all chromosomes.
+        shrink_BAF : bool, optional
+            If True, apply shrinkage to the BAF values around 0.5. Default is False.
+        default_show : bool, optional
+            If True, use default settings for the heatmap. If False, use custom settings. Default is False.
+        **kwargs : dict
+            Additional keyword arguments passed to the `Xheatmap` function.
+
+    Returns
+    -------
+
+        None
+
+    Example
+    -------
+
+        .. code-block:: python
+
+            import xclone
+            # Visualize BAF with default settings
+            xclone.pl.visualize_cell_BAF(Xdata)
+
+            # Visualize BAF for specific chromosomes with custom settings
+            xclone.pl.visualize_cell_BAF(Xdata, chr_lst=["chr1", "chr2"], shrink_BAF=True, default_show=True)
     
     """
     if chr_lst is None:

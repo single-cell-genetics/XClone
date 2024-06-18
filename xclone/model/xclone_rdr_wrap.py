@@ -23,12 +23,56 @@ def preview_RDR(RDR_adata,
     return None
 
 
-def run_RDR(RDR_adata,
-            verbose = True,
-            run_verbose = True,
-            config_file = None
-            ):
+def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
     """
+    Run the RDR (Read Depth Ratio) analysis on the provided annotated data.
+
+    This function performs the RDR analysis using the provided annotated data (`RDR_adata`).
+    It allows for verbose output and the use of a custom configuration object. If no configuration
+    object is specified, default settings from XClone's RDR module will be used.
+
+    Parameters
+    ----------
+
+        RDR_adata : anndata.AnnData
+            The annotated data matrix on which the RDR analysis will be performed.
+        verbose : bool, optional
+            If True, prints detailed information about the process. Default is True.
+        run_verbose : bool, optional
+            If True, provides verbose output during the run. Default is True.
+        config_file : xclone.XCloneConfig or None, optional
+            The XClone configuration object. If None, the default settings in XClone-RDR will be used.
+            Default is None.
+            The configuration can be created as follows:
+            
+            .. code-block:: python
+
+                config_file = xclone.XCloneConfig(dataset_name="your_dataset_name", module="RDR")
+
+    Returns
+    -------
+
+        RDR_adata : anndata.AnnData
+            The finalized output with multiple layers of information in the `anndata.AnnData` from RDR module.
+
+
+    Example
+    -------
+
+        .. code-block:: python
+
+            import xclone
+            
+            # Run RDR analysis with default settings
+            RDR_Xdata = xclone.model.run_RDR(RDR_adata, verbose=True, run_verbose=True)
+            
+            # Run RDR analysis with a custom configuration object
+            xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "RDR")
+            xconfig.outdir = out_dir
+            #... other specified parameters in `xconfig`
+            xconfig.display()
+            RDR_Xdata = xclone.model.run_RDR(RDR_adata, verbose=True, run_verbose=True, config_file=xconfig)
+    
     """
     ## settings
     from .._config import XCloneConfig

@@ -57,6 +57,8 @@ For further information visit `xclone.org <https://xclone-cnv.readthedocs.io/en/
 
    about
    installation
+   API
+   manual
    FAQ
    release
    references
@@ -67,7 +69,7 @@ For further information visit `xclone.org <https://xclone-cnv.readthedocs.io/en/
    :hidden:
    
    tutorials
-   getting_started
    preprocessing
+   getting_started
    TNBC1_XClone_tutorials
    BCH869_XClone_tutorials

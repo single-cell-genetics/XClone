@@ -19,12 +19,12 @@ from ._anno_data import load_anno
 
 ## Part I: mtx preprocessing
 
-def get_Xmtx(X, genome_mode):
+def get_Xmtx(Xmtx, genome_mode):
     """
     Function: prepare data format for XClone
     ------
     params:
-    X: csr_mtx /csr_mtx path
+    Xmtx: csr_mtx /csr_mtx path
     genome_mode: hg38_genes/hg38_blocks/hg19_genes/hg19_blocks/mm10_genes
     default: hg38_genes
     ------
@@ -32,23 +32,23 @@ def get_Xmtx(X, genome_mode):
     from xclone.model.preprocessing_utils import get_Xmtx
     dat_dir = '/storage/yhhuang/users/rthuang/processed_data/xcltk/
     xianjie-cpos/kat_022621/TNBC1-csp-post/phase-snp-even/'
-    X = dat_dir + 'kat-csp-post.50kb.block.AD.mtx'
-    Xmtx = get_Xmtx(X, "hg38_blocks")
+    Xmtx = dat_dir + 'kat-csp-post.50kb.block.AD.mtx'
+    Xmtx = get_Xmtx(Xmtx, "hg38_blocks")
     """
     # X can be file path/or loaded sparse matrix
-    if sp.sparse.issparse(X):
-        X_data = X   
-    elif os.path.exists(X):
-        X_data = sp.io.mmread(X).tocsr()
+    if sp.sparse.issparse(Xmtx):
+        Xdata = Xmtx   
+    elif os.path.exists(Xmtx):
+        Xdata = sp.io.mmread(Xmtx).tocsr()
     ## use chr1-22+XY, 
     ## can be updated if xcltk output change[Note1]
     if genome_mode=="hg19_genes":
-        X_data = X_data[0:32696,:]
+        Xdata = Xdata[0:32696,:]
     if genome_mode=="hg38_genes":
-        X_data = X_data[0:33472,:]
+        Xdata = Xdata[0:33472,:]
     if genome_mode=="mm10_genes":
-        X_data = X_data[0:32195,:]
-    return X_data.T
+        Xdata = Xdata[0:32195,:]
+    return Xdata.T
 
 def resort_mtx_bychr(mtx_file, features_file, assign_sort_index=None, out_file = None, keep_all = True):
     """
@@ -193,36 +193,54 @@ def resort_mtx_bycell(BAF_barcodes_file, RDR_barcodes_file, RDR_mtx_file, out_mt
     return out_mtx
 
 ## Part II: XClone data format-AnnData
-def xclonedata(X, data_mode, 
+def xclonedata(Xmtx, 
+               data_mode, 
                mtx_barcodes_file, 
                regions_anno_file = None, 
                genome_mode = "hg38_genes", 
                data_notes = None):
     """
-    Function: 
-    ------
-    prepare data format for XClone
-    
-    Params:
+    Extracting `xcltk` output as anndata for the input of XClone.
+        
+    Parameters
+    ----------
+
+        Xmtx : csr_mtx or csr_mtx path
+            The input data matrix/path; or a list of data matrix/paths to the matrix files.
+        data_mode : str
+            Mode of the data, either 'BAF' or 'RDR'.
+        mtx_barcodes_file : str
+            Path to the barcodes file.
+        genome_mode : str, optional
+            Genome mode, one of 'hg38_genes', 'hg38_blocks', 'hg19_genes', 
+            'hg19_blocks', or 'mm10_genes'. Default is 'hg38_genes'.
+
+
+    Returns
     -------
-    X: csr_mtx/csr_mtx path, can be list
-    data_mode: 'BAF' OR 'RDR'
-    mtx_barcodes_file: barcodes_file path
-    genome_mode: hg38_genes/hg38_blocks/hg19_genes/hg19_blocks/mm10_genes
-    default: hg38_genes
-    
-    Example:
-    --------
-    * Load xclonedata
-    >>> import xclone
-    >>> dat_dir = '/storage/yhhuang/users/rthuang/processed_data/xcltk/
-    xianjie-cpos/kat_022621/TNBC1-csp-post/phase-snp-even/'
-    >>> AD_file = dat_dir + 'kat-csp-post.50kb.block.AD.mtx'
-    >>> DP_file = dat_dir + 'kat-csp-post.50kb.block.DP.mtx'
-    >>> mtx_barcodes_file = dat_dir + "cellSNP.samples.tsv"
-    >>> BAF_adata = xclone.pp.xclonedata([AD_file, DP_file], 'BAF', mtx_barcodes_file, 
-    "hg38_blocks", "TNBC1 scRNA-seq data in copyKAT")
-    >>> RDR_adata = xclonedata(RDR_file, 'RDR', mtx_barcodes_file, "hg38_genes")
+
+        Xadata : anndata.AnnData
+            The  data customised for XClone as input for both RDR module and BAF module.
+
+        
+    Example
+    -------
+
+        .. code-block:: python
+
+            import xclone
+
+            dat_dir = 'xxx/TNBC1-csp-post/phase-snp-even/'
+            AD_file = dat_dir + 'kat-csp-post.50kb.block.AD.mtx'
+            DP_file = dat_dir + 'kat-csp-post.50kb.block.DP.mtx'
+            mtx_barcodes_file = dat_dir + "cellSNP.samples.tsv"
+            
+            BAF_adata = xclone.pp.xclonedata([AD_file, DP_file], 'BAF', mtx_barcodes_file, 
+                                            "hg38_blocks", "TNBC1 scRNA-seq data in copyKAT")
+            dat_dir = 'xxx/TNBC1-rdr/'
+            RDR_file = dat_dir + 'matrix.mtx'
+            RDR_adata = xclonedata(RDR_file, 'RDR', mtx_barcodes_file, "hg38_genes")
+
     """
     ## data loading
     ### obs anno-mtx cell barcoedes
@@ -239,57 +257,84 @@ def xclonedata(X, data_mode,
 
     ## initialize the data in AnnData format
     if data_mode == 'BAF':
-        AD = get_Xmtx(X[0], genome_mode)
-        DP = get_Xmtx(X[1], genome_mode)
-        X_adata = AnnData(AD, obs=cell_anno, var=regions_anno) # dtype='int32'
-        X_adata.layers["AD"] = AD
-        X_adata.layers["DP"] = DP  
+        AD = get_Xmtx(Xmtx[0], genome_mode)
+        DP = get_Xmtx(Xmtx[1], genome_mode)
+        Xadata = AnnData(AD, obs=cell_anno, var=regions_anno) # dtype='int32'
+        Xadata.layers["AD"] = AD
+        Xadata.layers["DP"] = DP  
     elif data_mode =='RDR':
-        RDR = get_Xmtx(X, genome_mode)
-        X_adata = AnnData(RDR, obs=cell_anno, var=regions_anno) # dtype='int32'
-        X_adata.layers["raw_expr"] = RDR
+        RDR = get_Xmtx(Xmtx, genome_mode)
+        Xadata = AnnData(RDR, obs=cell_anno, var=regions_anno) # dtype='int32'
+        Xadata.layers["raw_expr"] = RDR
     
     ## unstructed anno
-    X_adata.uns["log"] = dict([('init_data', str(X_adata.shape))])
-    X_adata.uns["log"]["data_mode"] = data_mode
-    X_adata.uns["log"]["data_notes"] = data_notes
-    X_adata.uns["log"]["genome_mode"] = genome_mode
-    X_adata.uns["data_mode"] = data_mode
-    X_adata.uns["genome_mode"] = genome_mode
+    Xadata.uns["log"] = dict([('init_data', str(Xadata.shape))])
+    Xadata.uns["log"]["data_mode"] = data_mode
+    Xadata.uns["log"]["data_notes"] = data_notes
+    Xadata.uns["log"]["genome_mode"] = genome_mode
+    Xadata.uns["data_mode"] = data_mode
+    Xadata.uns["genome_mode"] = genome_mode
     if data_notes is None:
         data_notes = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     else:
         data_notes = data_notes + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    X_adata.uns["data_notes"] = data_notes
-    return X_adata
+    Xadata.uns["data_notes"] = data_notes
+    return Xadata
 
-def extra_anno(Xdata, anno_file, 
-               barcodes_key = "cell",
+
+def extra_anno(Xdata, 
+               anno_file, 
+               barcodes_key = "barcodes",
                cell_anno_key = "cell_type", 
                sep = ",", 
                copy=True):
     """
-    Func:
-    add extra annotation for Xdata.obs
-    Params:
-    --------
-    anno_file: first column is cell barcodes, default col_name is "cell"; other
-            cols contains different type of annotations, like celltypes or clones.
-    cell_anno_key: default "cell_type", also can be list ["cell_type", "Clone ID"]
+    Add extra annotation for `Xdata.obs`.
 
-    Example:
-    >>> import xclone
-    >>> anno_dir = "/storage/yhhuang/research/xomics/GEX5/GX109-T1c/"
-    >>> anno_file = anno_dir + "GX109-T1c_yh.csv"
-    >>> RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key = "cell", 
-    cell_anno_key = "cell_type", sep =",") 
+    This function adds additional annotations from the provided `anno_file` to the `obs` attribute
+    of the `Xdata` object. The file should contain cell barcodes and other columns with different
+    types of annotations, such as cell types or clones.
+
+    Parameters
+    ----------
+
+        Xdata : anndata.AnnData
+            The annotated data matrix to which the extra annotations will be added.
+        anno_file : str
+            The path to the annotation file. The first column should contain cell/spot barcodes, with the
+            default column name being "barcodes". Other columns contain different types of annotations.
+        barcodes_key : str, optional
+            The column name in `anno_file` that contains cell barcodes. Default is "barcodes".
+        cell_anno_key : str or list of str, optional
+            The key(s) for the cell annotations to be added. Default is "cell_type".
+        sep : str, optional
+            The delimiter used in the `anno_file`. Default is ",".  
+
+    Returns
+    -------
+
+        Xadata : anndata.AnnData
+            The  data with additional annotations added.
+
+    Example
+    -------
+
+        .. code-block:: python
+
+            import xclone
+
+            anno_dir = "/storage/yhhuang/research/xomics/GEX5/GX109-T1c/"
+            anno_file = anno_dir + "GX109-T1c_yh.csv"
+            RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key="cell", 
+                                            cell_anno_key="cell_type", sep=",")
 
     """
     Xdata = Xdata.copy() if copy else Xdata
     # annotation data loading
     anno_data = pd.read_csv(anno_file, sep = sep)
     # merge annotaion
-    anno_data_update = Xdata.obs.merge(anno_data.set_index(barcodes_key), left_index=True, right_index=True, how = "left")
+    anno_data_update = Xdata.obs.merge(anno_data.set_index(barcodes_key), 
+                                       left_index=True, right_index=True, how = "left")
     
     if isinstance(cell_anno_key, list):
         for key_ in cell_anno_key:

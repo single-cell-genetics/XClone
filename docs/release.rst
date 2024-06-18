@@ -9,6 +9,7 @@ Release History
 
 Version 0.3.7
 -------------
+- [docs]
 
 
 

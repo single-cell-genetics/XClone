@@ -17,6 +17,56 @@ def run_combine(RDR_Xdata,
                 run_verbose = True,
                 config_file = None):
     """
+    Run the Combine (RDR & BAF) analysis on the provided annotated data.
+
+    This function performs the combine analysis using the provided annotated data (`RDR_adata` & `BAF_merge_Xdata`).
+    It allows for verbose output and the use of a custom configuration object. If no configuration
+    object is specified, default settings from XClone's Combine module will be used.
+
+    Parameters
+    ----------
+
+        RDR_Xdata : anndata.AnnData
+            The annotated data matrix output by the RDR moudle analysis.
+        BAF_merge_Xdata : anndata.AnnData
+            The annotated data matrix output by the BAF moudle analysis.
+        verbose : bool, optional
+            If True, prints detailed information about the process. Default is True.
+        run_verbose : bool, optional
+            If True, provides verbose output during the run. Default is True.
+        config_file : xclone.XCloneConfig or None, optional
+            The XClone configuration object. If None, the default settings in XClone-RDR will be used.
+            Default is None.
+            The configuration can be created as follows:
+            
+            .. code-block:: python
+
+                config_file = xclone.XCloneConfig(dataset_name="your_dataset_name", module="Combine")
+
+    Returns
+    -------
+
+        combine_Xdata : anndata.AnnData
+            The finalized output with multiple layers of information in the `anndata.AnnData` from Combine module.
+
+
+    Example
+    -------
+
+        .. code-block:: python
+
+            import xclone
+            
+            # Run Combine analysis with default settings
+            combine_Xdata = xclone.model.run_combine(RDR_Xdata, BAF_merge_Xdata, verbose=True, run_verbose=True)
+            
+            # Run Combine analysis with a custom configuration object
+            xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "Combine")
+            xconfig.outdir = out_dir
+            #... other specified parameters in `xconfig`
+            xconfig.display()
+            combine_Xdata = xclone.model.run_combine(RDR_Xdata, BAF_merge_Xdata, verbose=True, run_verbose=True, config_file=xconfig)
+    
     """
     ## settings
     from .._config import XCloneConfig

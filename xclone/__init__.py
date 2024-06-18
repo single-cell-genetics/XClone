@@ -1,3 +1,6 @@
+"""XClone: Inference of clonal Copy Number Alterations in single cells.
+"""
+
 from .version import __version__
 from time import gmtime, strftime
 print (f'(Running XClone {__version__})')

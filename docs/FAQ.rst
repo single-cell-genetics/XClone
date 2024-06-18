@@ -98,7 +98,9 @@ XClone Version 0.3.5 specific issues
 ------------------------------------
 
 Only support python == 3.7.
-Recommend XClone version 0.3.6 for Python >=3.9 environment.
+
+**Recommend XClone version 0.3.6 for Python >=3.9 environment.**
+
 No other issues reproted so far.
 
 
@@ -106,7 +108,9 @@ No other issues reproted so far.
 XClone Version 0.3.4 specific issues
 ------------------------------------
 Only support python == 3.7.
-Recommend XClone version 0.3.6 for Python >=3.7 environment.
+
+**Recommend XClone version 0.3.6 for Python >=3.9 environment.**
+
 
 FileNotFoundError
 ~~~~~~~~~~~~~~~~~
@@ -156,7 +160,7 @@ You may encounter a `FileNotFoundError` like the one shown below:
 
 You may download the `anno_data` from the following URL and place the files under `/data/anno_data`:
 
-`https://github.com/single-cell-genetics/XClone/tree/master/xclone/data/anno_data`
+`data/anno_data <https://github.com/single-cell-genetics/XClone/tree/master/xclone/data/anno_data>`__
 
 
 
@@ -173,7 +177,7 @@ You may encounter an error indicating that the `requests` module is not found (i
 
     pip install requests
 
-This Dependency issues solved in XClone version >=0.3.6.
+**This Dependency issues solved in XClone version >=0.3.6.**
 
 
 ModuleNotFoundError: No module named 'importlib.metadata'
@@ -265,8 +269,8 @@ The most import step you may try is:
 
     pip install scanpy
 
-This Dependency issues solved in XClone version >=0.3.6 (for Python >=3.9).
+**This Dependency issues solved in XClone version >=0.3.6 (for Python >=3.9).**
 
-For XClone version 0.3.6 (Python ==3.7), the ModuleNotFoundError: No module named 'importlib.metadata' error indicates that the importlib.metadata module is not found, 
-which is unexpected given that importlib-metadata is included in setup.py and installed. This issue is likely due to the importlib.metadata module being available only in Python 3.8 and later. 
-Since you are using Python 3.7, you need to install the backport package importlib-metadata.
+For XClone version 0.3.6 (Python 3.7), the `ModuleNotFoundError: No module named 'importlib.metadata' error` indicates that the importlib.metadata module is not found, 
+which is unexpected given that importlib-metadata is included in `setup.py`` and installed. This issue is likely due to the `importlib.metadata` module being available only in Python 3.8 and later. 
+Since you are using Python 3.7, you need to install the backport package `importlib-metadata`.

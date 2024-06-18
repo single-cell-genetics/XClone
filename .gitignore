@@ -134,3 +134,8 @@ dmypy.json
 # TNBC1/
 # .tsv
 # .mtx
+
+# poetry specific
+poetry.lock
+poetry.toml
+# pyproject.toml

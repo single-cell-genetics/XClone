@@ -26,11 +26,57 @@ def preview_BAF(BAF_adata,
     return None
 
 
-def run_BAF(BAF_adata,
-            verbose = True,
-            run_verbose = True,
-            config_file = None):
+def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     """
+    Run the BAF (B Allele Frequency) analysis on the provided annotated data.
+
+    This function performs the BAF analysis using the provided annotated data (`BAF_adata`).
+    It allows for verbose output and the use of a custom configuration object. If no configuration
+    object is specified, default settings from XClone's BAF module will be used.
+
+    Parameters
+    ----------
+
+        BAF_adata : anndata.AnnData
+            The annotated data matrix on which the BAF analysis will be performed.
+        verbose : bool, optional
+            If True, prints detailed information about the process. Default is True.
+        run_verbose : bool, optional
+            If True, provides verbose output during the run. Default is True.
+        config_file : xclone.XCloneConfig or None, optional
+            The XClone configuration object. If None, the default settings in XClone-BAF will be used.
+            Default is None.
+            The configuration can be created as follows:
+            
+            .. code-block:: python
+
+                config_file = xclone.XCloneConfig(dataset_name="your_dataset_name", module="BAF")
+
+    Returns
+    -------
+
+        merge_Xdata : anndata.AnnData
+            The finalized output with multiple layers of information in the `anndata.AnnData` from BAF module.
+            It is at bin level.
+
+
+    Example
+    -------
+
+        .. code-block:: python
+
+            import xclone
+            
+            # Run BAF analysis with default settings
+            BAF_merge_Xdata = xclone.model.run_BAF(BAF_adata, verbose=True, run_verbose=True)
+            
+            # Run BAF analysis with a custom configuration object
+            xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "BAF")
+            xconfig.outdir = out_dir
+            #... other specified parameters in `xconfig`
+            xconfig.display()
+            BAF_merge_Xdata = xclone.model.run_BAF(BAF_adata, verbose=True, run_verbose=True, config_file=xconfig)
+    
     """
     ## settings
     from .._config import XCloneConfig

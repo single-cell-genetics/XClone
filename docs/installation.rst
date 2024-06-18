@@ -5,13 +5,13 @@ Installation
 Main Module XClone
 ==================
 
-XClone requires Python 3.7 or later. 
+XClone requires Python 3.9 or later (Python 3.7 for XClone v0.3.4 & v0.3.5). 
 We recommend to use Anaconda_ environment for version control and to avoid potential conflicts ::
 
-    conda create -n xclone python=3.7
+    conda create -n xclone python=3.9
     conda activate xclone
 
-We strongly recommend users install xclone in Python 3.7 environment, for higher version may not stable
+We strongly recommend users install xclone in Python 3.9 environment, for higher version may not stable
 for higher version of packages dependencies.
 
 XClone package can be conveniently installed via PyPI (for stable version) ::
@@ -47,6 +47,6 @@ If you run into any issues or errors are raised during the installation process,
 .. _Anaconda: https://www.anaconda.com/
 .. _xcltk: https://pypi.org/project/xcltk/
 .. _GitHub: https://github.com/single-cell-genetics/XClone
-.. _FAQ: https://xclone-cnv.readthedocs.io/en/latest/FAQ.html
+.. _FAQ: https://xclone-cnv.readthedocs.io/en/latest/FAQ.html#python-environment
 .. _`Getting Started`: getting_started
 .. _`Prepare data and preprocessing`: preprocessing
