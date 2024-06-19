@@ -11,6 +11,9 @@ import numpy as np
 from .._logging import get_logger
 from datetime import datetime, timezone
 
+import gc
+
+
 def preview_RDR(RDR_adata,
                 cell_anno_key,):
     """
@@ -262,6 +265,9 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
         print("[XClone Warning]", e)
     else:
         print("[XClone hint] RDR_base_file and bulk_file saved in %s." %(out_data_dir))
+
+    del RDR_adata_bulk
+    gc.collect()
 
     RDR_adata = xclone.model.extra_preprocess(RDR_adata, cluster_key = cell_anno_key,
                                               ref_celltype = ref_celltype,

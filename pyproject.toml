@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "xclone"
 version = "0.3.7"
-description = "XClone-Inference of clonal Copy Number Alterations in single cells"
+description = "XClone: Inference of clonal Copy Number Alterations in single cells"
 authors = ["Rongting Huang <rthuang@connect.hku.hk>"]
 readme = "README.rst"
 

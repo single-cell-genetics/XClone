@@ -86,7 +86,7 @@ Ciatation
 
 For details of the method, please checkout our paper `Robust analysis of allele-specific copy number variations from scRNA-seq data with XClone <https://www.biorxiv.org/content/10.1101/2023.04.03.535352v3>`_.
 
-.. |Compatible| image:: https://img.shields.io/badge/python-3.7-blue
+.. |Compatible| image:: https://img.shields.io/badge/python-3.7%203.9-blue
     :target: https://pypi.org/project/xclone
     :alt: Compatible
 
