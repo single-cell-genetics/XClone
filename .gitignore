@@ -76,6 +76,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+docs/**/*.ipynb
 
 # IPython
 profile_default/
@@ -134,3 +135,7 @@ dmypy.json
 # TNBC1/
 # .tsv
 # .mtx
+
+# Poetry specific
+poetry.lock
+poetry.toml

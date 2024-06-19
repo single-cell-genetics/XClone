@@ -12,6 +12,8 @@ import numpy as np
 from .._logging import get_logger
 from datetime import datetime, timezone
 
+import gc
+
 def preview_BAF(BAF_adata,
                 cell_anno_key,
                 ref_celltype,
@@ -234,6 +236,9 @@ def run_BAF(BAF_adata,
         print("[XClone Warning]", e)
     else:
         print("[XClone hint] BAF_base_file and merged_file saved in %s." %(out_data_dir))
+
+    del BAF_adata
+    gc.collect()
     
     ## HMM smoothing for CNV states calling
     if guide_theo_CNV_states is not None:
