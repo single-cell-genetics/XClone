@@ -10,5 +10,4 @@ sphinxcontrib-bibtex
 # converting notebooks to html
 ipykernel
 sphinx
-# nbsphinx<=0.8.6
 nbsphinx>=0.8.7

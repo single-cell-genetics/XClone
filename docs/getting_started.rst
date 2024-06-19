@@ -1,17 +1,18 @@
 .. _getting started:
+
 ===============
 Getting Started
 ===============
-XClone is a software tool designed for analyzing single-cell RNA sequencing data to identify copy number variations within individual cells.  
-CNVs are important in a variety of biological processes, especially in cancer development.
+XClone is a software tool designed for analyzing single-cell RNA sequencing data to identify somatic copy number alterations (CNAs) within individual cells. 
+Somatic CNAs play a crucial role in various biological processes, particularly in cancer development.
 
-XClone uses probabilistic modelling to estimate the copy number variation status of each gene within each cell in a sample. 
-By analyzing the expression levels of genes and B allele frequency of gene_bins, 
-XClone can determine which cells are likely to have copy number variations and which genes are affected.
+XClone employs probabilistic modeling to estimate the copy number alterations status of each gene within each cell in a cancer sample. 
+By analyzing gene expression levels and the B allele frequency of gene bins, XClone can determine which cells are likely to have copy number variations and which genes are affected.
 
-In this tutorial, we'll walk through the steps of using XClone to analyze single-cell RNA sequencing data for CNV analysis. 
-We'll cover everything from preparing the input data to interpreting the output of the analysis. 
-Whether you're new to single-cell RNA sequencing or an experienced user, this tutorial will provide a comprehensive introduction to using XClone for CNV analysis.
+In XClone tutorials, we'll guide you through the steps of using XClone to analyze single-cell RNA sequencing data for CNA analysis. 
+We'll cover everything **from preparing the input data to interpreting the analysis results**. 
+Whether you're new to single-cell RNA sequencing or an experienced user, this tutorial will provide a comprehensive introduction to using XClone for CNA analysis.
+
 
 Public Datasets
 ===============
@@ -37,15 +38,25 @@ For start, please refer to tutorials analyzing `TNBC1`_ and `BCH869`_ datasets, 
 .. _Gao et al. (2021): https://www.nature.com/articles/s41587-020-00795-2
 .. _Filbin et al. (2018): DOI: 10.1126/science.aao4750
 
+
 XClone on new datasets
 ======================
-- import package
 
-::
+Preparing XClone input
+----------------------
+
+For detailed preprocessing tool from bam files to `anndata.AnnData` format input for XClone, refer to preprocessing page, :ref:`XClone preprocessing <XClone preprocessing>`.
+
+
+Import package
+--------------
+
+.. code-block:: python
 
     import xclone
 
-XClone provides integrated functions (RDR BAF and Combination) for CNV analysis by default 
+
+XClone provides integrated functions (RDR, BAF and Combination) for CNV analysis by default 
 whilst specific configurations might need to be adjusted accordingly. For each XClone module, we provide
 independent Class for configuration. You can specify which module to use by set `module = "RDR"`, `module = "BAF"`
 or `module = "Combine"` in `xclone.XCloneConfig(dataset_name = dataset_name, module = "RDR")`.
@@ -56,9 +67,14 @@ If you want to change params setting, Please Sub-class and override base configu
 please refer config.py for detailed arguments. After overriding, you can print `xconfig.display()` to show the updated configurations 
 before you run the module, e.g., `RDR_Xdata = xclone.model.run_RDR(RDR_adata, config_file = xconfig)`.
 
-- RDR module
 
-::
+**For detailed description of the functions in XClone, refer to API page, :ref:`XClone API <api>`.**
+
+
+RDR module
+----------
+
+.. code-block:: python
 
     xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "RDR", set_smartseq = True)
     xconfig.set_figure_params(xclone= True, fontsize = 18)
@@ -79,9 +95,10 @@ before you run the module, e.g., `RDR_Xdata = xclone.model.run_RDR(RDR_adata, co
                 config_file = xconfig)
 
 
-- BAF module
+BAF module
+----------
 
-::
+.. code-block:: python
 
     xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "BAF", set_smartseq = True)
     xconfig.set_figure_params(xclone= True, fontsize = 18)
@@ -107,7 +124,6 @@ before you run the module, e.g., `RDR_Xdata = xclone.model.run_RDR(RDR_adata, co
     xconfig.trans_prob = np.array([[1-4*t, t, t, t,t],[t, 1-4*t, t, t,t],[t, t, 1-4*t, t,t], [t, t, t, 1-4*t, t], [t, t, t, t, 1-4*t]])
     xconfig.CNV_N_components = 5
 
-    ## update
     xconfig.BAF_denoise = True
     xconfig.display()
 
@@ -115,9 +131,10 @@ before you run the module, e.g., `RDR_Xdata = xclone.model.run_RDR(RDR_adata, co
                 config_file = xconfig)
 
 
-- Combine module
+Combine module
+--------------
 
-::
+.. code-block:: python
 
     xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "Combine")
     xconfig.set_figure_params(xclone= True, fontsize = 18)
@@ -142,9 +159,3 @@ before you run the module, e.g., `RDR_Xdata = xclone.model.run_RDR(RDR_adata, co
                     verbose = True,
                     run_verbose = True,
                     config_file = xconfig)
-
-
-
-XClone on GX109-T1c
-===================
-

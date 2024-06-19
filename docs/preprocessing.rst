@@ -1,3 +1,5 @@
+.. _XClone preprocessing:
+
 ====================
 XClone preprocessing
 ====================
@@ -202,6 +204,8 @@ See `xcltk_preprocess`_ for details of how to prepare BAF and RDR data.
 
 
 .. _xcltk: https://pypi.org/project/xcltk/
+.. _xcltk RDR: https://github.com/hxj5/xcltk/tree/master/preprocess#rdr-part-2
+.. _xcltk BAF: https://github.com/hxj5/xcltk/tree/master/preprocess#baf-part-2
 .. _preprocessing pipeline: https://github.com/hxj5/xcltk/tree/master/preprocess
 .. _xcltk_preprocess: https://github.com/hxj5/xcltk/tree/master/preprocess
 

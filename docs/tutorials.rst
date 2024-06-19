@@ -1,6 +1,6 @@
-==========
+=========
 Tutorials
-==========
+=========
 
 XClone base
 ============
@@ -15,6 +15,14 @@ Examples of XClone and steps for reproducible results are provided in **Jupyter 
 
 Please refer to **Tutorials** analyzing `TNBC1`_ and `BCH869`_ datasets.
 
+
+.. _examples: https://github.com/Rongtingting/xclone-data/tree/main/examples
+.. _TNBC1: ./TNBC1_XClone_tutorials.html
+.. _BCH869: ./BCH869_XClone_tutorials.html
+
+
+
+
 CNV Visualization
 ==================
 
@@ -24,6 +32,3 @@ This tutorial shows how to visually explore CNVs results using XClone.
 
 
 
-.. _examples: https://github.com/Rongtingting/xclone-data/tree/main/examples
-.. _TNBC1: ./TNBC1_XClone_tutorials.html
-.. _BCH869: ./BCH869_XClone_tutorials.html

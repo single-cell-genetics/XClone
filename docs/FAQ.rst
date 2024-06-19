@@ -5,18 +5,6 @@ FAQ
    :depth: 2
    :local:
 
-Top Questions
--------------
-
-Input and Output
-----------------
-
-CNA Modules
------------
-
-Parameters
-----------
-
 
 Python Environment
 ------------------
