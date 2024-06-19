@@ -1,3 +1,4 @@
+===
 API
 ===
 
@@ -9,7 +10,7 @@ Import XClone as::
 
 
 Commands
---------
+========
 
 * ``XCloneRDR``: see manual_
 * ``XCloneBAF``: see manual_
@@ -17,6 +18,10 @@ Commands
 
 .. _manual: https://xclone-cnv.readthedocs.io/en/latest//manual.html
 
+
+
+Functions
+=========
 
 
 Read / Load

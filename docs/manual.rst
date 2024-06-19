@@ -1,5 +1,7 @@
+======
 Manual
 ======
+
 
 .. contents:: Manual
    :depth: 1
