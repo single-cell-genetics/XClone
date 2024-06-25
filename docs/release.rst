@@ -6,12 +6,14 @@ Release History
    :local:
 
 
+Version 0.3.8
+-------------
+- [docs] Base Configurations class.
+
 
 Version 0.3.7
 -------------
-- [docs]
-
-
+- [docs] Main functions.
 
 
 Version 0.3.6

@@ -1,10 +1,19 @@
 .. _api:
 
-===
-API
-===
+=================
+API Documentation
+=================
+
+
+.. contents:: Contents
+   :depth: 3
+   :local:
+
 
 .. automodule:: xclone
+   :members:
+
+
 
 Import XClone as::
 
@@ -38,7 +47,60 @@ Read / Load
 Config module-specific parmas
 -----------------------------
 
-.. autofunction:: xclone.XCloneConfig
+Main config manager
+~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: xclone.PreprocessingConfig
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: xclone.XCloneConfig
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Module specific config manager 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: xclone.XCloneGeneral_config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: xclone.RDR_General_config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: xclone.BAF_General_config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: xclone.Combine_General_config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. autoclass:: xclone.HMM_Configs
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: xclone.Smartseq_Config
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: xclone.Spatial_Config
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 
 

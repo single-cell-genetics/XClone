@@ -18,3 +18,5 @@ from .model import mixture as mixture
 
 from ._logging import get_logger
 from ._config import PreprocessingConfig, XCloneConfig, settings
+from ._config import XCloneGeneral_config, RDR_General_config, BAF_General_config, Combine_General_config
+from ._config import HMM_Configs, Smartseq_Config, Spatial_Config

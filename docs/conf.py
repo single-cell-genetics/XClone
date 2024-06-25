@@ -68,6 +68,20 @@ extensions = [
     'sphinxcontrib.bibtex',
     # "edit_on_github",
 ]
+
+# Add this to include __init__ method docstrings in the class documentation
+autoclass_content = 'both'
+
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'private-members': True,
+    'special-members': True,
+    'inherited-members': True,
+    'show-inheritance': True,
+}
+
+
 bibtex_bibfiles = ['references.bib']
 # Use the APA style
 bibtex_default_style = 'plain' #Or 'unsrt', 'alpha', 'abbrv'

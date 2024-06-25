@@ -36,17 +36,91 @@ class Base_settings():
 
 class PreprocessingConfig():
     """
-    Xdata loading params.
+    Configuration manager for preprocessing/loading XClone data.
+
+    This class handles the configuration settings required for loading and preprocessing
+    XClone data, including dataset details, module-specific configurations, file paths,
+    and spatial settings.
+
+    Attributes
+    ----------
+
+        module : str
+            The module to configure ('pre_check', 'RDR', 'BAF', 'Combine').
+        set_spatial : bool
+            Flag to indicate if spatial data settings should be applied.
+        rdr_data_dir : str or None
+            Directory path for RDR data files.
+        baf_data_dir : str or None
+            Directory path for BAF data files.
+        dataset_name : str
+            The name of the dataset.
+        RDR_file : str or None
+            Path to the RDR matrix file.
+        mtx_barcodes_file : str or None
+            Path to the barcodes file for the matrix.
+        regions_anno_file : str or None
+            Path to the regions annotation file.
+        cell_anno_file : str or None
+            Path to the cell annotation file.
+        barcodes_key : str
+            Key for barcodes in the cell annotation file.
+        anno_file_sep : str
+            Separator used in the annotation file.
+        cell_anno_key : str
+            Key for cell type annotations.
+        genome_mode : str
+            Genome mode setting. One of 'hg38_genes', 'hg38_blocks', 'hg19_genes', 
+            'hg19_blocks', or 'mm10_genes'. Default is 'hg38_genes'.
+        spot_position_file : str or None
+            Path to the spot position file for spatial data.
+        AD_file : str or None
+            Path to the AD matrix file for BAF data.
+        DP_file : str or None
+            Path to the DP matrix file for BAF data.
+        RDR_adata_file : str or None
+            Path to the processed RDR AnnData file. Specific for 'Combine' module.
+        BAF_adata_file : str or None
+            Path to the processed BAF AnnData file. Specific for 'Combine' module.
     """
     def __init__(
         self,
         dataset_name = "XClone_scDATA",
         module = "RDR",
         cell_anno_file = None,
+        barcodes_key = "barcodes",
+        anno_file_sep = ",", 
         set_spatial: bool = False,
         spot_position_file = None,
         rdr_data_dir = None,
         baf_data_dir = None):
+        """
+        Initialize the PreprocessingConfig class with various configuration parameters.
+
+        Parameters
+        ----------
+
+            dataset_name : str, optional
+                The name of the dataset (default is "XClone_scDATA").
+            module : str, optional
+                The module to configure, must be one of "pre_check", "RDR", "BAF", or "Combine" 
+                (default is "RDR").
+            cell_anno_file : str or None, optional
+                Path to the cell annotation file (default is None).
+            barcodes_key : str, optional
+                Key for barcodes in the cell annotation file (default is "barcodes").
+            anno_file_sep : str, optional
+                Separator used in the annotation file (default is ",").
+            set_spatial : bool, optional
+                Flag to set spatial specific configurations (default is False).
+            spot_position_file : str or None, optional
+                Path to the spot position file for spatial data (default is None).
+            rdr_data_dir : str or None, optional
+                Directory path for RDR data files (default is None).
+            baf_data_dir : str or None, optional
+                Directory path for BAF data files (default is None).
+        """
+
         
         self.module = module
         self.set_spatial = set_spatial
@@ -62,8 +136,9 @@ class PreprocessingConfig():
             self.RDR_file = self.rdr_data_dir + "matrix.mtx"
             self.mtx_barcodes_file = self.rdr_data_dir + "barcodes.tsv"
             self.regions_anno_file = None
-            # self.regions_anno_file = self.rdr_data_dir + "features.tsv"
             self.cell_anno_file = cell_anno_file
+            self.barcodes_key = barcodes_key
+            self.anno_file_sep = anno_file_sep
             self.cell_anno_key = "cell_type"
             self.genome_mode = "hg38_genes"
             
@@ -75,10 +150,12 @@ class PreprocessingConfig():
             self.DP_file = self.baf_data_dir + "xcltk.DP.mtx"
             self.mtx_barcodes_file = self.baf_data_dir + "xcltk.samples.tsv"
             self.regions_anno_file = None
-            # self.regions_anno_file = self.baf_data_dir + "xcltk.region.tsv"
             self.cell_anno_file = cell_anno_file
+            self.barcodes_key = barcodes_key
+            self.anno_file_sep = anno_file_sep
             self.cell_anno_key = "cell_type"
             self.genome_mode = "hg38_genes"
+            
             if self.set_spatial:
                 self.spot_position_file = spot_position_file
 
@@ -95,7 +172,45 @@ class PreprocessingConfig():
         print("\n")    
 
 class XCloneGeneral_config():
+    """
+    General configuration settings for XClone.
+
+    This class manages general configuration settings for the XClone tool,
+    including cell annotation keys, reference cell types, data exclusion options,
+    KNN smoothing parameters, and plotting preferences.
+
+    Attributes
+    ----------
+
+        cell_anno_key : str
+            The key for cell type annotations.
+        ref_celltype : str
+            The reference cell type.
+        exclude_XY : bool
+            Flag to exclude XY chromosomes from analysis.
+        remove_guide_XY : bool
+            Flag to remove guide XY chromosomes.
+        KNN_neighbors : int
+            Number of neighbors for KNN smoothing.
+        plot_remove_immune : bool
+            Flag to remove immune cells during plotting.
+        plot_immune_celltype : str or None
+            The cell type to be considered as immune cells for plotting.
+        plot_remove_reference : bool
+            Flag to remove reference cells during plotting.
+        plot_ref_celltype : str or None
+            The cell type to be considered as reference cells for plotting.
+    """
+
     def __init__(self):
+        """
+        Initialize the XCloneGeneral_config class with default configuration parameters.
+
+        Parameters
+        ----------
+
+            None
+        """
         self.cell_anno_key = "cell_type"
         self.ref_celltype = "N"
         self.exclude_XY = False
@@ -111,10 +226,72 @@ class XCloneGeneral_config():
 
 
 class RDR_General_config():
+    """
+    General configuration settings for RDR (Read Depth Ratio) analysis.
+
+    This class manages the configuration settings for RDR analysis, particularly
+    for 10X scRNA-seq data, including transformation options, filtering criteria,
+    marker gene settings, GLM fitting settings, smoothing parameters, and plotting preferences.
+
+    Attributes
+    ----------
+
+        smart_transform : bool
+            Flag to apply smart transformation (default is False).
+        filter_ref_ave : float
+            Threshold for filtering based on reference average (default is 0.5).
+        min_gene_keep_num : int
+            Minimum number of genes to keep (default is 3000).
+        multi_refcelltype : bool
+            Flag to use multiple reference cell types.
+        marker_group_anno_key : str or None
+            Annotation key for marker groups.
+        get_marker_genes : bool
+            Flag to retrieve marker genes (default is True).
+        top_n_marker : int
+            Number of top marker genes to select (default is 15).
+        remove_marker : bool
+            Flag to remove marker genes (default is True).
+        fit_GLM_libratio : bool
+            Flag to fit GLM using library ratio (default is False, to use counts ratio).
+        select_normal_chr_num : int
+            Number of normal chromosomes to select (default is 4).
+        dispersion_celltype : str or None
+            Cell type for dispersion calculation.
+        gene_exp_group : int
+            Expression group for gene analysis (default is 1).
+        gene_exp_ref_log : bool
+            Flag to use log transformation for reference expression (should active when exp_group > 1).
+        guide_cnv_ratio : float or None
+            Ratio for guiding CNV.
+        guide_chr_anno_key : str
+            Annotation key for chromosome guidance (default is "chr_arm").
+        guide_qt_lst : list of float
+            List of quantiles for guidance (default is [1e-04, 0.96, 0.99] for "chr_arm",
+            We recommend try [0.00001, 0.96, 0.999] for "chr").
+        WMA_window_size : int
+            Window size for Weighted Moving Average (WMA) smoothing (default is 40).
+        WMA_smooth_key : str
+            Key for WMA smoothing (default is "chr_arm").
+        xclone_plot : bool
+            Flag to enable XClone plotting (default is True).
+        plot_cell_anno_key : str or None
+            Annotation key for plotting cell annotations.
+        rdr_plot_vmin : float
+            Minimum value for RDR plot color scale.
+        rdr_plot_vmax : float
+            Maximum value for RDR plot color scale.
+        set_figtitle : bool
+            Flag to set figure titles in plots (default is True).
+        """
     def __init__(self):
         """
-        RDR params init settings. 
-        default for 10X scRNA-seq data.
+        Initialize the class RDR_General_config() class with default configuration parameters.
+
+        Parameters
+        ----------
+
+            None
         """
         self.smart_transform = False
         self.filter_ref_ave = 0.5
@@ -133,13 +310,10 @@ class RDR_General_config():
         self.guide_cnv_ratio = None
         self.guide_chr_anno_key = "chr_arm"
         self.guide_qt_lst = [1e-04, 0.96, 0.99]
-        # [0.00001, 0.96, 0.99999]
-        # self.guide_chr_anno_key = "chr"
-        # self.guide_qt_lst = [0.00001, 0.96, 0.999]
         ## smoothing
         self.WMA_window_size = 40
         self.WMA_smooth_key = "chr_arm"
-        # WMA_smooth_key may update to predefined segment for simple clones
+        # Notes: WMA_smooth_key may update to predefined segment for simple clones
         
         ## RDR plotting
         self.xclone_plot = True
@@ -150,10 +324,90 @@ class RDR_General_config():
 
 
 class BAF_General_config():
+    """
+    General configuration settings for BAF (B Allele Frequency) analysis.
+
+    This class manages the configuration settings for BAF analysis, particularly
+    for 10X scRNA-seq data, including bias mode settings, related RDR settings,
+    KNN connectivity options, theoretical CNV states, phasing parameters, smoothing,
+    postprocessing options, and plotting preferences.
+
+    Attributes
+    ----------
+
+        baf_bias_mode : int
+            Mode for BAF bias setting.
+        CNV_N_components : int
+            Number of components for CNV analysis, dependent on baf_bias_mode.
+        BAF_add : bool or None
+            Additional BAF configuration based on baf_bias_mode.
+        update_info_from_rdr : bool
+            Flag to update information from RDR.
+        RDR_file : str or None
+            Path to the RDR file.
+        remove_marker_genes : bool
+            Flag to remove marker genes.
+        KNN_connect_use_key : str
+            Key for KNN connectivity usage.
+        get_BAF_KNN_connectivities : bool
+            Flag to get BAF KNN connectivities.
+        KNN_Xlayer : str
+            X layer for KNN smoothing.
+        guide_theo_CNV_states : str or None
+            Theoretical CNV states for guidance.
+        theo_neutral_BAF : str or None
+            Theoretical neutral BAF value.
+        ref_BAF_clip : bool
+            Flag to clip reference BAF.
+        concentration : int
+            Concentration value for analysis.
+        extreme_count_cap : bool
+            Flag to cap extreme counts.
+        gene_specific_concentration : bool
+            Flag for gene-specific concentration.
+        concentration_lower : int
+            Lower bound for concentration.
+        concentration_upper : int
+            Upper bound for concentration.
+        feature_mode : str
+            Mode for feature selection.
+        phasing_region_key : str
+            Key for phasing regions.
+        phasing_len : int
+            Length of phasing regions.
+        bin_nproc : int
+            Number of processes for binning.
+        WMA_window_size : int
+            Window size for Weighted Moving Average (WMA) smoothing.
+        WMA_smooth_key : str
+            Key for WMA smoothing.
+        BAF_denoise : bool
+            Flag to enable BAF denoising.
+        BAF_denoise_GMM_detection : bool
+            Flag to enable GMM detection in BAF denoising.
+        BAF_denoise_GMM_comp : int
+            Number of components for GMM in BAF denoising.
+        BAF_denoise_cellprop_cutoff : float
+            Cutoff for cell proportion in BAF denoising.
+        xclone_plot : bool
+            Flag to enable XClone plotting.
+        plot_cell_anno_key : str or None
+            Annotation key for plotting cell annotations.
+        set_figtitle : bool
+            Flag to set figure titles in plots.
+    """
     def __init__(self, baf_bias_mode):
         """
-        BAF params init settings.
-        default for 10X scRNA-seq data.
+        Initialize the BAF_General_config class with configuration parameters based on the BAF bias mode.
+
+        This method sets default values for BAF analysis settings, optimized for 10X scRNA-seq data.
+
+        Parameters
+        ----------
+
+            baf_bias_mode : int
+                Mode for BAF bias setting, determines specific configurations.
+                Default 1 (5 allele bias states), otherwise 0 (3 allele bias states).
         """
         self.baf_bias_mode = baf_bias_mode
         if self.baf_bias_mode == 0:
@@ -204,10 +458,60 @@ class BAF_General_config():
 
 
 class Combine_General_config():
+    """
+    General configuration settings for combining BAF and RDR analyses.
+
+    This class manages the configuration settings for combining BAF and RDR analyses,
+    including denoising options, copy number correction settings, plotting preferences,
+    and whole-genome duplication (WGD) detection parameters.
+
+    Attributes
+    ----------
+
+        BAF_denoise : bool
+            Flag to enable BAF denoising.
+        RDR_denoise : bool
+            Flag to enable RDR denoising.
+        copyloss_correct : bool
+            Flag to apply copy loss correction (default is True).
+        copyloss_correct_mode : int
+            Mode for copy loss correction.
+        copygain_correct : bool
+            Flag to apply copy gain correction (default is False).
+        copygain_correct_mode : int or None
+            Mode for copy gain correction, None if copygain_correct is False.
+        RDR_prior : bool
+            Flag to prioritize RDR in combination analysis.
+        xclone_plot : bool
+            Flag to enable XClone plotting.
+        plot_cell_anno_key : str or None
+            Annotation key for plotting cell annotations.
+        merge_loss : bool
+            Flag to merge loss segments in plots.
+        merge_loh : bool
+            Flag to merge loss of heterozygosity (LOH) segments in plots.
+        set_figtitle : bool
+            Flag to set figure titles in plots.
+        WGD_detection : bool
+            Flag to enable whole-genome duplication (WGD) detection.
+        WGD_detect_genome_level : str
+            Genome level for WGD detection (e.g., "chr_arm").
+        WGD_prop_value_threshold : float
+            Proportion value threshold for WGD detection.
+        WGD_cell_prop_threshold : int
+            Cell proportion threshold for WGD detection.
+    """
+
     def __init__(self):
         """
-        Combination parmas init settings.
-        default settings.
+        Initialize the Combine_General_config class with default combination parameters.
+
+        This method sets default values for combining BAF and RDR analyses, optimized for default settings.
+
+        Parameters
+        ----------
+
+            None
         """
         ## combine performing
         self.BAF_denoise = False
@@ -233,10 +537,42 @@ class Combine_General_config():
         self.WGD_cell_prop_threshold = 50
 
 class HMM_Configs():
+    """
+    Configuration settings for Hidden Markov Model (HMM) smoothing.
+
+    This class manages the configuration settings for HMM smoothing, 
+    including transition probabilities, HMM breaks, and module-specific settings for RDR and BAF.
+
+    Attributes
+    ----------
+
+        trans_t : float
+            base setting for transition probability.
+        HMM_brk : str
+            Break point for HMM analysis (e.g., "chr_arm").
+        start_prob : numpy.ndarray
+            Starting probabilities for the HMM states.
+        trans_prob : numpy.ndarray
+            Transition probabilities for the HMM states.
+        max_iter : int
+            Maximum number of iterations for HMM.
+        min_iter : int
+            Minimum number of iterations for HMM.
+        module : str
+            Module type for HMM configuration ("RDR" or "BAF").
+        CNV_N_components : int
+            Number of CNV components, relevant for BAF module.
+    """
     def __init__(self):
         """
-        HMM smoothing params init settings.
-        default settings.
+        Initialize the HMM_Configs class with default HMM smoothing parameters.
+
+        This method sets default values for HMM smoothing parameters, optimized for different modules (RDR and BAF).
+
+        Parameters
+        ----------
+
+            None
         """
         ## base setting
         self.trans_t = 1e-6
@@ -264,11 +600,48 @@ class HMM_Configs():
         
 
 class Smartseq_Config():
+    """
+    Configuration settings specific to Smart-seq data analysis.
+
+    This class manages the configuration settings for Smart-seq data, including
+    module-specific settings for RDR, BAF, and their combination, as well as general settings.
+
+    Attributes
+    ----------
+
+        module : str
+            Module type for configuration ("RDR", "BAF", or "Combine").
+        smart_transform : bool
+            Flag to enable smart transformation (RDR module).
+        filter_ref_ave : float
+            Reference average filter threshold (RDR module).
+        start_prob : numpy.ndarray
+            Starting probabilities for the HMM states (RDR module).
+        extreme_count_cap : bool
+            Flag to cap extreme counts (BAF module).
+        gene_specific_concentration : bool
+            Flag to enable gene-specific concentration (BAF module).
+        concentration : None
+            Concentration value, None if gene_specific_concentration is True (BAF module).
+        WMA_window_size : int
+            Window size for Weighted Moving Average (WMA) smoothing (BAF module).
+        exclude_XY : bool
+            Flag to exclude sex chromosomes (general setting).
+        remove_guide_XY : bool
+            Flag to remove guide for sex chromosomes (general setting).
+    """
     def __init__(self):
         """
-        Smartseq specific config settings.
-        default settings.
+        Initialize the Smartseq_Config class with default Smart-seq specific parameters.
+
+        This method sets default values for Smart-seq specific parameters, optimized for different modules (RDR, BAF, Combine).
+
+        Parameters
+        ----------
+
+            None
         """
+
         if self.module == "RDR":
             self.smart_transform = True
             self.filter_ref_ave = 1.8
@@ -294,11 +667,53 @@ class Smartseq_Config():
 
 
 class Spatial_Config():
+    """
+    Configuration settings specific to spatial transcriptomics analysis.
+
+    This class manages the configuration settings for spatial transcriptomics data, 
+    including module-specific settings for RDR, BAF, and their combination, as well as general settings.
+
+    Attributes
+    ----------
+
+        module : str
+            Module type for configuration ("RDR", "BAF", or "Combine").
+        smart_transform : bool
+            Flag to enable smart transformation (RDR module).
+        spatial_transform : bool
+            Flag to enable spatial transformation (RDR module).
+        filter_ref_ave : float
+            Reference average filter threshold (RDR module).
+        min_gene_keep_num : int
+            Minimum number of genes to keep (RDR module).
+        start_prob : numpy.ndarray
+            Starting probabilities for the HMM states (RDR module).
+        extreme_count_cap : bool
+            Flag to cap extreme counts (BAF module).
+        gene_specific_concentration : bool
+            Flag to enable gene-specific concentration (BAF module).
+        concentration : None
+            Concentration value, None if gene_specific_concentration is True (BAF module).
+        WMA_window_size : int
+            Window size for Weighted Moving Average (WMA) smoothing (BAF module).
+        exclude_XY : bool
+            Flag to exclude sex chromosomes (general setting).
+        remove_guide_XY : bool
+            Flag to remove guide for sex chromosomes (general setting).
+    """
     def __init__(self):
         """
-        Spatial transcriptmoics specific config settings.
-        default settings.
+        Initialize the Spatial_Config class with default spatial transcriptomics specific parameters.
+
+        This method sets default values for spatial transcriptomics specific parameters, 
+        optimized for different modules (RDR, BAF, Combine).
+
+        Parameters
+        ----------
+
+            None
         """
+
         if self.module == "RDR":
             # self.spatail_imputation = True
             self.smart_transform = False
@@ -330,8 +745,12 @@ class Spatial_Config():
 ## todo: denoise part
 
 class XCloneConfig():
-    """\
-    Config manager for xclone.
+    """
+    Config manager for XClone.
+
+    This class manages the configuration settings for the XClone tool,
+    including dataset details, module-specific configurations, file formats,
+    and output directories.
     """
 
     def __init__(
@@ -348,7 +767,35 @@ class XCloneConfig():
         _frameon: bool = True,
         _vector_friendly: bool = False
     ):
-        """
+        """\
+        Initialize the XCloneConfig class with various configuration parameters.
+
+        Parameters
+        ----------
+
+            dataset_name : str, optional
+                The name of the dataset (default is "XClone_scDATA").
+            set_smartseq : bool, optional
+                Flag to set Smart-seq specific configurations (default is False).
+            set_spatial : bool, optional
+                Flag to set spatial specific configurations (default is False).
+            module : str, optional
+                The module to configure, must be one of "RDR", "BAF", or "Combine" 
+                (default is "RDR").
+            baf_bias_mode : int, optional
+                BAF bias mode (default is 1).
+            plot_suffix : str, optional
+                Suffix to append to plot filenames (default is "").
+            file_format_data : str, optional
+                Format for saving data files (default is "h5ad").
+            file_format_figs : str, optional
+                Format for saving figure files (default is "pdf").
+            outdir : Union[str, Path], optional
+                Directory to save output files (default is "./XCLONE_OUT/").
+            _frameon : bool, optional
+                Flag to add frames and axes labels to scatter plots (default is True).
+            _vector_friendly : bool, optional
+                Flag for vector-friendly plotting (default is False).
         """
         self.dataset_name = dataset_name
         self.set_smartseq = set_smartseq
@@ -503,36 +950,37 @@ class XCloneConfig():
     ):
         """\
         Set resolution/size, styling and format of figures.
+
         Parameters
         ----------
-        xclone
-            Init default values for :obj:`matplotlib.rcParams` suited for XClone.
-        dpi
-            Resolution of rendered figures – this influences the size of figures in notebooks.
-        dpi_save
-            Resolution of saved figures. This should typically be higher to achieve
-            publication quality.
-        frameon
-            Add frames and axes labels to scatter plots.
-        vector_friendly
-            Plot scatter plots using `png` backend even when exporting as `pdf` or `svg`.
-        fontsize
-            Set the fontsize for several `rcParams` entries. Ignored if `xclone=False`.
-        figsize
-            Set plt.rcParams['figure.figsize'].
-        color_map
-            Convenience method for setting the default color map. Ignored if `xclone=False`.
-        format
-            This sets the default format for saving figures: `file_format_figs`.
-        facecolor
-            Sets backgrounds via `rcParams['figure.facecolor'] = facecolor` and
-            `rcParams['axes.facecolor'] = facecolor`.
-        transparent
-            Save figures with transparent back ground. Sets
-            `rcParams['savefig.transparent']`.
-        ipython_format
-            Only concerns the notebook/IPython environment; see
-            :func:`~IPython.display.set_matplotlib_formats` for details.
+
+            xclone
+                Init default values for :obj:`matplotlib.rcParams` suited for XClone.
+            dpi
+                Resolution of rendered figures, this influences the size of figures in notebooks.
+            dpi_save
+                Resolution of saved figures. This should typically be higher to achieve publication quality.
+            frameon
+                Add frames and axes labels to scatter plots.
+            vector_friendly
+                Plot scatter plots using `png` backend even when exporting as `pdf` or `svg`.
+            fontsize
+                Set the fontsize for several `rcParams` entries. Ignored if `xclone=False`.
+            figsize
+                Set plt.rcParams['figure.figsize'].
+            color_map
+                Convenience method for setting the default color map. Ignored if `xclone=False`.
+            format
+                This sets the default format for saving figures: `file_format_figs`.
+            facecolor
+                Sets backgrounds via `rcParams['figure.facecolor'] = facecolor` and
+                `rcParams['axes.facecolor'] = facecolor`.
+            transparent
+                Save figures with transparent back ground. Sets
+                `rcParams['savefig.transparent']`.
+            ipython_format
+                Only concerns the notebook/IPython environment; see
+                :func:`~IPython.display.set_matplotlib_formats` for details.
         """
         if self._is_run_from_ipython():
             import IPython

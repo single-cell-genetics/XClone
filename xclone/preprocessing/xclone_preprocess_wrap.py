@@ -22,14 +22,16 @@ def load_Xdata(module = "RDR",
             f'Model configuration file not specified.\n'
             f'Default settings in preprocessing will be used.'
         )
-        config = PreprocessingConfig(module = module, 
-        rdr_data_dir = rdr_data_dir,
-        baf_data_dir = baf_data_dir)
+        config = PreprocessingConfig(module = module,      
+                                    rdr_data_dir = rdr_data_dir,
+                                    baf_data_dir = baf_data_dir)
 
     else:
         config = config_file
+    
     ## general settings
     dataset_name = config.dataset_name
+    
     
     ## moudle specific settings
     if module == "pre_check":
@@ -47,15 +49,16 @@ def load_Xdata(module = "RDR",
         regions_anno_file = config.regions_anno_file
         anno_file = config.cell_anno_file
         cell_anno_key = config.cell_anno_key
-
         genome_mode = config.genome_mode
+        barcodes_key = config.barcodes_key
+        anno_file_sep = config.anno_file_sep
 
         RDR_adata = xclone.pp.xclonedata(RDR_file, 'RDR', mtx_barcodes_file, 
                                          regions_anno_file,
                                          genome_mode = genome_mode,
                                          data_notes = dataset_name)
-        RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key = "barcode", 
-                                         cell_anno_key = cell_anno_key, sep =",")
+        RDR_adata = xclone.pp.extra_anno(RDR_adata, anno_file, barcodes_key = barcodes_key, 
+                                         cell_anno_key = cell_anno_key, sep = anno_file_sep)
         ## spatial 
         set_spatial = config.set_spatial
         if set_spatial:
@@ -64,7 +67,7 @@ def load_Xdata(module = "RDR",
                 print("[XClone warning: No position annotation provided in spatial data.]")
             else:
                 if Path(spot_position_file).is_file():
-                    RDR_adata = xclone.pp.extra_anno(RDR_adata, spot_position_file, barcodes_key = "barcode", 
+                    RDR_adata = xclone.pp.extra_anno(RDR_adata, spot_position_file, barcodes_key = barcodes_key, 
                                         cell_anno_key = None, sep =",")
                 else:
                     raise ValueError(f"[XClone error] Position file '{spot_position_file}' not exists")
@@ -80,13 +83,15 @@ def load_Xdata(module = "RDR",
         anno_file = config.cell_anno_file
         cell_anno_key = config.cell_anno_key
         genome_mode = config.genome_mode
+        barcodes_key = config.barcodes_key
+        anno_file_sep = config.anno_file_sep
 
         BAF_adata = xclone.pp.xclonedata([AD_file, DP_file], 'BAF', mtx_barcodes_file, 
                                          regions_anno_file,
                                          genome_mode = genome_mode,
                                          data_notes = dataset_name)
-        BAF_adata = xclone.pp.extra_anno(BAF_adata, anno_file, barcodes_key = "barcode", 
-                                         cell_anno_key = cell_anno_key, sep =",")
+        BAF_adata = xclone.pp.extra_anno(BAF_adata, anno_file, barcodes_key = barcodes_key, 
+                                         cell_anno_key = cell_anno_key, sep =anno_file_sep)
         
         ## spatial 
         set_spatial = config.set_spatial
