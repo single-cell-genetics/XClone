@@ -15,6 +15,7 @@ from scipy.sparse import vstack
 from anndata import AnnData
 
 from ._anno_data import load_anno
+import scanpy as sc
 
 
 ## Part I: mtx preprocessing
@@ -279,6 +280,70 @@ def xclonedata(Xmtx,
     else:
         data_notes = data_notes + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     Xadata.uns["data_notes"] = data_notes
+    return Xadata
+
+def readrdr_mtx(path,
+                genome_mode = "hg38_genes", 
+                data_notes = None,
+                **kwargs):
+    """
+    Extracting `cellranger` output as anndata for the input of XClone RDR module.
+
+    Parameters
+    ----------
+
+        path : Path | str
+            Path to directory for .mtx and .tsv files, e.g. './filtered_gene_bc_matrices/hg19/'.
+        genome_mode : str, optional
+            Genome mode, one of 'hg38_genes',  'hg19_genes' or 'mm10_genes'. Default is 'hg38_genes'.
+        **kwargs : other parameters from scanpy.read_10x_mtx().
+            e.g., var_names='gene_symbols', make_unique=True, cache=False, cache_compression=None, gex_only=True, prefix=None
+
+    Returns
+    -------
+
+        Xadata : anndata.AnnData
+            The  data customised for XClone as input for RDR module.
+
+    Example
+    -------
+
+        .. code-block:: python
+
+            import xclone
+
+            path = './filtered_gene_bc_matrices/hg38/'
+            Xdata = xclone.pp.readrdr_mtx(path)
+
+    """
+    
+    read_paras = {}
+    read_paras["path"] = path
+    read_paras.update(**kwargs)
+
+    try:
+        adata = sc.read_10x_mtx(**read_paras)
+        adata.layers["raw_expr"] = adata.X.copy()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    regions_anno = load_anno(genome_mode)
+    var_ = adata.var.merge(regions_anno, left_on="gene_ids", right_on="GeneID", how = "left")
+
+    adata.var = var_.copy()
+    nan_flag = adata.var.isnull().any(axis=1)
+    Xadata = adata[:, ~nan_flag]
+
+    ## unstructed anno
+    data_mode = "RDR"
+    Xadata.uns["log"] = dict([('init_data', str(Xadata.shape))])
+    Xadata.uns["log"]["data_mode"] = data_mode
+    Xadata.uns["log"]["genome_mode"] = genome_mode
+    if data_notes is None:
+        data_notes = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    else:
+        data_notes = data_notes + ": " + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    Xadata.uns["log"]["data_notes"] = data_notes
     return Xadata
 
 

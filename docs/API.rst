@@ -40,6 +40,10 @@ Read / Load
 
 .. autofunction:: xclone.preprocessing.xclonedata
 
+
+.. autofunction:: xclone.preprocessing.readrdr_mtx
+    
+
 .. autofunction:: xclone.preprocessing.extra_anno
 
 
