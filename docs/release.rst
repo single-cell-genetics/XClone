@@ -6,6 +6,10 @@ Release History
    :local:
 
 
+Version 0.3.9
+-------------
+- [preprocessing] Add RDR-ONLY read function.
+
 Version 0.3.8
 -------------
 - [docs] Base Configurations class.
