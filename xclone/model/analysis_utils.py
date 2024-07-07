@@ -21,7 +21,7 @@ def filter_data(X,X_name="X", axis=1, output_format="np.arr"):
     "sp.sparse_mtx"(default:csr sparse matirx)
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     print(X_name,X.shape)
     X_mask = np.all(np.isnan(X) | np.equal(X, 0), axis=axis)
     if axis==1:
@@ -46,9 +46,9 @@ def filter_2data(X,Y,X_name="X", Y_name="Y",axis=1, output_format="np.arr"):
     "sp.sparse_mtx"(default:csr sparse matirx)
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     if type(Y) == np.matrix or issparse(Y):
-        Y=Y.A
+        Y=Y.toarray()
     print(X_name,X.shape)
     print(Y_name,Y.shape)
     # X_mask = np.all(np.isnan(X) | np.equal(X, 0), axis=axis)
@@ -85,7 +85,7 @@ def filter_nulldata(X,X_name="X", axis=1, output_format="np.arr"):
     "sp.sparse_mtx"(default:csr sparse matirx)
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     print(X_name,X.shape)
     X_mask = np.all(np.isnan(X) | np.equal(X, 0), axis=axis)
     X_filter_idx = ~X_mask
@@ -111,9 +111,9 @@ def filter_2nulldata(X,Y,X_name="X", Y_name="Y",axis=1, output_format="np.arr"):
     "sp.sparse_mtx"(default:csr sparse matirx)
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     if type(Y) == np.matrix or issparse(Y):
-        Y=Y.A
+        Y=Y.toarray()
     print(X_name, X.shape)
     print(Y_name, Y.shape)
     # X_mask = np.all(np.isnan(X) | np.equal(X, 0), axis=axis)
@@ -151,7 +151,7 @@ def sub_chr(X, region_index, X_name="X",chr_list=-1,output_format="np.arr"):
     return the extracted subset for testing/analysis
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     for i in range(len(chr_list)):
         chr_idx = region_index[:,0] ==chr_list[i]
         print("chr", chr_list[i], sum(chr_idx))
@@ -180,7 +180,7 @@ def select_chr_region(X, region_index, X_name="X", mode="genome", select_list=-1
     return the extracted subset for testing/analysis
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     ## regions mode1
     if mode == "genome":
         print("regions mode1: genome...")
@@ -268,7 +268,7 @@ def select_feature(X, feature_index=None, X_name="X", regions_mode="genome", chr
     """
     print("load select_feature function...")
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     ## select genes
     if include_state==True:
         if exclude_state==True:
@@ -799,9 +799,9 @@ def plot_BAF_scatter(AD,DP,xlabel,ylabel,title,display_state="show"):
     print("AD shape:", AD.shape)
     print("DP shape:", DP.shape)
     if type(AD) == np.matrix or issparse(AD):
-        AD = AD.A
+        AD = AD.toarray()
     if type(DP) == np.matrix or issparse(DP):
-        DP = DP.A
+        DP = DP.toarray()
     print("AD type:", type(AD))
     print("DP type:", type(DP))
     ### merge all cells to get BAF
@@ -867,8 +867,8 @@ def get_BAF_plot_data(regions_file, AD, DP,filter_nan=True):
     ### merge AD and DP for cells to get the bulk level
     AD_sum = AD.sum(axis=1)
     DP_sum = DP.sum(axis=1)
-    regions_df["AD"] = pd.Series(AD_sum.A[:,0])
-    regions_df["DP"] = pd.Series(DP_sum.A[:,0])
+    regions_df["AD"] = pd.Series(AD_sum.toarray()[:,0])
+    regions_df["DP"] = pd.Series(DP_sum.toarray()[:,0])
     ## filter tha nan
     if filter_nan:
 #         AD_flag = ~(regions_df['AD'] == 0)

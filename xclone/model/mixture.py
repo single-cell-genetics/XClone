@@ -205,11 +205,11 @@ class PoissonMixture(MixtureBase):
         X: numpy.array or scipy.sparse matrix, (n_dimensions, n_samples) 
         """
         if type(X) == np.matrix:
-            X = X.A
+            X = X.toarray()
             
         if issparse(X):
             X_dot_size_factors = X.T.multiply(np.log(self.size_factors))
-            X_dot_size_factors_sum = X_dot_size_factors.sum(1).A
+            X_dot_size_factors_sum = X_dot_size_factors.sum(1).toarray()
         else:
             X_dot_size_factors = np.multiply(X.T, np.log(self.size_factors))
             X_dot_size_factors_sum = X_dot_size_factors.sum(1, keepdims=True)
@@ -236,10 +236,10 @@ class PoissonMixture(MixtureBase):
         self.size_factors: numpy.array, (n_samples, 1)
         """
         if type(X) == np.matrix:
-            X = X.A
+            X = X.toarray()
             
         if issparse(X):
-            X_colsum = X.sum(0).A
+            X_colsum = X.sum(0).toarray()
         else:
             X_colsum = X.sum(0, keepdims=True)
         

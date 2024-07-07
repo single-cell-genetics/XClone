@@ -1,6 +1,6 @@
 """Base functions for XClone clustering analysis.
 """
-
+import numpy as np
 def XClustering(Xdata, 
                 Xlayer, 
                 n_clusters = 5, 

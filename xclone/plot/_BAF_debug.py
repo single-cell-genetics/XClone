@@ -149,7 +149,7 @@ def get_count_df(Xdata, Xlayer, cell_anno_key = "cell_type",
 
     # init the matrix to dataframe
     if sp.sparse.issparse(Xdata_used.layers[Xlayer]):
-        data_mtx = Xdata_used.layers[Xlayer].A.copy()
+        data_mtx = Xdata_used.layers[Xlayer].toarray().copy()
     else:
         data_mtx = Xdata_used.layers[Xlayer].copy()
     

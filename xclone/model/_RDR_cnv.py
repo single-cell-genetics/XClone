@@ -57,7 +57,7 @@ def fit_CNV_ratio_update(Xdata,
     print("[XClone] fit CNV ratio")
 
     if sp.sparse.issparse(Xdata.X):
-        Xmtx = Xdata.X.A
+        Xmtx = Xdata.X.toarray()
     else:
         Xmtx = Xdata.X
     

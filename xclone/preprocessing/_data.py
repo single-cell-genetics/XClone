@@ -177,7 +177,7 @@ def resort_mtx_bycell(BAF_barcodes_file, RDR_barcodes_file, RDR_mtx_file, out_mt
     RDR_mtx_init  = sp.io.mmread(RDR_mtx_file).tocsr()
     print("mtx init:", RDR_mtx_init.shape)
 
-    RDR_mtx_df = pd.DataFrame(RDR_mtx_init.A.T)
+    RDR_mtx_df = pd.DataFrame(RDR_mtx_init.toarray().T)
     RDR_mtx_df["cell_barcodes"] = RDR_barcodes.index
     RDR_mtx_df.set_index('cell_barcodes', inplace=True)
 

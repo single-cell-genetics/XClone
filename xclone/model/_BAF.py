@@ -34,8 +34,8 @@ def extrme_count_capping(Xdata,
     """
     remove extreme counts influence.
     """
-    ad_Counts = Xdata.layers["ad_bin"].A.sum(axis=0)
-    dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
+    ad_Counts = Xdata.layers["ad_bin"].toarray().sum(axis=0)
+    dp_Counts = Xdata.layers["dp_bin"].toarray().sum(axis=0)
     if verbose:
         ## visualize counts distribution
         import matplotlib.pylab as plt
@@ -54,8 +54,8 @@ def extrme_count_capping(Xdata,
 
     if verbose:
         ## update counts distribution
-        ad_Counts = Xdata.layers["ad_bin"].A.sum(axis=0)
-        dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
+        ad_Counts = Xdata.layers["ad_bin"].toarray().sum(axis=0)
+        dp_Counts = Xdata.layers["dp_bin"].toarray().sum(axis=0)
         plt.plot(ad_Counts)
         plt.plot(dp_Counts)
 
@@ -67,8 +67,8 @@ def concentration_mapping(Xdata,
     """
     Return bin specific concentration.
     """
-    # ad_Counts = Xdata.layers["ad_bin"].A.sum(axis=0)
-    dp_Counts = Xdata.layers["dp_bin"].A.sum(axis=0)
+    # ad_Counts = Xdata.layers["ad_bin"].toarray().sum(axis=0)
+    dp_Counts = Xdata.layers["dp_bin"].toarray().sum(axis=0)
     max_cnt = dp_Counts.max()
     min_cnt = dp_Counts.min()
     

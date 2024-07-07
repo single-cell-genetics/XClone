@@ -19,7 +19,7 @@ def Xtransformation(Xdata, transform = True, Xlayers = ["raw_expr"]):
         for layer_ in Xlayers:
             Xdata.layers[layer_] = Xdata.X.copy()
         
-        Xdata.X = sparse.csr_matrix(np.round(np.log(Xdata.X.A + 1)))
+        Xdata.X = sparse.csr_matrix(np.round(np.log(Xdata.X.toarray() + 1)))
     return Xdata
 
 ## scATAC-seq data
@@ -33,6 +33,6 @@ def Spatial_Xtransformation(Xdata, transform = True, Xlayers = ["raw_expr"]):
     if transform:
         for layer_ in Xlayers:
             Xdata.layers[layer_] = Xdata.X.copy()
-            trans_data = np.log(np.sqrt(Xdata.X.A + 1) + np.sqrt(Xdata.X.A))
+            trans_data = np.log(np.sqrt(Xdata.X.toarray() + 1) + np.sqrt(Xdata.X.toarray()))
         Xdata.X = sparse.csr_matrix(np.round(trans_data))
     return Xdata

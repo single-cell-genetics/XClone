@@ -68,7 +68,7 @@ def Estimate_Dispersions(Xdata, sample_libsize = None, verbose=False,
     """
 
     if sp.sparse.issparse(Xdata.X):
-        X_mtx = Xdata.X.A
+        X_mtx = Xdata.X.toarray()
     else:
         X_mtx = Xdata.X
     
@@ -140,7 +140,7 @@ def fit_Dispersions(Xdata, libsize_key = "library_ratio", verbose=True,
     start_time_ = datetime.datetime.now()
 
     if sp.sparse.issparse(Xdata.X):
-        X_mtx = Xdata.X.A
+        X_mtx = Xdata.X.toarray()
     else:
         X_mtx = Xdata.X
     

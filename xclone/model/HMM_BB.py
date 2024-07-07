@@ -259,12 +259,12 @@ def calculate_Xemm_prob_bb(Xdata,
 
     ## prepare the input from Xdata for generate_nb_logprob
     if sp.sparse.issparse(Xdata.layers[AD_key]):
-        AD = Xdata.layers[AD_key].A
+        AD = Xdata.layers[AD_key].toarray()
     else:
         AD = Xdata.layers[AD_key]
     
     if sp.sparse.issparse(Xdata.layers[DP_key]):
-        DP = Xdata.layers[DP_key].A
+        DP = Xdata.layers[DP_key].toarray()
     else:
         DP = Xdata.layers[DP_key]
     

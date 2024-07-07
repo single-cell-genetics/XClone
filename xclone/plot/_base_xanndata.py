@@ -31,12 +31,12 @@ def prepare_Xheatmap_df(Xdata, Xlayer):
     """
     if Xlayer == None:
         if issparse(Xdata.X):
-            X_df = pd.DataFrame(Xdata.X.A, columns = Xdata.var["chr"], index= Xdata.obs.index)
+            X_df = pd.DataFrame(Xdata.X.toarray(), columns = Xdata.var["chr"], index= Xdata.obs.index)
         else:
             X_df = pd.DataFrame(Xdata.X, columns = Xdata.var["chr"], index= Xdata.obs.index)
     else:
         if issparse(Xdata.layers[Xlayer]):
-            X_df = pd.DataFrame(Xdata.layers[Xlayer].A, columns = Xdata.var["chr"], index= Xdata.obs.index)
+            X_df = pd.DataFrame(Xdata.layers[Xlayer].toarray(), columns = Xdata.var["chr"], index= Xdata.obs.index)
         else:
             X_df = pd.DataFrame(Xdata.layers[Xlayer], columns = Xdata.var["chr"], index= Xdata.obs.index)
     X_df.columns.names = [""] 

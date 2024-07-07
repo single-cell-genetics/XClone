@@ -9,6 +9,7 @@ Release History
 Version 0.3.9
 -------------
 - [preprocessing] Add RDR-ONLY read function.
+- solve the issues caused by scipy expired deprecations in version 1.14.0
 
 Version 0.3.8
 -------------

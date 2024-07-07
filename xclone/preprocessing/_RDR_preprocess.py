@@ -85,7 +85,7 @@ def Xdata_RDR_preprocess(Xdata,
     
     # if mode == "Counts_ratio":
     #     ## cell counts_ratio to be compared with learned libratio
-    #     Xdata.obs[obs_key] = Xdata.X.A.sum(axis=1) / Xdata.var['ref_avg'].sum()
+    #     Xdata.obs[obs_key] = Xdata.X.toarray().sum(axis=1) / Xdata.var['ref_avg'].sum()
     #     return Xdata
     
     # reference data preprocessing
@@ -95,7 +95,7 @@ def Xdata_RDR_preprocess(Xdata,
     ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
     ref_Xdata = Xdata[ref_flag,:]
 
-    Xdata.var[var_key] = ref_Xdata.X.A.mean(axis=0)
+    Xdata.var[var_key] = ref_Xdata.X.toarray().mean(axis=0)
 
     ## filter genes based on ref_average counts
     ### if filter_ref_ave is None, skip the filtering step*
@@ -122,7 +122,7 @@ def Xdata_RDR_preprocess(Xdata,
     # mode="FILTER"
     update_Xdata = Xdata[:, gene_flag].copy()
     ## cell counts_ratio to be compared with learned libratio
-    update_Xdata.obs[obs_key] = update_Xdata.X.A.sum(axis=1) / update_Xdata.var[var_key].sum()
+    update_Xdata.obs[obs_key] = update_Xdata.X.toarray().sum(axis=1) / update_Xdata.var[var_key].sum()
     
     if mode == "FILTER":
         ## filter genes
@@ -161,7 +161,7 @@ def rr_ad_celltype_processing(Xdata, ref_celltype, cell_anno_key):
     ref_Xdata = Xdata[ref_flag,:]
     obs_Xdata = Xdata.copy()
 
-    ref_bulk = ref_Xdata.X.A.sum(axis=0)
+    ref_bulk = ref_Xdata.X.toarray().sum(axis=0)
     ref_normalization_term = ref_bulk.sum()
     ref_norm = ref_bulk/ref_normalization_term
 
@@ -174,9 +174,9 @@ def rr_ad_celltype_processing(Xdata, ref_celltype, cell_anno_key):
     for tmp_celltype, inds in groups.items():
         cell_type_order.append(tmp_celltype)
         if cnt==0:
-            obs_all_bulk = obs_Xdata[inds,:].X.A.sum(axis=0)
+            obs_all_bulk = obs_Xdata[inds,:].X.toarray().sum(axis=0)
         else:
-            obs_all_bulk = np.vstack((obs_all_bulk, obs_Xdata[inds,:].X.A.sum(axis=0)))
+            obs_all_bulk = np.vstack((obs_all_bulk, obs_Xdata[inds,:].X.toarray().sum(axis=0)))
         cnt+=1
     
     celltype_obs = pd.DataFrame({cell_anno_key:cell_type_order})
@@ -200,17 +200,17 @@ def rr_ad_cell_processing(Xdata, ref_celltype, cell_anno_key):
 
     obs_Xdata = Xdata
     
-    ref_bulk = ref_Xdata.X.A.sum(axis=0)
+    ref_bulk = ref_Xdata.X.toarray().sum(axis=0)
     ref_normalization_term = ref_bulk.sum()
     ref_norm = ref_bulk/ref_normalization_term
     
     # 02-cell based anndata
     ## calculate ratio-cell
-    cell_lib = obs_Xdata.X.A.sum(axis=1, keepdims=True)
-    # raw_ratio = np.log((obs_Xdata.X.A + 0.1) / (cell_lib*ref_norm)) ## add small value 0.1 for visualization
-    raw_ratio = np.log((obs_Xdata.X.A + 1e-8) / (cell_lib*ref_norm)) ## add small value 1e-6 for visualization
+    cell_lib = obs_Xdata.X.toarray().sum(axis=1, keepdims=True)
+    # raw_ratio = np.log((obs_Xdata.X.toarray() + 0.1) / (cell_lib*ref_norm)) ## add small value 0.1 for visualization
+    raw_ratio = np.log((obs_Xdata.X.toarray() + 1e-8) / (cell_lib*ref_norm)) ## add small value 1e-6 for visualization
 
-    test_ratio = np.log((np.sqrt(obs_Xdata.X.A + 1) + np.sqrt(obs_Xdata.X.A) + 1e-8) / (cell_lib*ref_norm))
+    test_ratio = np.log((np.sqrt(obs_Xdata.X.toarray() + 1) + np.sqrt(obs_Xdata.X.toarray()) + 1e-8) / (cell_lib*ref_norm))
 
     rr_cell_ad = ad.AnnData(raw_ratio, var=obs_Xdata.var.copy(), obs = obs_Xdata.obs.copy())
     rr_cell_ad.layers["test_ratio"] = test_ratio
@@ -290,7 +290,7 @@ def gene_length_scale(Xdata, avg_key = "ref_avg", scale_avg_key = "ref_avg_scale
 
 
     # ## cell counts_ratio to be compared with learned libratio
-    # Xdata.obs['counts_ratio'] = Xdata.X.A.sum(axis=1) / Xdata.var['ref_avg'].sum()
+    # Xdata.obs['counts_ratio'] = Xdata.X.toarray().sum(axis=1) / Xdata.var['ref_avg'].sum()
 
     return Xdata
 

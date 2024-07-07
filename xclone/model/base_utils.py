@@ -21,9 +21,9 @@ def normalize(X, axis=-1):
     shape2[axis] = 1
     
     if type(X) == np.matrix:
-        X = X.A
+        X = X.toarray()
     if sp.sparse.issparse(X):
-        X = X.A
+        X = X.toarray()
     
     X_sum = np.sum(X, axis=axis, keepdims=True)
     return X / X_sum
@@ -43,7 +43,7 @@ def loglik_amplify(X, axis=-1):
     shape2[axis] = 1
     
     if type(X) == np.matrix:
-        X = X.A
+        X = X.toarray()
     
     X_max = np.max(X, axis=axis, keepdims=True)
     return X - X_max

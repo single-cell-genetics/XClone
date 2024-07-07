@@ -111,7 +111,7 @@ def KNN_smooth(Xdata, run_KNN = False, KNN_Xlayer = None, KNN_connect_use = "con
         update_Xdata = Xdata.copy()
 
     # normalize connectivities 
-    # connectivities = normalize(update_Xdata.obsp[KNN_connect_use].A).copy()
+    # connectivities = normalize(update_Xdata.obsp[KNN_connect_use].toarray()).copy()
     connectivities = update_Xdata.obsp[KNN_connect_use].copy()
     update_Xdata.layers[out_layer] = connectivities @ update_Xdata.layers[layer]
     return update_Xdata

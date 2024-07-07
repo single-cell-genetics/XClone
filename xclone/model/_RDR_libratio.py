@@ -364,7 +364,7 @@ def fit_lib_ratio(Xdata, select_chr_index = None, verbose=False, avg_key = "ref_
     sorted_chr = ['1', '2','3', '4', '5', '6', '7', '8', '9','10', '11', '12', '13', '14', '15', '16', '17', '18', '19','20', '21', '22', 'X', 'Y']
 
     if sp.sparse.issparse(Xdata.X):
-        Xmtx = Xdata.X.A
+        Xmtx = Xdata.X.toarray()
     else:
         Xmtx = Xdata.X
 
@@ -535,7 +535,7 @@ def fit_lib_ratio_accelerate(Xdata, select_chr_index = None, avg_key = "ref_avg"
     sorted_chr = ['1', '2','3', '4', '5', '6', '7', '8', '9','10', '11', '12', '13', '14', '15', '16', '17', '18', '19','20', '21', '22', 'X', 'Y']
     
     if sp.sparse.issparse(Xdata.X):
-        Xmtx = Xdata.X.A
+        Xmtx = Xdata.X.toarray()
     else:
         Xmtx = Xdata.X
 

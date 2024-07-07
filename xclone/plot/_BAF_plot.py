@@ -29,12 +29,12 @@ def prepare_manhattan_df(Xdata, AD_key = "AD", DP_key = "DP", filter_nan = True,
 
     ### merge AD and DP for cells to get the bulk level
     if issparse(Xdata.layers[AD_key]):
-        AD = Xdata.layers[AD_key].A
+        AD = Xdata.layers[AD_key].toarray()
     else:
         AD = Xdata.layers[AD_key]
     
     if issparse(Xdata.layers[DP_key]):
-        DP = Xdata.layers[DP_key].A
+        DP = Xdata.layers[DP_key].toarray()
     else:
         DP = Xdata.layers[DP_key]
     
@@ -153,11 +153,11 @@ def calculate_cell_BAF(Xdata, AD_key = "AD", DP_key = "DP", BAF_key = "BAF"):
     import scipy as sp
     # check data format
     if sp.sparse.issparse(Xdata.layers[AD_key]):
-        AD = Xdata.layers[AD_key].A
+        AD = Xdata.layers[AD_key].toarray()
     else:
         AD = Xdata.layers[AD_key]
     if sp.sparse.issparse(Xdata.layers[DP_key]):
-        DP = Xdata.layers[DP_key].A
+        DP = Xdata.layers[DP_key].toarray()
     else:
         DP = Xdata.layers[DP_key]
     
@@ -301,9 +301,9 @@ def plot_BAF_scatter(AD,DP,xlabel,ylabel,title,display_state="show"):
     print("AD shape:", AD.shape)
     print("DP shape:", DP.shape)
     if type(AD) == np.matrix or issparse(AD):
-        AD = AD.A
+        AD = AD.toarray()
     if type(DP) == np.matrix or issparse(DP):
-        DP = DP.A
+        DP = DP.toarray()
     print("AD type:", type(AD))
     print("DP type:", type(DP))
     ### merge all cells to get BAF
@@ -370,8 +370,8 @@ def compare_plot_BAF(AD,DP, model_proba, mtx_barcodes_file,regions_file, chr_lst
 #     ### merge AD and DP for cells to get the bulk level
 #     AD_sum = AD.sum(axis=1)
 #     DP_sum = DP.sum(axis=1)
-#     regions_df["AD"] = pd.Series(AD_sum.A[:,0])
-#     regions_df["DP"] = pd.Series(DP_sum.A[:,0])
+#     regions_df["AD"] = pd.Series(AD_sum.toarray()[:,0])
+#     regions_df["DP"] = pd.Series(DP_sum.toarray()[:,0])
 #     ## filter tha nan
 #     if filter_nan:
 # #         AD_flag = ~(regions_df['AD'] == 0)

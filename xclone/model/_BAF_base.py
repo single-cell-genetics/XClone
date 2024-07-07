@@ -36,7 +36,7 @@ def process_bin(idx, AD, DP):
     
     ## important *
     BD = DP-AD
-    AD_phased = AD.A * np.expand_dims(1-is_flip, axis=1) + BD.A * np.expand_dims(is_flip, axis=1)
+    AD_phased = AD.toarray() * np.expand_dims(1-is_flip, axis=1) + BD.toarray() * np.expand_dims(is_flip, axis=1)
 
     RV_bin = {}
     RV_bin["bin_idx"] = idx

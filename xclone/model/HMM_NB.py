@@ -240,7 +240,7 @@ def calculate_Xemm_probTry(Xdata,
     Shape: (n_cell, n_gene, n_state)
     """
     if sp.sparse.issparse(Xdata.X):
-        Xmtx = Xdata.X.A
+        Xmtx = Xdata.X.toarray()
     else:
         Xmtx = Xdata.X
     
@@ -320,7 +320,7 @@ def calculate_Xemm_prob(Xdata,
     
     ## prepare the input from Xdata for generate_nb_logprob
     if sp.sparse.issparse(Xdata.X):
-        X_mtx = Xdata.X.A
+        X_mtx = Xdata.X.toarray()
     else:
         X_mtx = Xdata.X
     
@@ -385,7 +385,7 @@ def calculate_Xemm_prob2(Xdata,
     
     ## prepare the input from Xdata for generate_nb_logprob
     if sp.sparse.issparse(Xdata.X):
-        X_mtx = Xdata.X.A
+        X_mtx = Xdata.X.toarray()
     else:
         X_mtx = Xdata.X
     

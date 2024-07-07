@@ -31,7 +31,7 @@ def data_check(Xdata, Xlayer):
     for RDR module and BAF module.
     """
     if sp.sparse.issparse(Xdata.layers[Xlayer]):
-        X_mtx = Xdata.layers[Xlayer].copy().A
+        X_mtx = Xdata.layers[Xlayer].copy().toarray()
     else:
         X_mtx = Xdata.layers[Xlayer].copy()
     
@@ -91,7 +91,7 @@ def gene_filter(Xdata, cell_detection_rate = 0.05, verbose = True):
     update_Xdata, Flag_ = gene_filter(Xdata)
     """
     if sp.sparse.issparse(Xdata.X):
-        X_mtx = Xdata.copy().X.A
+        X_mtx = Xdata.copy().X.toarray()
     else:
         X_mtx = Xdata.copy().X
     
@@ -122,7 +122,7 @@ def DP_coverage_check(Xdata, Xlayer, threshold = 20):
     can be applied on BAF_adata or merge_Xdata.
     """
     if issparse(Xdata.layers[Xlayer]):
-        flag_ = Xdata.layers[Xlayer].A.sum(axis=0) > threshold
+        flag_ = Xdata.layers[Xlayer].toarray().sum(axis=0) > threshold
     else:
         flag_ = Xdata.layers[Xlayer].sum(axis=0) > threshold
 
@@ -145,7 +145,7 @@ def filter_nulldata(X,X_name="X", axis=1, output_format="np.arr"):
     "sp.sparse_mtx"(default:csr sparse matirx)
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     # if isinstance(X, AnnData):
     #     X = X.X
     #     ## If there is only one layer in the AnnData
@@ -177,9 +177,9 @@ def filter_2nulldata(X,Y,X_name="X", Y_name="Y",axis=1, output_format="np.arr"):
     Notes:deprecated in xclonedata format
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     if type(Y) == np.matrix or issparse(Y):
-        Y=Y.A
+        Y=Y.toarray()
     print(X_name, X.shape)
     print(Y_name, Y.shape)
     # X_mask = np.all(np.isnan(X) | np.equal(X, 0), axis=axis)
@@ -284,15 +284,15 @@ def filter_pre(
         # DP = Xdata.layers["DP"]
         for layer_ in Xdata.layers:
             Xdata.obs[layer_+'_counts_per_obs'] = Xdata.layers[layer_].sum(axis=1)
-            Xdata.obs[layer_+'_features_per_obs'] = np.count_nonzero(Xdata.layers[layer_].A, axis=1)
-            Xdata.var[layer_+'_counts_per_feature'] = Xdata.layers[layer_].A.sum(axis=0)
-            Xdata.var[layer_+'_obs_per_feature'] = np.count_nonzero(Xdata.layers[layer_].A, axis=0)
+            Xdata.obs[layer_+'_features_per_obs'] = np.count_nonzero(Xdata.layers[layer_].toarray(), axis=1)
+            Xdata.var[layer_+'_counts_per_feature'] = Xdata.layers[layer_].toarray().sum(axis=0)
+            Xdata.var[layer_+'_obs_per_feature'] = np.count_nonzero(Xdata.layers[layer_].toarray(), axis=0)
             log_msg = 'add annotation for per obs/features'
     elif data_mode == "RDR":
         Xdata.obs['RDR'+'_counts_per_obs'] = Xdata.X.sum(axis=1)
-        Xdata.obs['RDR'+'_features_per_obs'] = np.count_nonzero(Xdata.X.A, axis=1)
-        Xdata.var['RDR'+'_counts_per_feature'] = Xdata.X.A.sum(axis=0)
-        Xdata.var['RDR'+'_obs_per_feature'] = np.count_nonzero(Xdata.X.A, axis=0)
+        Xdata.obs['RDR'+'_features_per_obs'] = np.count_nonzero(Xdata.X.toarray(), axis=1)
+        Xdata.var['RDR'+'_counts_per_feature'] = Xdata.X.toarray().sum(axis=0)
+        Xdata.var['RDR'+'_obs_per_feature'] = np.count_nonzero(Xdata.X.toarray(), axis=0)
         log_msg = 'add annotation for per obs/features'
     else:
         logging.error('error message: [XClone-filter_obs] Not xclonedata format')
@@ -335,7 +335,7 @@ def sub_chr(X, region_index, X_name="X",chr_list=-1,output_format="np.arr"):
     return the extracted subset for testing/analysis
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     for i in range(len(chr_list)):
         chr_idx = region_index[:,0] ==chr_list[i]
         print("chr", chr_list[i], sum(chr_idx))
@@ -366,7 +366,7 @@ def select_chr_region(X, region_index, X_name="X", mode="genome", select_list=-1
     return the extracted subset for testing/analysis
     """
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     ## regions mode1
     if mode == "genome":
         print("regions mode1: genome...")
@@ -455,7 +455,7 @@ def select_features(X, feature_index=None, X_name="X", regions_mode="genome", ch
     """
     print("load select_feature function...")
     if type(X) == np.matrix or issparse(X):
-        X=X.A
+        X=X.toarray()
     ## select genes/items
     if include_state==True:
         if exclude_state==True:

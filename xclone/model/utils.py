@@ -1,6 +1,7 @@
 """Utility functions for XClone.
 """
 # Author: Rongting Huang
+import numpy as np
 
 def pairwise0(iterable_arr):
     """

@@ -24,7 +24,7 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
     adata = adata.copy() if copy else adata
     
     if sp.sparse.issparse(adata.X):
-        Xmtx = adata.X.A
+        Xmtx = adata.X.toarray()
     else:
         Xmtx = adata.X
     
@@ -98,7 +98,7 @@ def extra_preprocess2(adata, ref_celltype, cluster_key='cell_type',
     adata = adata.copy() if copy else adata
     
     if sp.sparse.issparse(adata.X):
-        Xmtx = adata.X.A
+        Xmtx = adata.X.toarray()
     else:
         Xmtx = adata.X
 
