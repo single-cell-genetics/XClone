@@ -21,7 +21,7 @@ XClone RDR module
 -----------------
 
 In the RDR module, XClone considers three CNA states about the absolute copy numbers: copy loss, copy neutral and copy gain. 
-It takes the raw read or UMI counts as input and models the noise via a negative-binomial distribution.
+It takes the raw read or UMI counts (raw counts defaultly used for 10x scRNA-seq, log transformed counts for smart-seq data) as input and models the noise via a negative-binomial distribution.
 
 XClone BAF module
 -----------------
