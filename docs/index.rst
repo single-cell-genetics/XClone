@@ -35,7 +35,7 @@ Latest news
 References
 ==========
 
-For details of the method, please checkout our paper :cite:`huang2023xclone`.
+For details of the method, please checkout our paper :cite:`huang2024robust`.
 
 
 Support
