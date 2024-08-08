@@ -200,6 +200,9 @@ class XCloneGeneral_config():
             Flag to remove reference cells during plotting.
         plot_ref_celltype : str or None
             The cell type to be considered as reference cells for plotting.
+        develop_mode : bool
+            Flag to set develop mode or not (main difference in saved outputs).
+
     """
 
     def __init__(self):
@@ -223,6 +226,8 @@ class XCloneGeneral_config():
         self.plot_immune_celltype = None
         self.plot_remove_reference = True
         self.plot_ref_celltype = None
+        # develop 
+        self.develop_mode = False
 
 
 class RDR_General_config():

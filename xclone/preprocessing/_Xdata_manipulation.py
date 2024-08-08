@@ -101,3 +101,15 @@ def Xdata_cell_selection(Xdata,
     return Xdata_subset
 
 
+# develop mode for memory control
+def remove_layers(adata, layers_to_remove):
+    for layer in layers_to_remove:
+        if layer in adata.layers:
+            del adata.layers[layer]
+    return adata
+
+def keep_layers(adata, layers_to_keep):
+    for layer in list(adata.layers.keys()):
+        if layer not in layers_to_keep:
+            del adata.layers[layer]
+    return adata

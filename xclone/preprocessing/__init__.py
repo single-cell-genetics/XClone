@@ -46,6 +46,7 @@ from ._utils import annotate_node
 from ._efficiency import efficiency_preview
 
 from ._Xdata_manipulation import Xdata_region_selection, Xdata_cell_selection
+from ._Xdata_manipulation import remove_layers, keep_layers
 
 from .xclone_preprocess_wrap import load_Xdata
 

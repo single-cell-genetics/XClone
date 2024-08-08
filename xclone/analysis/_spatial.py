@@ -51,3 +51,23 @@ def CalculateSampleBAF(Xdata, brk = "chr_arm"):
         Xdata.uns["BAF_smooth_lst"] = BAF_smooth_lst
     
     return Xdata
+
+def spatial_analysis(visium_adata, xclone_adata, baf_adata):
+    """_summary_
+
+    Args:
+        visium_adata (_type_): _description_
+        xclone_adata (_type_): _description_
+        baf_adata (_type_): _description_
+    """
+
+    adata_sp = visium_adata[visium_adata.obs.index.isin(xclone_adata.obs.index),:]
+    # cnv
+    adata_sp.obs[xclone_adata.uns["p_cnv_lst"]] = xclone_adata.obs[xclone_adata.uns["p_cnv_lst"]]
+    adata_sp.uns["p_cnv_lst"] = xclone_adata.uns["p_cnv_lst"]
+    # baf
+    adata_sp.obs[baf_adata.uns["BAF_lst"]] = baf_adata.obs[baf_adata.uns["BAF_lst"]]
+    adata_sp.uns["BAF_lst"] = baf_adata.uns["BAF_lst"]
+    adata_sp.obs[baf_adata.uns["BAF_smooth_lst"]] = baf_adata.obs[baf_adata.uns["BAF_smooth_lst"]]
+    adata_sp.uns["BAF_smooth_lst"] = baf_adata.uns["BAF_smooth_lst"]
+    return adata_sp

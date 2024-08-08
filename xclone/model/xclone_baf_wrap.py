@@ -152,6 +152,9 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     # plot settings
     xclone_plot = config.xclone_plot
     plot_cell_anno_key = config.plot_cell_anno_key
+
+    # develop mode settings
+    develop_mode = config.develop_mode
     
 
     ## Result output prepare
@@ -477,6 +480,12 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                        cell_prop_cutoff = BAF_denoise_cellprop_cutoff,
                        out_layer = "denoised_posterior_mtx")
     try:
+        if develop_mode:
+            pass
+        else:
+            layers_to_keep = ['BAF', 'BAF_phased', 'fill_BAF_phased', 'BAF_phased_KNN', 'BAF_phased_KNN_WMA', 'BAF_phased_WMA', 
+            'posterior_mtx', 'posterior_mtx_log', 'add_posterior_mtx', 'denoised_add_posterior_mtx', 'denoised_posterior_mtx']
+            merge_Xdata = xclone.pp.keep_layers(merge_Xdata, layers_to_keep)
         merge_Xdata.write(BAF_final_file)
     except Exception as e:
         print("[XClone Warning]", e)

@@ -133,6 +133,8 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
     # plot settings
     xclone_plot = config.xclone_plot
     plot_cell_anno_key = config.plot_cell_anno_key
+    # develop mode settings
+    develop_mode = config.develop_mode
 
     ## Result output prepare
     if out_dir is None:
@@ -327,6 +329,12 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
     
     ## output after CNV calling, save data with CNV posterior.
     try:
+        if develop_mode:
+            pass
+        else:
+            layers_to_keep = ['raw_expr', 'RDR_smooth','posterior_mtx', 'posterior_mtx_log']
+            RDR_adata = xclone.pp.keep_layers(RDR_adata, layers_to_keep)
+
         RDR_adata.write(RDR_final_file)
     except Exception as e:
         print("[XClone Warning]", e)

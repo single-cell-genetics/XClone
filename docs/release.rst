@@ -10,6 +10,8 @@ Version 0.3.9
 -------------
 - [preprocessing] Add RDR-ONLY read function.
 - solve the issues caused by scipy expired deprecations in version 1.14.0
+- add develop mode (users are recommended to deactive develop mode)
+- [Spatial] analysis update
 
 Version 0.3.8
 -------------

@@ -108,6 +108,9 @@ def run_combine(RDR_Xdata,
     plot_cell_anno_key = config.plot_cell_anno_key
     merge_loss = config.merge_loss
     merge_loh = config.merge_loh
+
+    # develop mode settings
+    develop_mode = config.develop_mode
     
     ## Result output prepare
     if out_dir is None:
