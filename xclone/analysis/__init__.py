@@ -21,3 +21,5 @@ from ._clustering import XClustering2
 
 from ._spatial import CalculateSampleCNVProb, CalculateSampleBAF
 from ._spatial import spatial_analysis
+
+from ._quickanalysis import exploreClustering, OnestopBAFClustering

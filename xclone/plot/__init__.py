@@ -56,3 +56,7 @@ from .CNV_plot import Combine_CNV_visualization, Complex_Combine_CNV_visualizati
 # from .CNV_plot import CNV_LOH_visualization
 
 from .prob_plot import prob_visualization
+
+
+## Spatial
+from ._spatial_plot import simple_spatial_scatter

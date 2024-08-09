@@ -25,7 +25,8 @@ def reorder_data_by_cellanno(Xdata, cell_anno_key):
     ------
     ordered_Xdata: anndata
     """
-    groups = Xdata.obs.groupby(cell_anno_key).indices # dict, index can be saved in Xdata.uns
+    # groups = Xdata.obs.groupby(cell_anno_key).indices # dict, index can be saved in Xdata.uns
+    groups = Xdata.obs.groupby(cell_anno_key, observed=False).indices
     ordered_Xdata = ad.concat([Xdata[inds] for inds in groups.values()], merge="same")
     return ordered_Xdata
 
