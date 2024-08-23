@@ -109,3 +109,10 @@ For details of the method, please checkout our paper `Robust analysis of allele-
 .. |Docs Status| image:: https://img.shields.io/readthedocs/xclone-cnv/latest?logo=readthedocs&logoColor=FFFFFF&style=flat-square
     :target: https://xclone-cnv.readthedocs.io/en/latest/
     :alt: Docs Status
+
+License
+=======
+
+Licensed under the Apache License, Version 2.0 (the "License");
+
+Copyright 2024 Rongting Huang, Yuanhua Huang, StatBiomed Lab
