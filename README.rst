@@ -113,6 +113,6 @@ For details of the method, please checkout our paper `Robust analysis of allele-
 License
 =======
 
-Licensed under the Apache License, Version 2.0 (see the [LICENSE](LICENSE));
+Licensed under the Apache License, Version 2.0 (see the LICENSE);
 
 Copyright 2024 Rongting Huang, Yuanhua Huang, StatBiomed Lab
