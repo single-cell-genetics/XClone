@@ -1,5 +1,6 @@
 """Base functions for XClone spatial transcriptomics CNV analysis.
 """
+import numpy as np
 
 def CalculateSampleCNVProb(Xdata, brk = "chr_arm", Xlayer = "prob1_merge"):
     """
@@ -45,20 +46,50 @@ def CalculateSampleBAF(Xdata, brk = "chr_arm"):
         
         Xlayer = "BAF_phased_KNN_WMA"
         tmp_smooth_BAF = Xdata[:, tmp_region_flag].layers[Xlayer].mean(axis=1)
-        obs_key = "BAF_smooth" + brk_
+        obs_key = "BAF_smooth_" + brk_
         BAF_smooth_lst.append(obs_key)
         Xdata.obs[obs_key] = tmp_smooth_BAF
         Xdata.uns["BAF_smooth_lst"] = BAF_smooth_lst
     
     return Xdata
 
-def spatial_analysis(visium_adata, xclone_adata, baf_adata):
+def CalculateSampleRDR(Xdata, brk = "chr_arm"):
+    """
+    For rdr data;
+    """
+    brk_item = Xdata.var[brk].drop_duplicates(keep="first")
+    RDR_smooth_lst = []
+    RDR_smooth_log_lst = []
+    
+    for brk_ in brk_item:
+    
+        tmp_region_flag = Xdata.var[brk] == brk_
+        Xlayer = "RDR_smooth"
+        tmp_smooth_RDR = Xdata[:, tmp_region_flag].layers[Xlayer].mean(axis=1)
+        obs_key = "RDR_smooth_" + brk_ + " (log)"
+        RDR_smooth_log_lst.append(obs_key)
+        Xdata.obs[obs_key] = tmp_smooth_RDR
+        Xdata.uns["RDRsmooth_log_lst"] = RDR_smooth_log_lst
+        
+        
+        tmp_smooth_RDR = np.exp(Xdata[:, tmp_region_flag].layers[Xlayer]).mean(axis=1)
+        obs_key = "RDR_smooth_" + brk_
+        RDR_smooth_lst.append(obs_key)
+        Xdata.obs[obs_key] = tmp_smooth_RDR
+        Xdata.uns["RDR_smooth_lst"] = RDR_smooth_lst
+    
+    return Xdata
+
+
+def spatial_analysis(visium_adata, xclone_adata, baf_adata, rdr_adata=None):
     """_summary_
+    Sometimes only include combined cnv analysis and baf analysis.
 
     Args:
         visium_adata (_type_): _description_
         xclone_adata (_type_): _description_
         baf_adata (_type_): _description_
+        rdr_adata (_type_): _description_
     """
 
     adata_sp = visium_adata[visium_adata.obs.index.isin(xclone_adata.obs.index),:]
@@ -70,4 +101,13 @@ def spatial_analysis(visium_adata, xclone_adata, baf_adata):
     adata_sp.uns["BAF_lst"] = baf_adata.uns["BAF_lst"]
     adata_sp.obs[baf_adata.uns["BAF_smooth_lst"]] = baf_adata.obs[baf_adata.uns["BAF_smooth_lst"]]
     adata_sp.uns["BAF_smooth_lst"] = baf_adata.uns["BAF_smooth_lst"]
+
+    # rdr
+    if rdr_adata is not None:
+        adata_sp.obs[rdr_adata.uns["RDR_smooth_lst"]] = rdr_adata.obs[rdr_adata.uns["RDR_smooth_lst"]]
+        adata_sp.uns["RDR_smooth_lst"] = rdr_adata.uns["RDR_smooth_lst"]
+
+        adata_sp.obs[rdr_adata.uns["RDRsmooth_log_lst"]] = rdr_adata.obs[rdr_adata.uns["RDRsmooth_log_lst"]]
+        adata_sp.uns["RDRsmooth_log_lst"] = rdr_adata.uns["RDRsmooth_log_lst"]
+
     return adata_sp

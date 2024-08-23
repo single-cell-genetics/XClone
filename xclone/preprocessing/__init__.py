@@ -17,7 +17,7 @@ from ._data import readrdr_mtx
 from ._data import extra_anno
 from ._data import exclude_XY_adata
 from ._data import check_RDR, check_BAF
-from ._data import check_RDR_BAF_cellorder, check_data_combine
+from ._data import check_RDR_BAF_samecellnumber, check_RDR_BAF_cellorder, check_data_combine
 
 
 

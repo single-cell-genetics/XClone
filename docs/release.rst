@@ -12,6 +12,7 @@ Version 0.3.9
 - solve the issues caused by scipy expired deprecations in version 1.14.0
 - add develop mode (users are recommended to deactive develop mode)
 - [Spatial] analysis update
+- [Fix bug in Combine module] RDR BAF data mapping checking
 
 Version 0.3.8
 -------------

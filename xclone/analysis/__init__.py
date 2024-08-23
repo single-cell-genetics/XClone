@@ -19,7 +19,7 @@ from .evaluation import change_res_resolution
 from ._clustering import XClustering, Cluster_mapping
 from ._clustering import XClustering2
 
-from ._spatial import CalculateSampleCNVProb, CalculateSampleBAF
+from ._spatial import CalculateSampleCNVProb, CalculateSampleBAF, CalculateSampleRDR
 from ._spatial import spatial_analysis
 
 from ._quickanalysis import exploreClustering, OnestopBAFClustering

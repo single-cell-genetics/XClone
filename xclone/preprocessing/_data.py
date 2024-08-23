@@ -443,6 +443,23 @@ def check_BAF(Xdata, cell_anno_key = "cell_type", filter_na_anno = True, verbose
     print("[XClone data preprocessing] check BAF cell annotation: success")
     return update_Xdata
 
+def check_RDR_BAF_samecellnumber(RDR_Xdata, BAF_Xdata):
+    RDR_cellnum = RDR_Xdata.obs.shape[0]
+    BAF_cellnum = BAF_Xdata.obs.shape[0]
+    if RDR_cellnum == BAF_cellnum:
+        pass
+        
+    elif RDR_cellnum > BAF_cellnum:
+        RDR_Xdata = RDR_Xdata[RDR_Xdata.obs.index.isin(BAF_Xdata.obs.index),:]
+        print("[XClone data preprocessing] update RDR data")
+    else:
+        BAF_Xdata = BAF_Xdata[BAF_Xdata.obs.index.isin(RDR_Xdata.obs.index),:]
+        print("[XClone data preprocessing] update BAF data")
+    
+    return RDR_Xdata, BAF_Xdata
+
+
+
 def check_RDR_BAF_cellorder(RDR_Xdata, BAF_Xdata):
     """
     * need to make sure the BAF and RDR are in the same cell order.
@@ -464,6 +481,10 @@ def check_RDR_BAF_cellorder(RDR_Xdata, BAF_Xdata):
         else:
             print("[XClone data checking]: RDR and BAF in different cell order! Pls check!")
             success_flag = False
+    else:
+        success_flag = False
+        print("[XClone data checking]: RDR and BAF not contain same cells number! Pls check!")
+
     return success_flag
 
 
@@ -494,7 +515,7 @@ def check_data_combine(RDR_Xdata, BAF_Xdata):
         else:
             raise ValueError("[XClone data warning] No layer 'posterior_mtx' exists in BAF module.")
     else:
-        raise ValueError("[XClone data warning]-pls check cell order before combination step.")
+        raise ValueError("[XClone data warning]-pls check cell order/number before combination step.")
 
 def exclude_XY_adata(Xdata):
     """

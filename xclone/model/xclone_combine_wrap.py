@@ -147,6 +147,8 @@ def run_combine(RDR_Xdata,
     else:
         BAF_use_Xlayer = "posterior_mtx"
     
+
+    RDR_Xdata, BAF_merge_Xdata = xclone.pp.check_RDR_BAF_samecellnumber(RDR_Xdata, BAF_merge_Xdata)
     combine_Xdata = xclone.model.bin_to_gene_mapping(BAF_merge_Xdata,
                         RDR_Xdata,
                         Xlayer = BAF_use_Xlayer,
