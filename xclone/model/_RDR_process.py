@@ -11,6 +11,7 @@ strategies for reference biological information removing
 import numpy as np
 import scanpy as sc
 
+import gc
 
 from .base_utils import normalize
 
@@ -19,6 +20,7 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
                      low_dim=False, run_KNN=False, KNN_neighbors = 10,
                      copy=False):
     """
+    need improve: reduce memory.
     """
     import scipy as sp
     adata = adata.copy() if copy else adata
@@ -83,6 +85,9 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
         adata.X = raw_X
         ## connectivities normalization
         adata.obsp['connectivities'] = normalize(adata.obsp['connectivities'])
+        
+        del raw_X
+        gc.collect()
     
     return adata if copy else None
 

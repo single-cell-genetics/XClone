@@ -24,6 +24,8 @@ from ..plot._data import reorder_data_by_cellanno
 from ..plot._base_xanndata import Xheatmap
 from ..plot.CNV_plot import CNV_visualization
 
+import gc
+
 def gene_exp_group(Xdata, n_group = 5, ref_log = True, verbose=True):
     """
     Function:
@@ -730,4 +732,8 @@ def CNV_optimazation(Xdata,
     ## Results
     update_Xdata.uns["CNV_ratio"] = CNV_ratio_dic
     update_Xdata.uns["Logliklihood"] = Logliklihood
+
+
+    del Xdata
+    gc.collect()
     return update_Xdata

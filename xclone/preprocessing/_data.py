@@ -17,6 +17,8 @@ from anndata import AnnData
 from ._anno_data import load_anno
 import scanpy as sc
 
+import gc
+
 
 ## Part I: mtx preprocessing
 
@@ -441,6 +443,9 @@ def check_BAF(Xdata, cell_anno_key = "cell_type", filter_na_anno = True, verbose
     
     update_Xdata = valid_cell(Xdata, cell_anno_key, filter_na_anno, verbose = verbose)
     print("[XClone data preprocessing] check BAF cell annotation: success")
+
+    del Xdata
+    gc.collect()
     return update_Xdata
 
 def check_RDR_BAF_samecellnumber(RDR_Xdata, BAF_Xdata):

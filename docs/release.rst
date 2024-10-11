@@ -9,10 +9,16 @@ Release History
 Version 0.3.9
 -------------
 - [preprocessing] Add RDR-ONLY read function.
-- solve the issues caused by scipy expired deprecations in version 1.14.0
-- add develop mode (users are recommended to deactive develop mode)
-- [Spatial] analysis update
-- [Fix bug in Combine module] RDR BAF data mapping checking
+- [compatibility] Solve the issues caused by scipy expired deprecations in version 1.14.0
+- [Spatial] Aalysis update
+- [Fix bug] RDR BAF data mapping checking in Combine module
+- [improve efficiency] add develop mode (users are recommended to deactive develop mode)
+- [improve efficiency] reduce the memory used in whole pipeline
+- [improve efficiency] only save final results
+- [improve efficiency] improve plotting
+- [docs] add tutorials for annotate reference from BAF module
+- [tutorial] add script demo
+- [tutorial] add RDR-ONLY tutorial
 
 Version 0.3.8
 -------------

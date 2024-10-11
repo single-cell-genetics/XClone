@@ -11,6 +11,8 @@ import anndata as ad
 import multiprocessing
 import datetime
 
+import gc
+
 from .phasing import Local_Phasing, Global_Phasing
 # from .analysis_utils import select_chr_region
 
@@ -205,6 +207,7 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
     print("[XClone-Local_phasing] time_used: " + "{:.2f}".format(elapsed_sec) + "seconds")
 
     update_Xdata = Xdata.copy()
+
     update_Xdata.layers["AD_phased"] = AD_phased.T
     update_Xdata.var["bin_idx"] = bin_idx_lst
     update_Xdata.var["allele_flip_local"] = allele_flip_local
@@ -295,6 +298,10 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
 
     merge_Xdata.uns["local_phasing_key"] = region_key
     merge_Xdata.uns["local_phasing_len"] = phasing_len
+
+    del Xdata
+    gc.collect()
+    
     return update_Xdata, merge_Xdata
     
 
@@ -322,6 +329,11 @@ def process_bin_id(Xdata, region_key = "chr", verbose = False):
         tmp_Xdata = update_Xdata[:, flag_]
         bin_idx_cum = np.append(bin_idx_cum, tmp_Xdata.var["bin_idx_cum"] + cumcount_)
     update_Xdata.var["bin_idx_cum"] = bin_idx_cum
+    
+    
+    del Xdata
+    gc.collect()
+    
     return update_Xdata
 
 ### global phasing
@@ -391,6 +403,9 @@ def BAF_Global_phasing(Xdata, bin_Xdata):
     end_t = datetime.datetime.now()
     elapsed_sec = (end_t - start_t).total_seconds()
     print("[XClone-Global_phasing] time_used: " + "{:.2f}".format(elapsed_sec) + "seconds")
+
+    del Xdata
+    gc.collect()
     
     return update_Xdata, bin_Xdata
 

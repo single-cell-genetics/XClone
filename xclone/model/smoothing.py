@@ -7,6 +7,8 @@
 import numpy as np
 from scipy.sparse import csc_matrix
 
+import gc
+
 def make_WMA_connectivity(adata, chrom_key='chr_arm', 
                           gene_coordinate_key = 'start', 
                           method='pyramidinal', window_size=101, 
@@ -88,6 +90,9 @@ def WMA_smooth(adata, layer=None, out_layer='smoothed', chrom_key='chr_arm',
     X_smoothed = X_smoothed @ adata.varp[connect_key]
     adata_out = adata.copy()
     adata_out.layers[out_layer] = X_smoothed
+
+    del adata
+    gc.collect()
     
     return adata_out
 
@@ -114,4 +119,7 @@ def KNN_smooth(Xdata, run_KNN = False, KNN_Xlayer = None, KNN_connect_use = "con
     # connectivities = normalize(update_Xdata.obsp[KNN_connect_use].toarray()).copy()
     connectivities = update_Xdata.obsp[KNN_connect_use].copy()
     update_Xdata.layers[out_layer] = connectivities @ update_Xdata.layers[layer]
+
+    del Xdata
+    gc.collect()
     return update_Xdata

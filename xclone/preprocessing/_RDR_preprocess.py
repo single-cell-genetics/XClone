@@ -19,6 +19,8 @@ from scipy.special import logsumexp
 from ..model.base_utils import normalize
 from ..plot._data import reorder_data_by_cellanno
 
+import gc
+
 # About different filtering functions in data processing.
 # 1. filtering genes based on cell detection rate-FUNC `gene_filter``
 # 2. filtering genes based on ref cells-for raW ratio based following analysis- FUNC `Xdata_RDR_preprocess`
@@ -123,6 +125,9 @@ def Xdata_RDR_preprocess(Xdata,
     update_Xdata = Xdata[:, gene_flag].copy()
     ## cell counts_ratio to be compared with learned libratio
     update_Xdata.obs[obs_key] = update_Xdata.X.toarray().sum(axis=1) / update_Xdata.var[var_key].sum()
+
+    del Xdata
+    gc.collect()
     
     if mode == "FILTER":
         ## filter genes

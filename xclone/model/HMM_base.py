@@ -11,6 +11,8 @@ import datetime
 from scipy.special import logsumexp
 from .base_utils import normalize
 
+import gc
+
 ## Part I: base functions for HMM smoothing in XClone
 ## Forward-backward algorithm
 def fwd_bkw_prob1(obs_num, states_num, start_prob=None, trans_prob=None, emm_prob=None):
@@ -318,6 +320,10 @@ def processing_prob_bygene(emm_prob_log, Xdata):
         print("Gene level: filter nan emm_prob")
     else:
         print("Gene level: no filtering emm_prob")
+    
+    del Xdata
+    gc.collect()
+    
     return emm_prob_log, update_Xdata
 
 def processing_prob_bycell(emm_prob_log, Xdata):
@@ -337,6 +343,10 @@ def processing_prob_bycell(emm_prob_log, Xdata):
         print("[XClone] warning: filter cells!")## add warning
     else:
         print("Cell level: no filtering emm_prob")
+    
+    del Xdata
+    gc.collect()
+
     return emm_prob_log, update_Xdata
 
 ## Part III: HMM smoothing in XClone
@@ -515,6 +525,10 @@ def XHMM_smoothing(Xdata,
 
     update_Xdata.layers["posterior_mtx"] = res
     update_Xdata.layers["posterior_mtx_log"] = res_log
+
+    del Xdata
+    gc.collect()
+
     return update_Xdata
 
 ################################################################end of the HMM smoothing functions

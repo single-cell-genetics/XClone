@@ -13,6 +13,7 @@ from ._base_manhattan import manhattan
 from ._base_xanndata import Xheatmap
 from ._data import reorder_data_by_cellanno
 
+import gc
 
 ## Part I: bulk BAF visualization
 def prepare_manhattan_df(Xdata, AD_key = "AD", DP_key = "DP", filter_nan = True, fillna_value = 0.5):
@@ -165,6 +166,10 @@ def calculate_cell_BAF(Xdata, AD_key = "AD", DP_key = "DP", BAF_key = "BAF"):
     Xdata.layers[BAF_key] = AD/DP
 
     update_Xdata = Xdata.copy()
+
+    del Xdata
+    gc.collect()
+
     return update_Xdata
 
 def visualize_cell_BAF(Xdata, 
@@ -245,6 +250,11 @@ def visualize_cell_BAF(Xdata,
                  cell_anno_key = cell_anno_key, cmap="vlag",
                  colorbar_ticks = None, colorbar_label = None,
                  colorbar_name = "BAF values",**kwargs)
+        del shrink_Xdata_re
+        gc.collect()
+        
+    del Xdata_re
+    gc.collect()
 
     return None
 

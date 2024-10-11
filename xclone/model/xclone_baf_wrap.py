@@ -143,11 +143,14 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     WMA_window_size = config.WMA_window_size
     WMA_smooth_key = config.WMA_smooth_key
 
+    HMM_nproc = config.HMM_nproc
+
     # HMM settings
     start_prob = config.start_prob
     trans_t = config.trans_t
     trans_prob = config.trans_prob
     HMM_brk = config.HMM_brk
+    
 
     # plot settings
     xclone_plot = config.xclone_plot
@@ -220,6 +223,10 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                                     chr_lst = marker_genes,
                                                     update_uns = False,
                                                     uns_anno_key = None)
+        ## Managing Memory During Processing
+        del RDR_adata
+        gc.collect()
+
     ## BAF Phasing
     if HMM_brk in ["chr", "chr_arm"]:
         BAF_var_add = None
@@ -234,7 +241,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
     
     ### check coverage for bins
-    merge_Xdata.var[(merge_Xdata.layers["dp_bin"].A.sum(axis=0) == 0)]
+    merge_Xdata.var[(merge_Xdata.layers["dp_bin"].toarray().sum(axis=0) == 0)]
     if extreme_count_cap:
         merge_Xdata = xclone.model.extrme_count_capping(merge_Xdata)
 
@@ -278,13 +285,15 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     #                                       layer="BAF_phased_WMA", 
     #                                       out_layer='BAF_phased_WMA_KNN')
     ## after phasing & smoothing
-    try:
-        BAF_adata.write(BAF_base_file)
-        merge_Xdata.write(BAF_merge_base_file)
-    except Exception as e:
-        print("[XClone Warning]", e)
-    else:
-        print("[XClone hint] BAF_base_file and merged_file saved in %s." %(out_data_dir))
+
+    if develop_mode:
+        try:
+            BAF_adata.write(BAF_base_file)
+            merge_Xdata.write(BAF_merge_base_file)
+        except Exception as e:
+            print("[XClone Warning]", e)
+        else:
+            print("[XClone hint] BAF_base_file and merged_file saved in %s." %(out_data_dir))
 
     del BAF_adata
     gc.collect()
@@ -371,7 +380,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                               start_prob = start_prob,  
                                               trans_prob = trans_prob, 
                                               emm_inlayer = "bin_phased_BAF_specific_center_emm_prob_log_KNN", 
-                                              nproc = 80, 
+                                              nproc = HMM_nproc, 
                                               verbose = False)
     
     # merge_Xdata = xclone.model.BAF_smoothing(merge_Xdata,
@@ -387,8 +396,12 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     ### only support BAF 5 states to add 3 states visualization for comparasion now.[testing version] 
     if CNV_N_components == 5:
         if BAF_add is None:
-            BAF_add = True 
-            # default for BAF module 5 states mode to have 3 states for comparasion.
+            if develop_mode:
+                BAF_add = True 
+                # default for BAF module 5 states mode to have 3 states for comparasion. (in develop mode)
+            else:
+                BAF_add = False
+
     else:
         BAF_add = False
     
@@ -450,7 +463,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                               start_prob = start_prob,  
                                               trans_prob = trans_prob, 
                                               emm_inlayer = "correct_emm_prob_log_KNN", 
-                                              nproc = 80, 
+                                              nproc = HMM_nproc, 
                                               verbose = False)
         neutral_index = 1
         cnv_index = [0,2]

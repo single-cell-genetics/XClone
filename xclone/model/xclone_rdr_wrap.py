@@ -260,13 +260,14 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
     xclone.model.check_dispersion(RDR_adata, anno_key = "dispersion_capped")
     
     ## output before CNV calling, save data with fitted libratio and dispersion.
-    try:
-        RDR_adata.write(RDR_base_file)
-        RDR_adata_bulk.write(RDR_bulk_file)
-    except Exception as e:
-        print("[XClone Warning]", e)
-    else:
-        print("[XClone hint] RDR_base_file and bulk_file saved in %s." %(out_data_dir))
+    if develop_mode:
+        try:
+            RDR_adata.write(RDR_base_file)
+            RDR_adata_bulk.write(RDR_bulk_file)
+        except Exception as e:
+            print("[XClone Warning]", e)
+        else:
+            print("[XClone hint] RDR_base_file and bulk_file saved in %s." %(out_data_dir))
 
     del RDR_adata_bulk
     gc.collect()
@@ -360,7 +361,6 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
         if plot_remove_immune:
             pass
 
-        
         run_RDR_plot(RDR_adata, dataset_name, 
                      plot_cell_anno_key, 
                      set_figtitle,

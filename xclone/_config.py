@@ -449,6 +449,7 @@ class BAF_General_config():
         ## smoothing
         self.WMA_window_size = 101
         self.WMA_smooth_key = "chr_arm"
+        self.HMM_nproc = 40
         ## postprocessing
         self.BAF_denoise = True
         self.BAF_denoise_GMM_detection = True
@@ -497,6 +498,8 @@ class Combine_General_config():
             Flag to merge loss of heterozygosity (LOH) segments in plots.
         set_figtitle : bool
             Flag to set figure titles in plots.
+        customizedplotting : bool
+            Flag to get customized plot, related to the setting in `merge_loss` and `merge_loh`.
         WGD_detection : bool
             Flag to enable whole-genome duplication (WGD) detection.
         WGD_detect_genome_level : str
@@ -534,6 +537,7 @@ class Combine_General_config():
         self.merge_loss = True
         self.merge_loh = True
         self.set_figtitle = True
+        self.customizedplotting = False
         
         ## function in combine module
         self.WGD_detection = True

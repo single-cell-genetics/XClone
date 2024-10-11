@@ -10,6 +10,7 @@ import numpy as np
 from .._logging import get_logger
 from datetime import datetime, timezone
 
+import gc
 
 def run_combine(RDR_Xdata,
                 BAF_merge_Xdata,
@@ -108,6 +109,7 @@ def run_combine(RDR_Xdata,
     plot_cell_anno_key = config.plot_cell_anno_key
     merge_loss = config.merge_loss
     merge_loh = config.merge_loh
+    customizedplotting = config.customizedplotting
 
     # develop mode settings
     develop_mode = config.develop_mode
@@ -154,6 +156,12 @@ def run_combine(RDR_Xdata,
                         Xlayer = BAF_use_Xlayer,
                         extend_layer = "BAF_extend_post_prob",
                         return_prob = False)
+    
+    del RDR_Xdata
+    del BAF_merge_Xdata
+    gc.collect()
+    
+    
     if RDR_denoise:
         combine_Xdata = xclone.model.denoise_rdr_by_baf(combine_Xdata,
                                                         RDR_layer = "posterior_mtx",
@@ -190,12 +198,13 @@ def run_combine(RDR_Xdata,
                                  genome_level = genome_level, 
                                  prop_value_threshold = prop_value_threshold,
                                  cell_prop_threshold = cell_prop_threshold)
-    try:
-        combine_Xdata.write(RDR_combine_corrected_file)
-    except Exception as e:
-        print("[XClone Warning]", e)
-    else:
-        print("[XClone hint] combine_corrected_file saved in %s." %(out_data_dir))
+    if develop_mode:
+        try:
+            combine_Xdata.write(RDR_combine_corrected_file)
+        except Exception as e:
+            print("[XClone Warning]", e)
+        else:
+            print("[XClone hint] combine_corrected_file saved in %s." %(out_data_dir))
     
 
     combine_Xdata = xclone.model.CNV_prob_merge_for_plot(combine_Xdata, Xlayer = "corrected_prob")
@@ -221,12 +230,14 @@ def run_combine(RDR_Xdata,
                          plot_cell_anno_key, 
                          merge_loss, merge_loh, 
                          set_figtitle,
-                         out_dir)
-        if RDR_denoise:
-            rdr_denoise_plot(combine_Xdata, dataset_name, 
-                         plot_cell_anno_key, 
-                         set_figtitle,
-                         out_dir)
+                         out_dir,
+                         customizedplotting)
+        if develop_mode:
+            if RDR_denoise:
+                rdr_denoise_plot(combine_Xdata, dataset_name, 
+                            plot_cell_anno_key, 
+                            set_figtitle,
+                            out_dir)
 
     return combine_Xdata
 
@@ -269,6 +280,7 @@ def run_combine_plot(combine_Xdata,
             merge_loh = True,
             set_figtitle = True,
             out_dir = None,
+            customizedplotting = False,
             **kwargs):
     """
     """
@@ -299,61 +311,62 @@ def run_combine_plot(combine_Xdata,
         save_file = True, out_file = combine_res_base_fig,
         **kwargs)
     
+    if customizedplotting:
     ## SELECT PLOT
-    if merge_loh:
-        if merge_loss:
-            colorbar_ticks = [0.25,1,2,2.75]
-            colorbar_label = ["copy loss","loh", "copy neutral", "copy gain"]
-            xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge1", 
-                                        cell_anno_key = plot_cell_anno_key, 
-                                        color_map_name = "combine_cmap", 
-                                        states_num = 4, 
-                                        colorbar_ticks = colorbar_ticks,
-                                        colorbar_label = colorbar_label,
-                                        title = fig_title,
-                                        save_file = True, 
-                                        out_file = combine_res_select_fig,
-                                        **kwargs)
-        else:
+        if merge_loh:
+            if merge_loss:
+                colorbar_ticks = [0.25,1,2,2.75]
+                colorbar_label = ["copy loss","loh", "copy neutral", "copy gain"]
+                xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge1", 
+                                            cell_anno_key = plot_cell_anno_key, 
+                                            color_map_name = "combine_cmap", 
+                                            states_num = 4, 
+                                            colorbar_ticks = colorbar_ticks,
+                                            colorbar_label = colorbar_label,
+                                            title = fig_title,
+                                            save_file = True, 
+                                            out_file = combine_res_select_fig,
+                                            **kwargs)
+            else:
+                colorbar_ticks = [0,1,2,3,4]
+                colorbar_label = ["copy lossA", "copy lossB", "LOH", "copy neutral", "copy gain"]
+                xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge2", 
+                                            cell_anno_key = plot_cell_anno_key, 
+                                            color_map_name = "combine_cmap2", 
+                                            states_num = 5,
+                                            colorbar_ticks = colorbar_ticks,
+                                            colorbar_label = colorbar_label,
+                                            title = fig_title,
+                                            save_file = True, 
+                                            out_file = combine_res_select_fig,
+                                            **kwargs)
+        elif merge_loss:
             colorbar_ticks = [0,1,2,3,4]
-            colorbar_label = ["copy lossA", "copy lossB", "LOH", "copy neutral", "copy gain"]
-            xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge2", 
-                                        cell_anno_key = plot_cell_anno_key, 
-                                        color_map_name = "combine_cmap2", 
-                                        states_num = 5,
-                                        colorbar_ticks = colorbar_ticks,
-                                        colorbar_label = colorbar_label,
-                                        title = fig_title,
-                                        save_file = True, 
-                                        out_file = combine_res_select_fig,
-                                        **kwargs)
-    elif merge_loss:
-        colorbar_ticks = [0,1,2,3,4]
-        colorbar_label = ["copy loss","LOH-A", "LOH-B",  "copy neutral", "copy gain"]
-        xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge4", 
-                                        cell_anno_key = plot_cell_anno_key, 
-                                        color_map_name = "combine_cmap4", 
-                                        states_num = 5,
-                                        colorbar_ticks = colorbar_ticks,
-                                        colorbar_label = colorbar_label,
-                                        title = fig_title,
-                                        save_file = True, 
-                                        out_file = combine_res_select_fig,
-                                        **kwargs)
-        
-    else:
-        colorbar_ticks = [0,1,2,3,4,5]
-        colorbar_label = ["copy lossA", "copy lossB","LOH-A", "LOH-B", "copy neutral", "copy gain"]
-        xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge3", 
-                                        cell_anno_key = plot_cell_anno_key, 
-                                        color_map_name = "combine_cmap3", 
-                                        states_num = 6,
-                                        colorbar_ticks = colorbar_ticks,
-                                        colorbar_label = colorbar_label,
-                                        title = fig_title,
-                                        save_file = True, 
-                                        out_file = combine_res_select_fig,
-                                        **kwargs)
+            colorbar_label = ["copy loss","LOH-A", "LOH-B",  "copy neutral", "copy gain"]
+            xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge4", 
+                                            cell_anno_key = plot_cell_anno_key, 
+                                            color_map_name = "combine_cmap4", 
+                                            states_num = 5,
+                                            colorbar_ticks = colorbar_ticks,
+                                            colorbar_label = colorbar_label,
+                                            title = fig_title,
+                                            save_file = True, 
+                                            out_file = combine_res_select_fig,
+                                            **kwargs)
+            
+        else:
+            colorbar_ticks = [0,1,2,3,4,5]
+            colorbar_label = ["copy lossA", "copy lossB","LOH-A", "LOH-B", "copy neutral", "copy gain"]
+            xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "plot_prob_merge3", 
+                                            cell_anno_key = plot_cell_anno_key, 
+                                            color_map_name = "combine_cmap3", 
+                                            states_num = 6,
+                                            colorbar_ticks = colorbar_ticks,
+                                            colorbar_label = colorbar_label,
+                                            title = fig_title,
+                                            save_file = True, 
+                                            out_file = combine_res_select_fig,
+                                            **kwargs)
     
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time

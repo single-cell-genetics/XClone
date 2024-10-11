@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import scanpy as sc
 
+import gc
 
 ## Part I: filter marker genes for celltype
 def get_markers(Xdata, 
@@ -36,6 +37,9 @@ def get_markers(Xdata,
     marker_genes_rank = np.unique(top_marker_genes)
     
     Xdata.uns[marker_genes_key] = marker_genes_rank
+
+    del Xdata_use
+    gc.collect()
     return marker_genes_rank
 
 def filter_markers(Xdata, anno_key="GeneName", marker_genes_key = None, top_n = 15, marker_lst = None):
@@ -47,6 +51,7 @@ def filter_markers(Xdata, anno_key="GeneName", marker_genes_key = None, top_n = 
 
     """
     update_Xdata = Xdata.copy()
+
     if marker_genes_key is not None:
         marker_genes = Xdata.uns[marker_genes_key]['names'].head(top_n).values
         print("[XClone] use marker genes in uns:", marker_lst)
@@ -61,6 +66,11 @@ def filter_markers(Xdata, anno_key="GeneName", marker_genes_key = None, top_n = 
     print("used_genes_num:", used_genes_num)
 
     adata_NOmarkers = update_Xdata[:, ~is_marker]
+
+    del update_Xdata
+    del Xdata
+    gc.collect()
+
     return adata_NOmarkers
 
 

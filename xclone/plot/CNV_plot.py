@@ -11,6 +11,8 @@ from ._visualize  import convert_res_to_ann
 from ._data import reorder_data_by_cellanno
 from ._base_xanndata import Xheatmap, XXheatmap
 
+import gc
+
 ## utils
 def remove_Xdata_layers(Xdata, copy = True):
     """
@@ -28,7 +30,12 @@ def remove_Xdata_layers(Xdata, copy = True):
     if copy:
         Xdata_copy = Xdata.copy()
         Xdata_copy = remove_layers(Xdata_copy)
+        
+        del Xdata
+        gc.collect()
+
         return Xdata_copy
+        
     else:
         Xdata = remove_layers(Xdata)
         return Xdata
@@ -172,6 +179,11 @@ def CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True,
         colorbar_ticks = [1.1,2,3],
         colorbar_name = colorbar_name, 
         colorbar_label = ["copy loss", "copy neutral", "copy gain"], **kwargs)
+
+        del res_cnv_weights_ad
+        del res_cnv_weights_ad1_re
+        gc.collect()
+
     else:
         # category visualization
         ## transfer data to anndata for visualization
@@ -186,6 +198,11 @@ def CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True,
         colorbar_name = colorbar_name, 
         colorbar_label = ["copy loss",  "copy neutral", "copy gain"],
         cmap = color_map, **kwargs)
+
+        del res_cnv_ad
+        del res_cnv_ad_re
+        gc.collect()
+
     return None
 
 def Complex_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True, 
@@ -261,6 +278,11 @@ def Complex_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True,
         colorbar_ticks = [1,2,3],
         colorbar_name = colorbar_name, 
         colorbar_label = ["copy loss", "copy neutral", "copy gain"],**kwargs)
+
+        del res_cnv_weights_ad
+        del res_cnv_weights_ad1_re
+        gc.collect()
+
     else:
         # category visualization
         ## transfer data to anndata for visualization
@@ -276,6 +298,10 @@ def Complex_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = True,
         colorbar_name = colorbar_name, 
         colorbar_label = ["copy loss",  "copy neutral", "copy gain"],
         cmap = color_map, **kwargs)
+
+        del res_cnv_ad
+        del res_cnv_ad_re
+        gc.collect()
     return None
 
 ## BAF CNV 
@@ -350,6 +376,11 @@ def BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = False,
         colorbar_name = colorbar_name, 
         colorbar_label = ["allele-A bias",  "allele balance",  "allele-B bias"],
         cmap = color_map, **kwargs)
+
+        del res_cnv_weights_ad
+        del res_cnv_weights_ad1_re
+        gc.collect()
+
     else:
         # category visualization
         ## transfer data to anndata for visualization
@@ -373,6 +404,11 @@ def BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = False,
             colorbar_name = colorbar_name, 
             colorbar_label = ["allele-A bias (++)", "allele-A bias (+)", "allele balance",  "allele-B bias (+)", "allele-B bias (++)"],
             cmap = color_map, **kwargs)
+        
+        del res_cnv_ad
+        del res_cnv_ad_re
+        gc.collect()
+
     return None
 
 
@@ -449,6 +485,11 @@ def Complex_BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = Fal
         colorbar_name = colorbar_name, 
         colorbar_label = ["allele-A bias",  "allele balance",  "allele-B bias"],
         cmap = color_map, **kwargs)
+
+        del res_cnv_weights_ad
+        del res_cnv_weights_ad1_re
+        gc.collect()
+
     else:
         # category visualization
         ## transfer data to anndata for visualization
@@ -473,6 +514,11 @@ def Complex_BAF_CNV_visualization(Xdata, Xlayer = "posterior_mtx", weights = Fal
             colorbar_name = colorbar_name, 
             colorbar_label = ["allele-A bias (++)", "allele-A bias (+)", "allele balance",  "allele-B bias (+)", "allele-B bias (++)"],
             cmap = color_map, **kwargs)
+        
+        del res_cnv_ad
+        del res_cnv_ad_re
+        gc.collect()
+
     return None
         
 
@@ -558,6 +604,11 @@ def Combine_CNV_visualization(Xdata,
     colorbar_ticks = colorbar_ticks,
     colorbar_label = colorbar_label,
     cmap = color_map, **kwargs)
+
+    del res_cnv_ad
+    del res_cnv_ad_re
+    gc.collect()
+
     return None
 
 
@@ -652,4 +703,9 @@ def Complex_Combine_CNV_visualization(Xdata,
     colorbar_label = colorbar_label, 
     cmap = color_map,
     **kwargs)
+
+    del res_cnv_ad
+    del res_cnv_ad_re
+    gc.collect()
+    
     return None

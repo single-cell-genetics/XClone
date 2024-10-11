@@ -2,12 +2,15 @@
 from .base_utils import normalize
 import scipy as sp
 import scanpy as sc
+import gc
 
 def extra_preprocess_BAF(adata, Xlayer = "fill_BAF_phased",
                          KNN_neighbors = 10,
                          run_KNN = False, 
                          copy=False):
-    """s
+    """
+    may need change the copy strategy to improve the efficiency
+    [tested, seems no difference]
     """
     adata = adata.copy() if copy else adata
 
@@ -19,6 +22,9 @@ def extra_preprocess_BAF(adata, Xlayer = "fill_BAF_phased",
         sc.pp.neighbors(adata, n_neighbors= KNN_neighbors, n_pcs=40)
         adata.X = raw_X
         adata.obsp['connectivities'] = normalize(adata.obsp['connectivities'])
+
+        del raw_X
+        gc.collect()
 
     return adata if copy else None
 

@@ -9,6 +9,8 @@ import scanpy as sc
 import scipy.sparse as sp
 from .smoothing import WMA_smooth, KNN_smooth
 
+import gc
+
 ## Smoothing strategy
 
 def RDR_smoothing_base(Xdata,
@@ -77,5 +79,9 @@ def RDR_smoothing_base(Xdata,
                layer = "WMA_smoothed", out_layer = outlayer)
 
         Xdata.layers[outlayer] = adata_tmp.layers[outlayer].copy()
+    
+    del Xdata_norm
+    del adata_tmp
+    gc.collect()
 
     return Xdata

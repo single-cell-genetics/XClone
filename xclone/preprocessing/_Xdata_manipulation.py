@@ -4,6 +4,8 @@
 # Date: 2022/06/29
 # update: 2022/06/29
 
+import gc
+
 ## Part I
 def Xdata_region_selection(Xdata,
                            select = False,
@@ -52,6 +54,9 @@ def Xdata_region_selection(Xdata,
             for key_ in uns_anno_key:
                 Xdata_subset.uns.update({key_: Xdata.uns[key_][:, region_flag,:].copy()})
 
+    del Xdata
+    gc.collect()
+
     return Xdata_subset
 
 def Xdata_cell_selection(Xdata,
@@ -98,6 +103,9 @@ def Xdata_cell_selection(Xdata,
         else:
             for key_ in uns_anno_key:
                 Xdata_subset.uns.update({key_: Xdata.uns[key_][cell_flag ,:,:].copy()})
+    del Xdata
+    gc.collect()
+    
     return Xdata_subset
 
 
