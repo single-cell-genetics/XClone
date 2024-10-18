@@ -29,6 +29,9 @@ def load_anno(genome_mode):
         stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_blocks_hg19_update.txt')
     if genome_mode == "mm10_genes":
         stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_genes_mm10.txt')
+    if genome_mode == "hg38_genes_select":
+        stream = pkg_resources.resource_stream(__name__, '../data/anno_data/annotate_genes_hg38_select.txt')
+
     return pd.read_table(stream)#encoding='latin-1'
 
 

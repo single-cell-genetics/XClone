@@ -60,3 +60,6 @@ from .prob_plot import prob_visualization
 
 ## Spatial
 from ._spatial_plot import simple_spatial_scatter
+
+## simulation
+from .simulationGT import Plot_Simulation_GT
