@@ -23,3 +23,5 @@ from ._spatial import CalculateSampleCNVProb, CalculateSampleBAF, CalculateSampl
 from ._spatial import spatial_analysis
 
 from ._quickanalysis import exploreClustering, OnestopBAFClustering
+
+from .benchmark import extract_numbat

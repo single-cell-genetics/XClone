@@ -7,10 +7,16 @@ def dir_make(out_dir):
         os.makedirs(out_dir)
 
 import pandas as pd
-def extract_xclone_matrix(Xdata, Xlayer, states = None, region_lst = ["chr", "start", "stop"], 
+import numpy as np
+def extract_xclone_matrix(Xdata, Xlayer="prob1_merge", states = None, region_lst = ["chr", "start", "stop"], 
                           index = False, header = False, out_dir = None):
     """
     extract cell by features matrix from xclone
+    state = 0: copy loss
+    state = 1: loh
+    state = 2: copy neutral
+    state = 3: copy gain
+    state = None: argmax CNV state.
     """
     if out_dir is not None:
         dir_make(out_dir)
@@ -19,7 +25,8 @@ def extract_xclone_matrix(Xdata, Xlayer, states = None, region_lst = ["chr", "st
         if states is not None:
             pd.DataFrame(Xdata.layers[Xlayer][:,:,states]).to_csv(mtx_file, index = index, header = header)     
         else:
-            pd.DataFrame(Xdata.layers[Xlayer]).to_csv(mtx_file, index = index, header = header)
+            cnv_state = np.argmax(Xdata.layers[Xlayer], axis =2)
+            pd.DataFrame(cnv_state).to_csv(mtx_file, index = index, header = header)
         ## cells file
         cells_file = out_dir + "cells.csv"
         pd.Series(Xdata.obs.index).to_csv(cells_file, index = index, header = header)
