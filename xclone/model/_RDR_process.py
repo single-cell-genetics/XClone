@@ -18,6 +18,7 @@ from .base_utils import normalize
 def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
                      avg_key = "ref_avg", depth_key='counts_ratio', 
                      low_dim=False, run_KNN=False, KNN_neighbors = 10,
+                     KNN_npcs = 40,
                      copy=False):
     """
     need improve: reduce memory.
@@ -79,7 +80,7 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
         raw_X = adata.X.copy()
         adata.X = np.log(adata.layers['ref_normalized'] + 0.3)
         sc.pp.pca(adata)
-        sc.pp.neighbors(adata, n_neighbors = KNN_neighbors, n_pcs=40)
+        sc.pp.neighbors(adata, n_neighbors = KNN_neighbors, n_pcs=KNN_npcs)
         ## Notes: connectivities and distances can be slightly different every run
         ## even the random_state = 0 (default).
         adata.X = raw_X

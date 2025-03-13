@@ -6,6 +6,7 @@ import gc
 
 def extra_preprocess_BAF(adata, Xlayer = "fill_BAF_phased",
                          KNN_neighbors = 10,
+                         KNN_npcs = 40,
                          run_KNN = False, 
                          copy=False):
     """
@@ -19,7 +20,7 @@ def extra_preprocess_BAF(adata, Xlayer = "fill_BAF_phased",
         raw_X = adata.X.copy()
         adata.X = adata.layers[Xlayer].copy()
         sc.pp.pca(adata)
-        sc.pp.neighbors(adata, n_neighbors= KNN_neighbors, n_pcs=40)
+        sc.pp.neighbors(adata, n_neighbors= KNN_neighbors, n_pcs=KNN_npcs)
         adata.X = raw_X
         adata.obsp['connectivities'] = normalize(adata.obsp['connectivities'])
 

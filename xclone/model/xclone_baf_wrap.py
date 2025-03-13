@@ -116,6 +116,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     get_BAF_KNN_connectivities = config.get_BAF_KNN_connectivities
     KNN_Xlayer = config.KNN_Xlayer
     KNN_neighbors = config.KNN_neighbors
+    KNN_npcs = config.KNN_npcs
     
     # BAF settings
     theo_neutral_BAF = config.theo_neutral_BAF
@@ -258,6 +259,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
         # KNN_Xlayer = "fill_BAF_phased" # can also update the first `KNN_smooth` func.
         merge_Xdata = xclone.model.extra_preprocess_BAF(merge_Xdata, Xlayer = KNN_Xlayer,
                          KNN_neighbors = KNN_neighbors,
+                         KNN_npcs = KNN_npcs,
                          run_KNN = get_BAF_KNN_connectivities, 
                          copy=True)
 

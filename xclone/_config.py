@@ -220,6 +220,7 @@ class XCloneGeneral_config():
         self.remove_guide_XY = False
         # KNN smoothing
         self.KNN_neighbors = 10
+        self.KNN_npcs = 40
         # Plotting
         # self.plot_cell_anno_key =  None
         self.plot_remove_immune = True

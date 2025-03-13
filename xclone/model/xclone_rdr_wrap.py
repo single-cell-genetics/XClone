@@ -128,6 +128,7 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
     guide_cnv_ratio = config.guide_cnv_ratio
     ## smoothing settings
     KNN_neighbors = config.KNN_neighbors
+    KNN_npcs = config.KNN_npcs
     WMA_window_size = config.WMA_window_size
     WMA_smooth_key = config.WMA_smooth_key
     # plot settings
@@ -277,6 +278,7 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
                                               depth_key=depth_key,
                                               low_dim=False, run_KNN=True, 
                                               KNN_neighbors = KNN_neighbors,
+                                              KNN_npcs = KNN_npcs,
                                               copy=True)
     
     if multi_refcelltype:
