@@ -6,6 +6,8 @@ import anndata as ad
 from ..preprocessing import load_anno
 from .CNV_plot import Combine_CNV_visualization
 
+
+
 def calculate_count(total_cells, clone_meta):
     clone_meta['generated_count'] = (clone_meta['count'] / clone_meta['count'].sum()) * total_cells
 
@@ -27,8 +29,12 @@ def calculate_count(total_cells, clone_meta):
     
     return clone_meta
 
+
+
 def generate_barcode():
     return ''.join(random.choices('ATCG', k=16))
+
+
 def generate_barcode_lst(barcodes_num):
     # Set to store unique barcodes
     unique_barcodes = set()
@@ -41,6 +47,7 @@ def generate_barcode_lst(barcodes_num):
     barcode_list = list(unique_barcodes)
     return barcode_list  
         
+    
 
 def Generate_adata(total_cells, clone_meta):
     barcode_list = generate_barcode_lst(total_cells)
@@ -68,6 +75,8 @@ def Generate_adata(total_cells, clone_meta):
     adata.var["chr"] = adata.var["chr"].astype(str)
     return adata
        
+    
+    
 # Function to determine label
 def assign_label(row, mode=1):
     total = row['allele A'] + row['allele B']
@@ -92,7 +101,8 @@ def assign_label(row, mode=1):
         else:
             return 'copy neutral'
         
-        
+
+
 def generate_illustrate_GT(adata, cnv_profile, mode=1):
     ## init layer for plotting
     Xlayer = "illustrate_GT"
@@ -122,10 +132,15 @@ def generate_illustrate_GT(adata, cnv_profile, mode=1):
             if cnv_profile_tmp.loc[idx_]["start"] == 1 and cnv_profile_tmp.loc[idx_]["end"] == np.inf:
                 flag = adata_tmp.var["chr"].isin([cnv_profile_tmp.loc[idx_]["chr"].strip("chr"), ])
             else:
-                flag = (adata_tmp.var["chr"] == cnv_profile_tmp.loc[idx_]["chr"].strip("chr")) and (adata_tmp.var["start"] >= int(cnv_profile_tmp.loc[idx_]["start"])) and (adata_tmp.var["stop"] <= int(cnv_profile_tmp.loc[idx_]["end"]))
+                flag = np.logical_and(
+                    np.logical_and(
+                        adata_tmp.var["chr"] == cnv_profile_tmp.loc[idx_]["chr"].strip("chr"),
+                        adata_tmp.var["start"] <= cnv_profile_tmp.loc[idx_]["end"]
+                    ),
+                    adata_tmp.var["stop"] >= cnv_profile_tmp.loc[idx_]["start"]
+                )
             
             if mode == 1:
-                
                 if cnv_profile_tmp.loc[idx_]["cnvlabel"] == "copy gain":
                     adata_tmp.layers[Xlayer][:, flag, 3] = 1
                     adata_tmp.layers[Xlayer][:, flag, 2] = 0
@@ -173,6 +188,8 @@ def generate_illustrate_GT(adata, cnv_profile, mode=1):
     
     return adata_concatenated 
 
+
+
 def Plot_Simulation_GT(clone_meta_path, cnv_profile_path, total_cells = 400, normal = True, mode = 1, plot = True):
     """
     Plotting for simulation ground truth.
@@ -182,7 +199,7 @@ def Plot_Simulation_GT(clone_meta_path, cnv_profile_path, total_cells = 400, nor
     """
     column_names = ["simulated_label", 'seed_label', 'count']
     clone_meta = pd.read_table(clone_meta_path, names=column_names, header=None)
-    column_names = ["chr", 'start', 'end', "lable", "clone", "allele A", "allele B"]
+    column_names = ["chr", 'start', 'end', "clone", "allele A", "allele B"]
     cnv_profile = pd.read_table(cnv_profile_path, names=column_names, header=None)
     
     adata = Generate_adata(total_cells, clone_meta)
