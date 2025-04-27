@@ -190,7 +190,7 @@ def generate_illustrate_GT(adata, cnv_profile, mode=1):
 
 
 
-def Plot_Simulation_GT(clone_meta_path, cnv_profile_path, total_cells = 400, normal = True, mode = 1, plot = True):
+def Plot_Simulation_GT(clone_meta_path, cnv_profile_path, out_fig_path = "auto", total_cells = 400, normal = True, mode = 1, plot = True):
     """
     Plotting for simulation ground truth.
     
@@ -199,8 +199,16 @@ def Plot_Simulation_GT(clone_meta_path, cnv_profile_path, total_cells = 400, nor
     """
     column_names = ["simulated_label", 'seed_label', 'count']
     clone_meta = pd.read_table(clone_meta_path, names=column_names, header=None)
-    column_names = ["chr", 'start', 'end', "clone", "allele A", "allele B"]
-    cnv_profile = pd.read_table(cnv_profile_path, names=column_names, header=None)
+    
+    cnv_profile = pd.read_table(cnv_profile_path, header=None)
+    if cnv_profile.shape[1] == 6:
+        column_names = ["chr", 'start', 'end', "clone", "allele A", "allele B"]
+        cnv_profile = pd.read_table(cnv_profile_path, names=column_names, header=None)
+    elif cnv_profile.shape[1] == 7:
+        column_names = ["chr", 'start', 'end', "label", "clone", "allele A", "allele B"]
+        cnv_profile = pd.read_table(cnv_profile_path, names=column_names, header=None)
+    else:
+        raise ValueError("invalid CNA profile, expect 6 or 7 columns.")
     
     adata = Generate_adata(total_cells, clone_meta)
     
@@ -211,12 +219,16 @@ def Plot_Simulation_GT(clone_meta_path, cnv_profile_path, total_cells = 400, nor
         adata_concatenated = adata_concatenated[adata_concatenated.obs["annotation"] != "normal"]
     if plot:
         if mode == 1:
-            combine_res_base_fig = "GT_Simulation_test.png"
+            #combine_res_base_fig = "GT_Simulation_test.png"
+            if out_fig_path == "auto":
+                out_fig_path = "GT_Simulation_test.png"
             plot_cell_anno_key = "annotation"
             Combine_CNV_visualization(adata_concatenated, Xlayer = "illustrate_GT", 
-                    cell_anno_key = plot_cell_anno_key, save_file = True, out_file = combine_res_base_fig, title = None)
+                    cell_anno_key = plot_cell_anno_key, save_file = True, out_file = out_fig_path, title = None)
         elif mode == 2:
-            combine_res_base_fig = "GT_Simulation_allele_test.png"
+            #combine_res_base_fig = "GT_Simulation_allele_test.png"
+            if out_fig_path == "auto":
+                out_fig_path = "GT_Simulation_allele_test.png"
             plot_cell_anno_key = "annotation"
             colorbar_ticks = [0,1,2,3,4]
             colorbar_label = ["copy lossA", "copy lossB", "LOH", "copy neutral", "copy gain"]
@@ -226,6 +238,6 @@ def Plot_Simulation_GT(clone_meta_path, cnv_profile_path, total_cells = 400, nor
                                                     states_num = 5,
                                                     colorbar_ticks = colorbar_ticks,
                                                     colorbar_label = colorbar_label,
-                                                    save_file = True, out_file = combine_res_base_fig, title = None)
+                                                    save_file = True, out_file = out_fig_path, title = None)
 
     return adata_concatenated
