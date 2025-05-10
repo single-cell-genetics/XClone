@@ -2,7 +2,7 @@
 
 # Author: Rongting Huang
 # Date: 2022-10-21
-# update: 2023-01-07
+# update: 2025-05-09
 
 
 import os
@@ -224,9 +224,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                                     chr_lst = marker_genes,
                                                     update_uns = False,
                                                     uns_anno_key = None)
-        ## Managing Memory During Processing
-        del RDR_adata
-        gc.collect()
+        
 
     ## BAF Phasing
     if HMM_brk in ["chr", "chr_arm"]:
@@ -255,6 +253,10 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     ## smoothing
     if update_info_from_rdr:
         merge_Xdata = xclone.model.get_KNN_connectivities_from_expr(merge_Xdata, RDR_adata)
+        
+        ## Managing Memory During Processing
+        del RDR_adata
+        gc.collect()
     else:
         # KNN_Xlayer = "fill_BAF_phased" # can also update the first `KNN_smooth` func.
         merge_Xdata = xclone.model.extra_preprocess_BAF(merge_Xdata, Xlayer = KNN_Xlayer,
