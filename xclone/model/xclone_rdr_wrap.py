@@ -168,10 +168,18 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
     cell_detection_rate = 0.05, verbose = verbose)
 
     ## check ref_celltype
-    if ref_celltype in RDR_adata.obs[cell_anno_key].values:
-        pass
+    # if ref_celltype in RDR_adata.obs[cell_anno_key].values:
+        # pass
+    # else:
+        # raise ValueError(f"[XClone error] Item '{ref_celltype}' not found in the RDR_adata's annotation.")
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        missing_items = [item for item in ref_celltype if item not in RDR_adata.obs[cell_anno_key].values]
+        if missing_items:
+            raise ValueError(f"[XClone error] Items {missing_items} not found in the RDR_adata's annotation.")
     else:
-        raise ValueError(f"[XClone error] Item '{ref_celltype}' not found in the RDR_adata's annotation.")
+        if ref_celltype not in RDR_adata.obs[cell_anno_key].values:
+            raise ValueError(f"[XClone error] Item '{ref_celltype}' not found in the RDR_adata's annotation.")
     
     ## Transformation for smart-seq data
     RDR_adata = xclone.pp.Xtransformation(RDR_adata, transform = smart_transform, Xlayers = ["raw_expr"])
@@ -280,15 +288,17 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
                                               KNN_neighbors = KNN_neighbors,
                                               KNN_npcs = KNN_npcs,
                                               copy=True)
-    
+
     if multi_refcelltype:
         print("multi_refcelltype")
         # update expected layer
+        '''
         RDR_adata = xclone.model.extra_preprocess2(RDR_adata, ref_celltype = ref_celltype, 
                                    cluster_key=cell_anno_key,
                                    avg_layer = "ref_avg", 
                                    depth_key=depth_key, 
                                    copy=True)
+        '''
 
     RDR_adata = xclone.model.RDR_smoothing_base(RDR_adata,
                                                 clip = True,

@@ -34,9 +34,13 @@ def view_celltype(Xdata, cell_anno_key = "cell_type"):
 def select_celltype(Xdata, cell_anno_key = "cell_type", select_celltype = "Paneth"):
     """
     """
-    Flag_ = Xdata.obs[cell_anno_key] == select_celltype
-    
-    update_Xdata = Xdata[Flag_, :]
+    # Flag_ = Xdata.obs[cell_anno_key] == select_celltype
+    # modified for multiple select_celltype
+    if isinstance(select_celltype, list):
+        ref_flag = Xdata.obs[cell_anno_key].isin(select_celltype)
+    else:
+        ref_flag = Xdata.obs[cell_anno_key] == select_celltype
+    update_Xdata = Xdata[ref_flag, :]
     
     return update_Xdata
 

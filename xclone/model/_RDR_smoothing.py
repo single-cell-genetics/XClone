@@ -34,7 +34,13 @@ def RDR_smoothing_base(Xdata,
     # sc.pp.normalize_total from the Scanpy library supports both dense and sparse matrices. 
     
     Xdata_norm = Xdata.copy()
-    _is_ref = Xdata_norm.obs[cell_anno_key] == ref_celltype
+
+    #_is_ref = Xdata_norm.obs[cell_anno_key] == ref_celltype
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        _is_ref = Xdata_norm.obs[cell_anno_key].isin(ref_celltype)
+    else:
+        _is_ref = Xdata_norm.obs[cell_anno_key] == ref_celltype
 
     # Normalize and log transform using scanpy functions
     sc.pp.normalize_total(Xdata_norm, target_sum=10000)

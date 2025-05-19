@@ -91,11 +91,19 @@ def Xdata_RDR_preprocess(Xdata,
     #     return Xdata
     
     # reference data preprocessing
-    if ref_celltype is None:
-        raise ValueError("ref_celltype should be assigned! Pls check!")
+    # if ref_celltype is None:
+        # raise ValueError("ref_celltype should be assigned! Pls check!")
 
-    ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
-    ref_Xdata = Xdata[ref_flag,:]
+    # ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
+    # ref_Xdata = Xdata[ref_flag,:]
+
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        ref_flag = Xdata.obs[cell_anno_key].isin(ref_celltype)
+    else:
+        ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
+
+    ref_Xdata = Xdata[ref_flag, :]
 
     Xdata.var[var_key] = ref_Xdata.X.toarray().mean(axis=0)
 
@@ -145,7 +153,14 @@ def Xdata_RDR_preprocess(Xdata,
     # mode="ALL"
     ## process both cellbased data and celltype based data.
     celltype_ad = rr_ad_celltype_processing(update_Xdata, ref_celltype, cell_anno_key)
-    is_ref = celltype_ad.obs[cell_anno_key] == ref_celltype
+
+    # is_ref = celltype_ad.obs[cell_anno_key] == ref_celltype
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        is_ref = celltype_ad.obs[cell_anno_key].isin(ref_celltype)
+    else:
+        is_ref = celltype_ad.obs[cell_anno_key] == ref_celltype
+    
 
     celltype_ad.var[var_key] = celltype_ad[is_ref,:].X.toarray()[0]
 
@@ -162,8 +177,16 @@ def rr_ad_celltype_processing(Xdata, ref_celltype, cell_anno_key):
     For pseudo bulk. celltype-based count.
     version:0.0.2
     """
-    ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
-    ref_Xdata = Xdata[ref_flag,:]
+    # ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
+    # ref_Xdata = Xdata[ref_flag,:]
+
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        ref_flag = Xdata.obs[cell_anno_key].isin(ref_celltype)
+    else:
+        ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
+
+    ref_Xdata = Xdata[ref_flag, :]
     obs_Xdata = Xdata.copy()
 
     ref_bulk = ref_Xdata.X.toarray().sum(axis=0)
@@ -200,8 +223,14 @@ def rr_ad_cell_processing(Xdata, ref_celltype, cell_anno_key):
     """
     version:0.0.2
     """
-    ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
-    ref_Xdata = Xdata[ref_flag,:]
+    # ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        ref_flag = Xdata.obs[cell_anno_key].isin(ref_celltype)
+    else:
+        ref_flag = Xdata.obs[cell_anno_key] == ref_celltype
+
+    ref_Xdata = Xdata[ref_flag, :]
 
     obs_Xdata = Xdata
     
