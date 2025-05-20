@@ -31,11 +31,28 @@ def extra_preprocess(adata, ref_celltype, cluster_key='cell_type',
     else:
         Xmtx = adata.X
     
-    if ref_celltype not in list(adata.obs[cluster_key]):
-        print("Error: %s not exist as ref cell type" %(ref_celltype))
-        return None
-        
-    _is_ref = adata.obs[cluster_key] == ref_celltype
+    # if ref_celltype not in list(adata.obs[cluster_key]):
+        # print("Error: %s not exist as ref cell type" %(ref_celltype))
+        # return None
+
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        missing_items = [item for item in ref_celltype if item not in list(adata.obs[cluster_key])]
+        if missing_items:
+            print("Error: The following items do not exist as ref cell types: %s" % (", ".join(missing_items)))
+            return None
+    else:
+        if ref_celltype not in list(adata.obs[cluster_key]):
+            print("Error: %s does not exist as a ref cell type" % (ref_celltype))
+            return None  
+
+    # _is_ref = adata.obs[cluster_key] == ref_celltype
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        _is_ref = adata.obs[cluster_key].isin(ref_celltype)
+    else:
+        _is_ref = adata.obs[cluster_key] == ref_celltype
+
     adata.var['ref_avg'] = Xmtx[_is_ref, :].mean(axis=0)
     adata.obs['counts_ratio'] = Xmtx.sum(axis=1) / adata.var['ref_avg'].sum()
 
@@ -108,11 +125,27 @@ def extra_preprocess2(adata, ref_celltype, cluster_key='cell_type',
     else:
         Xmtx = adata.X
 
-    if ref_celltype not in list(adata.obs[cluster_key]):
-        print("Error: %s not exist as ref cell type" %(ref_celltype))
-        return None
-        
-    _is_ref = adata.obs[cluster_key] == ref_celltype
+    # if ref_celltype not in list(adata.obs[cluster_key]):
+        # print("Error: %s not exist as ref cell type" %(ref_celltype))
+        # return None
+
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        missing_items = [item for item in ref_celltype if item not in list(adata.obs[cluster_key])]
+        if missing_items:
+            print("Error: The following items do not exist as ref cell types: %s" % (", ".join(missing_items)))
+            return None
+    else:
+        if ref_celltype not in list(adata.obs[cluster_key]):
+            print("Error: %s does not exist as a ref cell type" % (ref_celltype))
+            return None 
+
+    # _is_ref = adata.obs[cluster_key] == ref_celltype
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        _is_ref = adata.obs[cluster_key].isin(ref_celltype)
+    else:
+        _is_ref = adata.obs[cluster_key] == ref_celltype
 
     sorted_indices = np.argsort(adata.obsp['connectivities'], axis = -1) # cell*cell
     sorted_ref_indices = sorted_indices[:, _is_ref] # cell* ref_cell
@@ -198,7 +231,12 @@ def NMF_confounder(Xdata,
         Xdata_norm = Xdata.copy()
     
     ## NMF modelling
-    _is_ref = Xdata_norm.obs[anno_key] == ref_celltype
+    # _is_ref = Xdata_norm.obs[anno_key] == ref_celltype
+    # modified for multiple ref_celltype
+    if isinstance(ref_celltype, list):
+        _is_ref = Xdata_norm.obs[anno_key].isin(ref_celltype)
+    else:
+        _is_ref = Xdata_norm.obs[anno_key] == ref_celltype
 
     _X_norm = np.array(Xdata_norm.X) + 0.0
     
