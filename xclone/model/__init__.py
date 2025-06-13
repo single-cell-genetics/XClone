@@ -122,3 +122,24 @@ from .xclone_combine_wrap import run_combine, run_combine_plot
 
 ## debug-develop-improvement
 from ._HMM import Model_NB, HMM_Frame
+
+
+## RDR_gaussian
+
+### HMM
+from ._RDR_gaussian_HMM import calculate_z_post_parallel
+
+### preprocessing and smoothing
+from ._RDR_gaussian_base import preprocess_adaptive_baseline, WMA_smoothing, denoise
+
+### GMM
+from ._RDR_gaussian_base import compute_gaussian_probabilities
+
+### probability smoothing
+from ._RDR_gaussian_base import smooth_and_normalize, smooth_anndata_layer, low_rank_approximation, knn_smooth_prob_layer
+
+### plot
+from ._RDR_gaussian_base import run_RDR_gaussian_plot
+
+### RDR Gaussian
+from .xclone_rdr_gaussian import run_RDR_gaussian
