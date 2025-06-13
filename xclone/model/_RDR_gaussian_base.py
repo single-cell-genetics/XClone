@@ -90,6 +90,13 @@ def preprocess_adaptive_baseline(
     normal_cells = log_normalized[~is_not_normal, :]
     all_cells = log_normalized
 
+    # test if number of normal cells is less than k
+    if normal_cells.shape[0] < k:
+        # If not enough normal cells, use all available normal cells
+        k = normal_cells.shape[0]
+        print(f"Warning: Only {normal_cells.shape[0]} normal cells available, using k={k} for adaptive baseline.")
+
+
     # Build KDTree and query k nearest normal cells for each cell
     kdtree = KDTree(normal_cells)
     distances, indices = kdtree.query(all_cells, k=k)
@@ -300,6 +307,13 @@ def compute_gaussian_probabilities(
     # Calculate the mean and variance for each gene
     mean = np.mean(ref_data, axis=0)
     gene_variance = np.var(ref_data, axis=0)
+
+    # debug 
+    print("variance of genes:", gene_variance)
+
+    # add a small value to avoid division by zero when necessary
+    gene_variance = np.where(gene_variance < 1e-6, 1e-6, gene_variance)
+    print("variance of genes after clip:", gene_variance)
 
     # Prepare data for all cells
     all_data = tmp_adata.layers[layer]

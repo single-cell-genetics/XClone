@@ -15,7 +15,7 @@ from .smoothing import make_WMA_connectivity
 
 import gc
 
-def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file = None):
+def run_RDR_gaussian(RDR_adata, verbose = True, config_file = None):
     """
     Run the RDR (Read Depth Ratio) analysis on the provided annotated data.
 
@@ -34,8 +34,6 @@ def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file 
             The annotated data matrix on which the RDR analysis will be performed.
         verbose : bool, optional
             If True, prints detailed information about the process. Default is True.
-        run_verbose : bool, optional
-            If True, provides verbose output during the run. Default is True.
         config_file : xclone.XCloneConfig or None, optional
             The XClone configuration object. If None, the default settings in XClone-RDR will be used.
             Default is None.
@@ -60,14 +58,14 @@ def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file 
             import xclone
             
             # Run RDR analysis with default settings
-            RDR_Xdata = xclone.model.run_RDR_gaussian(RDR_adata, verbose=True, run_verbose=True)
+            RDR_Xdata = xclone.model.run_RDR_gaussian(RDR_adata, verbose=True)
             
             # Run RDR analysis with a custom configuration object
             xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "RDR_gaussian")
             xconfig.outdir = out_dir
             #... other specified parameters in `xconfig`
             xconfig.display()
-            RDR_Xdata = xclone.model.run_RDR_gaussian(RDR_adata, verbose=True, run_verbose=True, config_file=xconfig)
+            RDR_Xdata = xclone.model.run_RDR_gaussian(RDR_adata, verbose=True, config_file=xconfig)
     
     """
     ## settings
@@ -161,7 +159,7 @@ def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file 
     main_logger.info("XClone RDR module Started")
     start_time = datetime.now(timezone.utc)
 
-    if run_verbose:
+    if verbose:
         print("[XClone RDR module running]************************")
     
     if exclude_XY:
@@ -224,7 +222,8 @@ def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file 
                                                           ref_celltype=ref_celltype,
                                                           k=ab_k_neighbors, 
                                                           pseudo_count=ab_pseudo_count, 
-                                                          verbose=False, plot=False)
+                                                          verbose=False, 
+                                                          plot=False)
 
     ## WMA smoothing
     _WMA_mat = make_WMA_connectivity(RDR_adata, chrom_key=WMA_smooth_key, window_size=WMA_window_size)
@@ -247,6 +246,9 @@ def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file 
                                                                         cell_anno_key=cell_anno_key,
                                                                         ref_celltype=ref_celltype,
                                                                         c_k=c_k)
+    if verbose:
+        print("[XClone RDR module] GMM probabilities calculated.")
+        print("[XClone RDR module] Layer '%s' contains the GMM probabilities." % layer_name)
 
     # HMM
     z_post_all = xclone.model.calculate_z_post_parallel(RDR_adata, start_prob, trans_prob)
@@ -256,10 +258,18 @@ def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file 
     z_post_all = xclone.model.calculate_z_post_parallel(RDR_adata, start_prob, trans_prob, layer='post_HMM_prob')
     RDR_adata.layers['post_HMM_prob_2'] = z_post_all
 
+    if verbose:
+        print("[XClone RDR module] HMM posterior probabilities calculated.")
+        print("[XClone RDR module] Layer 'post_HMM_prob' contains the HMM posterior probabilities.")
+        print("[XClone RDR module] Layer 'post_HMM_prob_2' contains the 2nd iteration of HMM posterior probabilities.")
+
     ## denoise
     RDR_adata, layer_name = xclone.model.smooth_anndata_layer(RDR_adata, 
                                                   layer='post_HMM_prob_2',
                                                   method='gauss')
+    if verbose:
+        print("[XClone RDR module] HMM posterior probabilities smoothed.")
+        print("[XClone RDR module] Layer '%s' contains the smoothed HMM posterior probabilities." % layer_name)
 
     ## optional low rank
     if low_rank:
@@ -297,7 +307,7 @@ def run_RDR_gaussian(RDR_adata, verbose = True, run_verbose = True, config_file 
         rdr_plot_vmax = config.rdr_plot_vmax
         set_figtitle = config.set_figtitle
 
-        if run_verbose:
+        if verbose:
             print("[XClone plotting]")
         if plot_cell_anno_key is None:
             plot_cell_anno_key = cell_anno_key
