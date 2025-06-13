@@ -226,11 +226,16 @@ def run_RDR_gaussian(RDR_adata, verbose = True, config_file = None):
                                                           plot=False)
 
     ## WMA smoothing
-    _WMA_mat = make_WMA_connectivity(RDR_adata, chrom_key=WMA_smooth_key, window_size=WMA_window_size)
-    RDR_adata.varp['WMA_connect'] = _WMA_mat
-    RDR_adata = xclone.model.WMA_smoothing(RDR_adata, method='wma')
+    RDR_adata = xclone.model.WMA_smooth(RDR_adata, 
+                                          layer='log_ratio_ab', 
+                                          out_layer='WMA_smoothed_log_ratio_ab', 
+                                          window_size = WMA_window_size,
+                                          chrom_key = WMA_smooth_key, 
+                                          verbose=False)
     # default start layer is 'log_ratio_ab'
     # default out layer is 'WMA_smoothed_log_ratio_ab'
+    print("[XClone RDR module] WMA smoothing applied, smoothed layer saved to 'WMA_smoothed_log_ratio_ab'.")
+    # WMA_smooth in smoothing.py
 
     ## denoise
     # default start layer is 'WMA_smoothed_log_ratio_ab'
