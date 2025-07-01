@@ -328,6 +328,118 @@ class RDR_General_config():
         self.rdr_plot_vmax = 0.7
         self.set_figtitle = True
 
+class RDR_gaussian_General_config():
+    """
+    General configuration settings for RDR_gaussian
+    Adapted from RDR_General_config for Gaussian-based RDR analysis.
+
+    This class manages the configuration settings for RDR analysis, particularly
+    for 10X scRNA-seq data, including transformation options, filtering criteria,
+    marker gene settings, GLM fitting settings, smoothing parameters, and plotting preferences.
+
+    Attributes
+    ----------
+
+        smart_transform : bool
+            Flag to apply smart transformation (default is False).
+        filter_ref_ave : float
+            Threshold for filtering based on reference average (default is 0.5).
+        min_gene_keep_num : int
+            Minimum number of genes to keep (default is 3000).
+        multi_refcelltype : bool
+            Flag to use multiple reference cell types.
+        marker_group_anno_key : str or None
+            Annotation key for marker groups.
+        get_marker_genes : bool
+            Flag to retrieve marker genes (default is True).
+        top_n_marker : int
+            Number of top marker genes to select (default is 15).
+        remove_marker : bool
+            Flag to remove marker genes (default is True).
+        fit_GLM_libratio : bool
+            Flag to fit GLM using library ratio (default is False, to use counts ratio).
+        select_normal_chr_num : int
+            Number of normal chromosomes to select (default is 4).
+        dispersion_celltype : str or None
+            Cell type for dispersion calculation.
+        gene_exp_group : int
+            Expression group for gene analysis (default is 1).
+        gene_exp_ref_log : bool
+            Flag to use log transformation for reference expression (should active when exp_group > 1).
+        guide_cnv_ratio : float or None
+            Ratio for guiding CNV.
+        guide_chr_anno_key : str
+            Annotation key for chromosome guidance (default is "chr_arm").
+        guide_qt_lst : list of float
+            List of quantiles for guidance (default is [1e-04, 0.96, 0.99] for "chr_arm",
+            We recommend try [0.00001, 0.96, 0.999] for "chr").
+        WMA_window_size : int
+            Window size for Weighted Moving Average (WMA) smoothing (default is 40).
+        WMA_smooth_key : str
+            Key for WMA smoothing (default is "chr_arm").
+        xclone_plot : bool
+            Flag to enable XClone plotting (default is True).
+        plot_cell_anno_key : str or None
+            Annotation key for plotting cell annotations.
+        rdr_plot_vmin : float
+            Minimum value for RDR plot color scale.
+        rdr_plot_vmax : float
+            Maximum value for RDR plot color scale.
+        set_figtitle : bool
+            Flag to set figure titles in plots (default is True).
+        """
+    def __init__(self):
+        """
+        Initialize the class RDR_General_config() class with default configuration parameters.
+
+        Parameters
+        ----------
+
+            None
+        """
+        self.smart_transform = False
+        self.filter_ref_ave = 0.5
+        self.min_gene_keep_num = 3000
+        self.multi_refcelltype = False
+        self.marker_group_anno_key = None
+        self.get_marker_genes = True
+        self.top_n_marker = 15
+        self.remove_marker = True
+        self.fit_GLM_libratio = False # default use counts ratio
+        self.select_normal_chr_num = 4
+        self.dispersion_celltype = None
+        self.gene_exp_group = 1
+        # active when exp_group larger than 2
+        self.gene_exp_ref_log = True
+        self.guide_cnv_ratio = None
+        self.guide_chr_anno_key = "chr_arm"
+        self.guide_qt_lst = [1e-04, 0.96, 0.99]
+        ## smoothing
+        self.WMA_window_size = 40
+        self.WMA_smooth_key = "chr_arm"
+        # Notes: WMA_smooth_key may update to predefined segment for simple clones
+        
+        ## RDR plotting
+        self.xclone_plot = True
+        self.plot_cell_anno_key =  None
+        self.rdr_plot_vmin = -0.7
+        self.rdr_plot_vmax = 0.7
+        self.set_figtitle = True
+
+        # adaptive baseline
+        self.ab_k_neighbors = 5
+        self.ab_pseudo_count = 1e-6
+
+        # denoise
+        self.denoise_sd_amplifier = 1.5
+
+        # GMM
+        self.c_k = np.array([0.5, 1, 1.5])
+
+        # low rank
+        self.low_rank = True
+        self.low_rank_n_components = 10
+
 
 class BAF_General_config():
     """
@@ -591,7 +703,7 @@ class HMM_Configs():
         
         self.HMM_brk = "chr_arm"
         
-        if self.module == "RDR":
+        if self.module == "RDR" or self.module == "RDR_gaussian":
             self.start_prob = np.array([0.1, 0.8, 0.1])
             self.trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
 
@@ -810,7 +922,7 @@ class XCloneConfig():
         self.dataset_name = dataset_name
         self.set_smartseq = set_smartseq
         self.set_spatial = set_spatial
-        if module in ["RDR", "BAF", "Combine"]:
+        if module in ["RDR", "BAF", "Combine", "RDR_gaussian"]:
             pass
         else:
             print(module)
@@ -820,6 +932,9 @@ class XCloneConfig():
         self.module = module
         if self.module == "RDR":
             RDR_General_config.__init__(self)
+            HMM_Configs.__init__(self)
+        if self.module == "RDR_gaussian":
+            RDR_gaussian_General_config.__init__(self)
             HMM_Configs.__init__(self)
         if self.module == "BAF":
             BAF_General_config.__init__(self, baf_bias_mode)
