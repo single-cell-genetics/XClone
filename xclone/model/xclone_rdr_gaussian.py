@@ -289,6 +289,7 @@ def run_RDR_gaussian(RDR_adata, verbose = True, config_file = None):
         print("[XClone hint] Low rank approximation applied to the HMM posterior probabilities.")
         print("[XClone hint] Layer '%s' contains the low rank approximation of HMM posterior probabilities." % layer_name)
 
+    RDR_adata.layers['posterior_mtx'] = RDR_adata.layers[layer_name]
     
     ## output after CNV calling, save data with CNV posterior.
     try:
