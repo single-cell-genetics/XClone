@@ -99,7 +99,7 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
     return ad_sum, ad_sum1, dp_sum, Z, thetas, _logLik_new
         
     
-    
+'''
 def Global_Phasing(thetas, step_size=1, n_prefix=1):
     """
     Phase the medium-sized bins into large scale regions, e.g., whole 
@@ -132,6 +132,60 @@ def Global_Phasing(thetas, step_size=1, n_prefix=1):
             # print(thetas.shape[0], _dist_tmp0, _dist_tmp1)
             
             is_flips[:-1]  = is_filps_pre
+            distances[:-1] = distances_pre
+            if _dist_tmp0 < _dist_tmp1:
+                is_flips[-1] = False
+                distances[-1]  = _dist_tmp0 + 0
+                thetas_new[-1, :] = theta_tmp0 + 0
+            else:
+                is_flips[-1] = True
+                distances[-1]  = _dist_tmp1 + 0
+                thetas_new[-1, :] = theta_tmp1 + 0
+            
+            return is_flips, distances, thetas_new
+    
+    ## Return Dynamical programming results
+    return _Dyna_Programming(thetas)
+
+'''
+
+
+def Global_Phasing(thetas, step_size=1, n_prefix=1, n_neighbors=5):
+    """
+    Phase the medium-sized bins into large scale regions, e.g., whole 
+    chromosome. The assumption here is that the allelic ratio is similar within
+    a neighborhood. A dynamic programming for recursive optimization is used for
+    this.
+
+    Parameters
+    ----------
+    thetas : np.ndarray
+        Array of shape (n_bins, n_states)
+    n_neighbors : int
+        Number of previous bins to average for distance calculation
+    """
+    def _Dyna_Programming(thetas):
+        """recursive optimization with neighborhood averaging"""
+        is_flips = np.zeros(thetas.shape[0], bool)
+        distances = np.zeros(thetas.shape[0])
+        thetas_new = thetas + 0
+        
+        if thetas.shape[0] == 1:
+            return is_flips, distances, thetas_new
+        else:
+            is_flips_pre, distances_pre, thetas_pre = _Dyna_Programming(thetas[:-1, :])
+            
+            # Compute average of previous n_neighbors bins
+            n_avail = min(n_neighbors, thetas_pre.shape[0])
+            avg_theta_pre = thetas_pre[-n_avail:, :].mean(axis=0)
+            
+            theta_tmp0 = 0 + thetas[-1, :]
+            theta_tmp1 = 1 - thetas[-1, :]
+            
+            _dist_tmp0 = np.sum((theta_tmp0 - avg_theta_pre) ** 2)
+            _dist_tmp1 = np.sum((theta_tmp1 - avg_theta_pre) ** 2)
+
+            is_flips[:-1]  = is_flips_pre
             distances[:-1] = distances_pre
             if _dist_tmp0 < _dist_tmp1:
                 is_flips[-1] = False
