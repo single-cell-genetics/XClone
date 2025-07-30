@@ -337,6 +337,7 @@ def process_bin_id(Xdata, region_key = "chr", verbose = False):
     return update_Xdata
 
 ### global phasing
+'''
 def BAF_Global_phasing(Xdata, bin_Xdata):
     """
     ##
@@ -405,6 +406,98 @@ def BAF_Global_phasing(Xdata, bin_Xdata):
     print("[XClone-Global_phasing] time_used: " + "{:.2f}".format(elapsed_sec) + "seconds")
 
     del Xdata
+    gc.collect()
+    
+    return update_Xdata, bin_Xdata
+
+'''
+    
+def BAF_Global_phasing(Xdata, bin_Xdata):
+    """
+    Global phasing per chromosome.
+    For each chromosome, perform global phasing on the corresponding theta_bin,
+    then combine is_flips for all chromosomes.
+    """
+
+    start_t = datetime.datetime.now()
+
+    # Prepare
+    chr_list = bin_Xdata.var['chr'].drop_duplicates(keep="first")
+    theta_bin = Xdata.obsm["theta_bin"]
+    chr_var = bin_Xdata.var['chr']
+
+    is_flips_all = []
+    distances_all = []
+    theta_new_all = []
+
+    for chr_ in chr_list:
+        chr_mask = chr_var == chr_
+        # Get the indices for this chromosome
+        chr_indices = np.where(chr_mask)[0]
+        # Get the theta_bin for this chromosome (shape: n_bins_chr, n_cells)
+        theta_chr = theta_bin[:, chr_indices]
+        # Global phasing for this chromosome
+        is_flips_chr, distances_chr, theta_new_chr = Global_Phasing(theta_chr.T)
+        is_flips_all.append(is_flips_chr)
+        # distances_all.append(distances_chr)
+        # theta_new_all.append(theta_new_chr)
+
+    # Concatenate results for all chromosomes
+    is_flips = np.concatenate(is_flips_all)
+    # distances = np.concatenate(distances_all)
+    # theta_new = np.concatenate(theta_new_all, axis=0)
+
+    # The rest of the function is unchanged
+    bin_value_counts = Xdata.var["bin_idx_cum"].value_counts()
+    bin_item = Xdata.var["bin_idx_cum"].drop_duplicates(keep="first")
+    
+    if is_flips.shape[0] == bin_item.shape[0]:
+        pass
+    else:
+        raise ValueError("[XClone] Pls check bin_item!")
+
+    for i, bin_id in enumerate(bin_item):
+        if i == 0:
+            gene_flip = np.repeat(is_flips[i], bin_value_counts[bin_id])
+        else:
+            gene_flip = np.append(gene_flip, np.repeat(is_flips[i], bin_value_counts[bin_id]))
+
+    # get gene_flip for AD_Phased
+    AD_phased = Xdata.layers["AD_phased"]
+    BD_phased = Xdata.layers["DP"] - Xdata.layers["AD_phased"]
+    AD_global_phased = AD_phased + 0
+    AD_global_phased[:, gene_flip] = BD_phased[: , gene_flip] + 0
+
+    update_Xdata = Xdata.copy()
+    update_Xdata.layers["AD_global_phased"] = AD_global_phased
+    update_Xdata.var["allele_flip_global"] = gene_flip
+    print("[XClone hint] get allele flip status from global phasing.")
+    if {'allele_flip_local', 'allele_flip_global'}.issubset(update_Xdata.var.columns):
+        update_Xdata.var["allele_flip"] =  update_Xdata.var["allele_flip_local"] ^ update_Xdata.var["allele_flip_global"]
+        print("[XClone hint] get final allele flip status.")
+
+    # apply global phasing method on AD_phased bins
+    ad_bin_softcnt = bin_Xdata.layers["ad_bin_softcnt"]
+    ad_bin = bin_Xdata.layers["ad_bin"]
+    dp_bin = bin_Xdata.layers["dp_bin"]
+    
+    bd_bin_softcnt = dp_bin - ad_bin_softcnt
+    ad_bin_softcnt_phased = ad_bin_softcnt + 0
+    ad_bin_softcnt_phased[: , is_flips] = bd_bin_softcnt[:, is_flips] + 0
+
+    bd_bin = dp_bin - ad_bin
+    ad_bin_phased = ad_bin + 0
+    ad_bin_phased[: , is_flips] = bd_bin[:, is_flips] + 0
+
+    bin_Xdata.layers["ad_bin_softcnt_phased"] = ad_bin_softcnt_phased
+    bin_Xdata.layers["ad_bin_phased"] = ad_bin_phased
+
+    end_t = datetime.datetime.now()
+    elapsed_sec = (end_t - start_t).total_seconds()
+    print("[XClone-Global_phasing] time_used: " + "{:.2f}".format(elapsed_sec) + "seconds")
+
+    del Xdata
+    import gc
     gc.collect()
     
     return update_Xdata, bin_Xdata

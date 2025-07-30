@@ -764,7 +764,7 @@ class Smartseq_Config():
             None
         """
 
-        if self.module == "RDR":
+        if self.module == "RDR" or self.module == "RDR_gaussian":
             self.smart_transform = True
             self.filter_ref_ave = 1.8
             ## HMM related
@@ -836,7 +836,7 @@ class Spatial_Config():
             None
         """
 
-        if self.module == "RDR":
+        if self.module == "RDR" or self.module == "RDR_gaussian":
             # self.spatail_imputation = True
             self.smart_transform = False
             self.spatial_transform = True

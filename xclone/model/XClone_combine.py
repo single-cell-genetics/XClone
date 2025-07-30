@@ -492,19 +492,26 @@ def CNV_prob_merge(Xdata,
     ## BAF 3 states
     if prob_.shape[-1] == 3:
         copy_loss = prob_[:,:,0,:].sum(axis = -1)
-        loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        # loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        loh = np.maximum(prob_[:,:,1,0], prob_[:,:,1,2])
         copy_neutral = prob_[:,:,1,1] 
         copy_gain = prob_[:,:,2,:].sum(axis = -1)
     
     ## BAF 5 states
     if prob_.shape[-1] == 5:
         copy_loss = prob_[:,:,0,:].sum(axis = -1)
-        loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        # loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        loh = np.maximum(prob_[:,:,1,0], prob_[:,:,1,4])
         copy_neutral = prob_[:,:,1,2]
-        copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        # copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        copy_gain_less = np.maximum(prob_[:,:,1,1], prob_[:,:,1,3])
         copy_gain = prob_[:,:,2,:].sum(axis = -1) + copy_gain_less
 
     prob_merge = np.stack([copy_loss, loh, copy_neutral, copy_gain], axis = -1)
+
+    # Normalize
+    prob_merge = prob_merge / prob_merge.sum(axis=-1, keepdims=True)
+
     return prob_merge
 
 def CNV_prob_merge2(Xdata,
@@ -522,7 +529,8 @@ def CNV_prob_merge2(Xdata,
     ## BAF 3 states
     if prob_.shape[-1] == 3:
         copy_loss = prob_[:,:,0,:].sum(axis = -1)
-        loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        # loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        loh = np.maximum(prob_[:,:,1,0], prob_[:,:,1,2])
         copy_loss = copy_loss + loh
         copy_neutral = prob_[:,:,1,1] 
         copy_gain = prob_[:,:,2,:].sum(axis = -1)
@@ -530,25 +538,34 @@ def CNV_prob_merge2(Xdata,
     ## BAF 5 states
     if prob_.shape[-1] == 5:
         copy_loss = prob_[:,:,0,:].sum(axis = -1)
-        loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        # loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        loh = np.maximum(prob_[:,:,1,0], prob_[:,:,1,4])
         copy_loss = copy_loss + loh
         copy_neutral = prob_[:,:,1,2]
-        copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        # copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        copy_gain_less = np.maximum(prob_[:,:,1,1], prob_[:,:,1,3])
         copy_gain = prob_[:,:,2,:].sum(axis = -1) + copy_gain_less
 
     prob_merge = np.stack([copy_loss, loh, copy_neutral, copy_gain], axis = -1)
+
+    # Normalize
+    prob_merge = prob_merge / prob_merge.sum(axis=-1, keepdims=True)
+
     return prob_merge
+
 
 def CNV_prob_merge_for_plot(Xdata,
                             Xlayer = "corrected_prob"):
     """
     Merge states prob for more detailed evaluation and visualization.
+    Uses np.maximum for loh and copy_gain_less for both 3 and 5 states.
+    Normalizes merged probabilities so that sum across last axis is 1.
     """
     prob_ = Xdata.layers[Xlayer].copy()
     ## BAF 3 states
     if prob_.shape[-1] == 3:
         copy_loss = prob_[:,:,0,:].sum(axis = -1)
-        loh = prob_[:,:,1,0] + prob_[:,:,1,2]
+        loh = np.maximum(prob_[:,:,1,0], prob_[:,:,1,2])
         copy_neutral = prob_[:,:,1,1] 
         copy_gain = prob_[:,:,2,:].sum(axis = -1)
 
@@ -561,9 +578,9 @@ def CNV_prob_merge_for_plot(Xdata,
     ## BAF 5 states
     if prob_.shape[-1] == 5:
         copy_loss = prob_[:,:,0,:].sum(axis = -1)
-        loh = prob_[:,:,1,0] + prob_[:,:,1,4]
+        loh = np.maximum(prob_[:,:,1,0], prob_[:,:,1,4])
         copy_neutral = prob_[:,:,1,2]
-        copy_gain_less = prob_[:,:,1,1] + prob_[:,:,1,3]
+        copy_gain_less = np.maximum(prob_[:,:,1,1], prob_[:,:,1,3])
         copy_gain = prob_[:,:,2,:].sum(axis = -1) + copy_gain_less
 
         copy_loss_A = prob_[:,:,0,3] + prob_[:,:,0,4]
@@ -573,12 +590,20 @@ def CNV_prob_merge_for_plot(Xdata,
         loh_B = prob_[:,:,1,0]
 
     plot_prob_merge1 = np.stack([copy_loss, loh, copy_neutral, copy_gain], axis = -1)
-    Xdata.layers["plot_prob_merge1"] = plot_prob_merge1
+    plot_prob_merge1 = plot_prob_merge1 / plot_prob_merge1.sum(axis=-1, keepdims=True)
+
     plot_prob_merge2 = np.stack([copy_loss_A, copy_loss_B, loh, copy_neutral, copy_gain], axis = -1)
-    Xdata.layers["plot_prob_merge2"] = plot_prob_merge2
+    plot_prob_merge2 = plot_prob_merge2 / plot_prob_merge2.sum(axis=-1, keepdims=True)
+
     plot_prob_merge3 = np.stack([copy_loss_A, copy_loss_B, loh_A, loh_B, copy_neutral, copy_gain], axis = -1)
-    Xdata.layers["plot_prob_merge3"] = plot_prob_merge3
+    plot_prob_merge3 = plot_prob_merge3 / plot_prob_merge3.sum(axis=-1, keepdims=True)
+
     plot_prob_merge4 = np.stack([copy_loss, loh_A, loh_B, copy_neutral, copy_gain], axis = -1)
+    plot_prob_merge4 = plot_prob_merge4 / plot_prob_merge4.sum(axis=-1, keepdims=True)
+
+    Xdata.layers["plot_prob_merge1"] = plot_prob_merge1
+    Xdata.layers["plot_prob_merge2"] = plot_prob_merge2
+    Xdata.layers["plot_prob_merge3"] = plot_prob_merge3
     Xdata.layers["plot_prob_merge4"] = plot_prob_merge4
     
     return Xdata

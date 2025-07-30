@@ -245,6 +245,7 @@ def run_RDR_gaussian(RDR_adata, verbose = True, config_file = None):
                                                  ref_celltype=ref_celltype,
                                                  sd_amplifier=denoise_sd_amplifier)    
     denoised_layer = layer_name
+
     ## GMM
     RDR_adata, layer_name = xclone.model.compute_gaussian_probabilities(RDR_adata, 
                                                                         layer=layer_name,
@@ -276,7 +277,7 @@ def run_RDR_gaussian(RDR_adata, verbose = True, config_file = None):
         print("[XClone RDR module] HMM posterior probabilities smoothed.")
         print("[XClone RDR module] Layer '%s' contains the smoothed HMM posterior probabilities." % layer_name)
 
-    ## optional low rank
+    ## recommended low rank
     if low_rank:
         RDR_adata, layer_name = xclone.model.low_rank_approximation(RDR_adata, 
                                                         layer=layer_name,
@@ -288,6 +289,7 @@ def run_RDR_gaussian(RDR_adata, verbose = True, config_file = None):
         print("[XClone hint] Low rank approximation applied to the HMM posterior probabilities.")
         print("[XClone hint] Layer '%s' contains the low rank approximation of HMM posterior probabilities." % layer_name)
 
+    RDR_adata.layers['posterior_mtx'] = RDR_adata.layers[layer_name]
     
     ## output after CNV calling, save data with CNV posterior.
     try:
