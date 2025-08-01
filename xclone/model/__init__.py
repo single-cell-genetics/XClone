@@ -71,7 +71,7 @@ from .HMM_NB import calculate_Xemm_probTry
 
 ## BAF module
 from ._BAF_base import BAF_Local_phasing
-from ._BAF_base import BAF_Global_phasing
+from ._BAF_base import BAF_Global_phasing, BAF_Global_phasing_rev
 from ._BAF_base import BAF_fillna
 from ._BAF_base import BAF_remove_ref
 
