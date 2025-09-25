@@ -53,52 +53,53 @@ def process_bin(idx, AD, DP):
     RV_bin['logLik'] = _logLik_new
     return RV_bin
 
-def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
+def process_region(AD_region, DP_region, phasing_len = 100, nproc=1, last_bin_min = 30):
     """
     Func:
     region: default chr_based. 
     """
     n_bins = int(AD_region.shape[0] / phasing_len)
     last_bin_len = AD_region.shape[0] % phasing_len
+
+    # merge last bin if too short
+    merge_last_bin = last_bin_len < last_bin_min and last_bin_len > 0
     
+
     ## do phasing
     if nproc > 1:
         result = []
-        pool = multiprocessing.Pool(processes = nproc)
-        if last_bin_len == 0:
-            for ib in range(n_bins):
-                idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                result.append(pool.apply_async(process_bin,(ib, AD_region[idx, :], DP_region[idx, :]), 
-                callback = None))
-            
-        else:
-            for ib in range(n_bins + 1):
-                if ib == n_bins:
-                    idx = range(-last_bin_len, 0)
-                else:
-                    idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                result.append(pool.apply_async(process_bin,(ib, AD_region[idx, :], DP_region[idx, :]), 
-                callback = None))
+        pool = multiprocessing.Pool(processes=nproc)
+
+        for ib in range(n_bins):
+            if merge_last_bin and ib == n_bins - 1:
+                idx = range(ib * phasing_len, AD_region.shape[0])
+            else:
+                idx = range(ib * phasing_len, (ib + 1) * phasing_len)
+            result.append(pool.apply_async(process_bin, (ib, AD_region[idx, :], DP_region[idx, :]), callback=None))
+
+        if not merge_last_bin and last_bin_len > 0:
+            idx = range(-last_bin_len, 0)
+            result.append(pool.apply_async(process_bin, (n_bins, AD_region[idx, :], DP_region[idx, :]), callback=None))
 
         pool.close()
         pool.join()
         result = [res.get() for res in result]
+
     else:
         result = []
-        if last_bin_len == 0:
-            for ib in range(n_bins):
-                idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :])
-                result.append(RV_bin)
-        else:
-            for ib in range(n_bins + 1):
-                if ib == n_bins:
-                    idx = range(-last_bin_len, 0)
-                else:
-                    idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :])
-                result.append(RV_bin)
-                
+        for ib in range(n_bins):
+            if merge_last_bin and ib == n_bins - 1:
+                idx = range(ib * phasing_len, AD_region.shape[0])
+            else:
+                idx = range(ib * phasing_len, (ib + 1) * phasing_len)
+            RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :])
+            result.append(RV_bin)
+
+        if not merge_last_bin and last_bin_len > 0:
+            idx = range(-last_bin_len, 0)
+            RV_bin = process_bin(n_bins, AD_region[idx, :], DP_region[idx, :])
+            result.append(RV_bin)
+      
     
     ## resolve result
     for i, RV_bin in zip(range(len(result)), result):
@@ -122,18 +123,16 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
             allele_flip_local = np.append(allele_flip_local, RV_bin["flip"])
 
     ## resolve results for global phasing input
-    RV_region = {}
-    RV_region["AD_phased"] = AD_phased
-
-    RV_region["bin_idx"] = bin_idx
-    RV_region["ad_bin_softcnt"] = ad_bin_softcnt
-    RV_region["ad_bin"] = ad_bin
-    RV_region["dp_bin"] = dp_bin
-    RV_region["theta_bin"] = theta_bin
-    RV_region["allele_flip_local"] = allele_flip_local
-    
-    ## for global phasing record
-    RV_region["bin_idx_lst"] = bin_idx_lst
+    RV_region = {
+        "AD_phased": AD_phased,
+        "bin_idx": bin_idx,
+        "ad_bin_softcnt": ad_bin_softcnt,
+        "ad_bin": ad_bin,
+        "dp_bin": dp_bin,
+        "theta_bin": theta_bin,
+        "allele_flip_local": allele_flip_local,
+        "bin_idx_lst": bin_idx_lst
+    }
     # return AD_phased
     return RV_region
 
