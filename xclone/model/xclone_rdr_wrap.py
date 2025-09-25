@@ -26,7 +26,7 @@ def preview_RDR(RDR_adata,
     return None
 
 
-def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
+def run_RDR_prev(RDR_adata, verbose = True, run_verbose = True, config_file = None):
     """
     Run the RDR (Read Depth Ratio) analysis on the provided annotated data.
 

@@ -15,7 +15,7 @@ from .smoothing import make_WMA_connectivity
 
 import gc
 
-def run_RDR_gaussian(RDR_adata, verbose = True, config_file = None):
+def run_RDR(RDR_adata, verbose = True, config_file = None):
     """
     Run the RDR (Read Depth Ratio) analysis on the provided annotated data.
 

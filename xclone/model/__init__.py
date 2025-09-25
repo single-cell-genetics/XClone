@@ -111,7 +111,7 @@ from ._denoise import denoise_rdr_by_baf
 
 ## wrap
 from .xclone_rdr_wrap import preview_RDR
-from .xclone_rdr_wrap import run_RDR, run_RDR_plot, run_RDR_complex_plot
+from .xclone_rdr_wrap import run_RDR_prev, run_RDR_plot, run_RDR_complex_plot
 from .xclone_rdr_wrap import plot_processed_RDR
 
 from .xclone_baf_wrap import preview_BAF
@@ -142,4 +142,4 @@ from ._RDR_gaussian_base import smooth_and_normalize, smooth_anndata_layer, low_
 from ._RDR_gaussian_base import run_RDR_gaussian_plot
 
 ### RDR Gaussian
-from .xclone_rdr_gaussian import run_RDR_gaussian
+from .xclone_rdr_gaussian import run_RDR
