@@ -241,7 +241,7 @@ def bin_to_gene_mapping(BAF_merge_Xdata,
     RDR_Xdata.var["gene_index"] = [int(x) for x in RDR_Xdata.var.index]
     BAF_merge_Xdata.var["brk_gene_index"] = [int(x) for x in BAF_merge_Xdata.var.index]
     phasing_len = BAF_merge_Xdata.uns["local_phasing_len"]
-    last_item = BAF_merge_Xdata.var["brk_gene_index"][-1] + phasing_len
+    last_item = BAF_merge_Xdata.var["brk_gene_index"][-1] + phasing_len * 2 # * 2 for merge last bin in BAF local phasing
     brk_index = BAF_merge_Xdata.var["brk_gene_index"].copy().tolist() + [last_item]
 
     phasing_key = BAF_merge_Xdata.uns["local_phasing_key"]

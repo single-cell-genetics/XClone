@@ -237,7 +237,10 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                                              bin_nproc = bin_nproc,
                                                              feature_mode = feature_mode,
                                                              var_add = BAF_var_add)
+    
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
+
+    BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing_rev(BAF_adata, merge_Xdata)
     
     ### check coverage for bins
     merge_Xdata.var[(merge_Xdata.layers["dp_bin"].toarray().sum(axis=0) == 0)]
@@ -247,7 +250,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     merge_Xdata = xclone.pl.calculate_cell_BAF(merge_Xdata, 
                                                AD_key = "ad_bin", DP_key = "dp_bin", BAF_key = "BAF")
     merge_Xdata = xclone.pl.calculate_cell_BAF(merge_Xdata, 
-                                               AD_key = "ad_bin_phased", DP_key = "dp_bin", BAF_key = "BAF_phased")
+                                               AD_key = "ad_bin_phased_rev", DP_key = "dp_bin", BAF_key = "BAF_phased")
     xclone.model.BAF_fillna(merge_Xdata, Xlayer = "BAF_phased", out_layer = "fill_BAF_phased")
 
     ## smoothing
@@ -360,7 +363,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
         merge_Xdata = xclone.model.concentration_mapping(merge_Xdata, concentration_lower, concentration_upper)
 
     merge_Xdata = xclone.model.calculate_Xemm_prob_bb(merge_Xdata, 
-                                                      AD_key = "ad_bin_phased", DP_key = "dp_bin",
+                                                      AD_key = "ad_bin_phased_rev", DP_key = "dp_bin",
                                                       outlayer = "bin_phased_BAF_specific_center_emm_prob_log", 
                                                       states = used_specific_states,
                                                       states_num = BAF_states_num,
@@ -450,7 +453,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                theo_states= guide_theo_states, specific_BAF = "ref_BAF_phased")
         
         merge_Xdata_copy = xclone.model.calculate_Xemm_prob_bb(merge_Xdata_copy, 
-                                                      AD_key = "ad_bin_phased", DP_key = "dp_bin",
+                                                      AD_key = "ad_bin_phased_rev", DP_key = "dp_bin",
                                                       outlayer = "correct_emm_prob_log", 
                                                       states = used_specific_states,
                                                       gene_specific = gene_specific_concentration, 

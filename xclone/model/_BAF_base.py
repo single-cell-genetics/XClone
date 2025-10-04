@@ -53,52 +53,53 @@ def process_bin(idx, AD, DP):
     RV_bin['logLik'] = _logLik_new
     return RV_bin
 
-def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
+def process_region(AD_region, DP_region, phasing_len = 100, nproc=1, last_bin_min = 30):
     """
     Func:
     region: default chr_based. 
     """
     n_bins = int(AD_region.shape[0] / phasing_len)
     last_bin_len = AD_region.shape[0] % phasing_len
+
+    # merge last bin if too short
+    merge_last_bin = last_bin_len < last_bin_min and last_bin_len > 0
     
+
     ## do phasing
     if nproc > 1:
         result = []
-        pool = multiprocessing.Pool(processes = nproc)
-        if last_bin_len == 0:
-            for ib in range(n_bins):
-                idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                result.append(pool.apply_async(process_bin,(ib, AD_region[idx, :], DP_region[idx, :]), 
-                callback = None))
-            
-        else:
-            for ib in range(n_bins + 1):
-                if ib == n_bins:
-                    idx = range(-last_bin_len, 0)
-                else:
-                    idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                result.append(pool.apply_async(process_bin,(ib, AD_region[idx, :], DP_region[idx, :]), 
-                callback = None))
+        pool = multiprocessing.Pool(processes=nproc)
+
+        for ib in range(n_bins):
+            if merge_last_bin and ib == n_bins - 1:
+                idx = range(ib * phasing_len, AD_region.shape[0])
+            else:
+                idx = range(ib * phasing_len, (ib + 1) * phasing_len)
+            result.append(pool.apply_async(process_bin, (ib, AD_region[idx, :], DP_region[idx, :]), callback=None))
+
+        if not merge_last_bin and last_bin_len > 0:
+            idx = range(-last_bin_len, 0)
+            result.append(pool.apply_async(process_bin, (n_bins, AD_region[idx, :], DP_region[idx, :]), callback=None))
 
         pool.close()
         pool.join()
         result = [res.get() for res in result]
+
     else:
         result = []
-        if last_bin_len == 0:
-            for ib in range(n_bins):
-                idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :])
-                result.append(RV_bin)
-        else:
-            for ib in range(n_bins + 1):
-                if ib == n_bins:
-                    idx = range(-last_bin_len, 0)
-                else:
-                    idx = range(ib*phasing_len, (ib+1)*phasing_len)
-                RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :])
-                result.append(RV_bin)
-                
+        for ib in range(n_bins):
+            if merge_last_bin and ib == n_bins - 1:
+                idx = range(ib * phasing_len, AD_region.shape[0])
+            else:
+                idx = range(ib * phasing_len, (ib + 1) * phasing_len)
+            RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :])
+            result.append(RV_bin)
+
+        if not merge_last_bin and last_bin_len > 0:
+            idx = range(-last_bin_len, 0)
+            RV_bin = process_bin(n_bins, AD_region[idx, :], DP_region[idx, :])
+            result.append(RV_bin)
+      
     
     ## resolve result
     for i, RV_bin in zip(range(len(result)), result):
@@ -122,18 +123,16 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1):
             allele_flip_local = np.append(allele_flip_local, RV_bin["flip"])
 
     ## resolve results for global phasing input
-    RV_region = {}
-    RV_region["AD_phased"] = AD_phased
-
-    RV_region["bin_idx"] = bin_idx
-    RV_region["ad_bin_softcnt"] = ad_bin_softcnt
-    RV_region["ad_bin"] = ad_bin
-    RV_region["dp_bin"] = dp_bin
-    RV_region["theta_bin"] = theta_bin
-    RV_region["allele_flip_local"] = allele_flip_local
-    
-    ## for global phasing record
-    RV_region["bin_idx_lst"] = bin_idx_lst
+    RV_region = {
+        "AD_phased": AD_phased,
+        "bin_idx": bin_idx,
+        "ad_bin_softcnt": ad_bin_softcnt,
+        "ad_bin": ad_bin,
+        "dp_bin": dp_bin,
+        "theta_bin": theta_bin,
+        "allele_flip_local": allele_flip_local,
+        "bin_idx_lst": bin_idx_lst
+    }
     # return AD_phased
     return RV_region
 
@@ -501,6 +500,90 @@ def BAF_Global_phasing(Xdata, bin_Xdata):
     gc.collect()
     
     return update_Xdata, bin_Xdata
+
+def BAF_Global_phasing_rev(Xdata, bin_Xdata):
+    """
+    Global phasing per chromosome (reversed).
+    For each chromosome, reverse the bin order before performing global phasing,
+    then combine is_flips for all chromosomes.
+    """
+
+    start_t = datetime.datetime.now()
+
+    # Prepare
+    chr_list = bin_Xdata.var['chr'].drop_duplicates(keep="first")
+    theta_bin = Xdata.obsm["theta_bin"]
+    chr_var = bin_Xdata.var['chr']
+
+    is_flips_all = []
+
+    for chr_ in chr_list:
+        chr_mask = chr_var == chr_
+        chr_indices = np.where(chr_mask)[0]
+        # Reverse the bin indices for this chromosome
+        chr_indices_rev = chr_indices[::-1]
+        # Get reversed theta_bin (shape: n_bins_chr, n_cells)
+        theta_chr_rev = theta_bin[:, chr_indices_rev]
+        # Global phasing on reversed bins
+        is_flips_chr_rev, _, _ = Global_Phasing(theta_chr_rev.T)
+        # Reorder flips back to original bin order
+        is_flips_chr = is_flips_chr_rev[::-1]
+        is_flips_all.append(is_flips_chr)
+
+    # Concatenate results for all chromosomes
+    is_flips = np.concatenate(is_flips_all)
+
+    # Map flips to genes
+    bin_value_counts = Xdata.var["bin_idx_cum"].value_counts()
+    bin_item = Xdata.var["bin_idx_cum"].drop_duplicates(keep="first")
+
+    if is_flips.shape[0] != bin_item.shape[0]:
+        raise ValueError("[XClone] Pls check bin_item!")
+
+    gene_flip = np.concatenate([
+        np.repeat(is_flips[i], bin_value_counts[bin_id])
+        for i, bin_id in enumerate(bin_item)
+    ])
+
+    # Apply global phasing to AD_phased
+    AD_phased = Xdata.layers["AD_phased"]
+    BD_phased = Xdata.layers["DP"] - AD_phased
+    AD_global_phased = AD_phased.copy()
+    AD_global_phased[:, gene_flip] = BD_phased[:, gene_flip]
+
+    update_Xdata = Xdata.copy()
+    update_Xdata.layers["AD_global_phased_rev"] = AD_global_phased
+    update_Xdata.var["allele_flip_global_rev"] = gene_flip
+
+    print("[XClone hint] get allele flip status from reversed global phasing.")
+    if {'allele_flip_local', 'allele_flip_global_rev'}.issubset(update_Xdata.var.columns):
+        update_Xdata.var["allele_flip_rev"] = update_Xdata.var["allele_flip_local"] ^ update_Xdata.var["allele_flip_global_rev"]
+        print("[XClone hint] get final allele flip status (reversed).")
+
+    # Apply global phasing to bin-level AD
+    ad_bin_softcnt = bin_Xdata.layers["ad_bin_softcnt"]
+    ad_bin = bin_Xdata.layers["ad_bin"]
+    dp_bin = bin_Xdata.layers["dp_bin"]
+
+    bd_bin_softcnt = dp_bin - ad_bin_softcnt
+    ad_bin_softcnt_phased = ad_bin_softcnt.copy()
+    ad_bin_softcnt_phased[:, is_flips] = bd_bin_softcnt[:, is_flips]
+
+    bd_bin = dp_bin - ad_bin
+    ad_bin_phased = ad_bin.copy()
+    ad_bin_phased[:, is_flips] = bd_bin[:, is_flips]
+
+    bin_Xdata.layers["ad_bin_softcnt_phased_rev"] = ad_bin_softcnt_phased
+    bin_Xdata.layers["ad_bin_phased_rev"] = ad_bin_phased
+
+    end_t = datetime.datetime.now()
+    elapsed_sec = (end_t - start_t).total_seconds()
+    print("[XClone-Global_phasing_rev] time_used: {:.2f} seconds".format(elapsed_sec))
+
+    del Xdata
+    gc.collect()
+    return update_Xdata, bin_Xdata
+
 
 
 ## Visualization

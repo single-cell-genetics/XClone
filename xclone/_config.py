@@ -231,8 +231,10 @@ class XCloneGeneral_config():
         self.develop_mode = False
 
 
-class RDR_General_config():
+class RDR_prev_General_config():
     """
+    Previous version of RDR
+
     General configuration settings for RDR (Read Depth Ratio) analysis.
 
     This class manages the configuration settings for RDR analysis, particularly
@@ -328,10 +330,10 @@ class RDR_General_config():
         self.rdr_plot_vmax = 0.7
         self.set_figtitle = True
 
-class RDR_gaussian_General_config():
+class RDR_General_config():
     """
-    General configuration settings for RDR_gaussian
-    Adapted from RDR_General_config for Gaussian-based RDR analysis.
+    General configuration settings for new version of RDR (RDR_gaussian)
+    Adapted from RDR_prev_General_config for Gaussian-based RDR analysis.
 
     This class manages the configuration settings for RDR analysis, particularly
     for 10X scRNA-seq data, including transformation options, filtering criteria,
@@ -703,7 +705,7 @@ class HMM_Configs():
         
         self.HMM_brk = "chr_arm"
         
-        if self.module == "RDR" or self.module == "RDR_gaussian":
+        if self.module == "RDR" or self.module == "RDR_prev":
             self.start_prob = np.array([0.1, 0.8, 0.1])
             self.trans_prob = np.array([[1-2*t, t, t],[t, 1-2*t, t],[t, t, 1-2*t]])
 
@@ -764,7 +766,7 @@ class Smartseq_Config():
             None
         """
 
-        if self.module == "RDR" or self.module == "RDR_gaussian":
+        if self.module == "RDR" or self.module == "RDR_prev":
             self.smart_transform = True
             self.filter_ref_ave = 1.8
             ## HMM related
@@ -836,7 +838,7 @@ class Spatial_Config():
             None
         """
 
-        if self.module == "RDR" or self.module == "RDR_gaussian":
+        if self.module == "RDR" or self.module == "RDR_prev":
             # self.spatail_imputation = True
             self.smart_transform = False
             self.spatial_transform = True
@@ -922,7 +924,7 @@ class XCloneConfig():
         self.dataset_name = dataset_name
         self.set_smartseq = set_smartseq
         self.set_spatial = set_spatial
-        if module in ["RDR", "BAF", "Combine", "RDR_gaussian"]:
+        if module in ["RDR", "BAF", "Combine", "RDR_prev"]:
             pass
         else:
             print(module)
@@ -933,8 +935,8 @@ class XCloneConfig():
         if self.module == "RDR":
             RDR_General_config.__init__(self)
             HMM_Configs.__init__(self)
-        if self.module == "RDR_gaussian":
-            RDR_gaussian_General_config.__init__(self)
+        if self.module == "RDR_prev":
+            RDR_prev_General_config.__init__(self)
             HMM_Configs.__init__(self)
         if self.module == "BAF":
             BAF_General_config.__init__(self, baf_bias_mode)

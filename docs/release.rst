@@ -5,6 +5,15 @@ Release History
    :depth: 1
    :local:
 
+Version 0.4.0
+-------------
+- [RDR] Support multiple reference cell types
+- [RDR] Changed RDR to Gaussian Mixture Model (GMM) based
+- [RDR] Add adaptive baseline
+- [RDR] Add new denoising and smoothing methods
+- [BAF] Improve BAF global phasing
+- [Combine] Modified combining strategy
+- [Fix bug] Fix some minor bugs
 
 Version 0.3.9
 -------------
