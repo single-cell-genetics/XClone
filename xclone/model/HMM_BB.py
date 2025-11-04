@@ -40,7 +40,11 @@ def get_BAF_ref(Xdata, Xlayer = "fill_BAF_phased", out_anno = "ref_BAF_phased",
     Xmtx_used = Xdata.layers[Xlayer].copy()
     # Xmtx_used = logit(Xmtx_used)
 
-    is_ref_ = Xdata.obs[anno_key] == ref_cell
+    # multiple ref_cell
+    if isinstance(ref_cell, list):
+        is_ref_ = Xdata.obs[anno_key].isin(ref_cell)
+    else:
+        is_ref_ = Xdata.obs[anno_key] == ref_cell
     ref_ = Xmtx_used[is_ref_].mean(axis = 0)
     
     ## do clipping at ref BAF
@@ -63,7 +67,10 @@ def get_BAF_ref_limited(Xdata, Xlayer = "BAF_phased_KNN_WMA", out_anno = "ref_BA
     update for if ref cells are limited.
     if variance is high, set the corresponding ref baf as 0.5"""
     Xmtx_used = Xdata.layers[Xlayer].copy()
-    is_ref_ = Xdata.obs[anno_key] == ref_cell
+    if isinstance(ref_cell, list):
+        is_ref_ = Xdata.obs[anno_key].isin(ref_cell)
+    else:
+        is_ref_ = Xdata.obs[anno_key] == ref_cell
     ref_ = Xmtx_used[is_ref_].mean(axis = 0)
 
     baf_variance = np.var(Xmtx_used[is_ref_], axis=0)

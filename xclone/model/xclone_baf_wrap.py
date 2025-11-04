@@ -198,11 +198,14 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     if run_verbose:
         print("[XClone BAF module running]************************")
     
-    ## check ref_celltype
-    if ref_celltype in BAF_adata.obs[cell_anno_key].values:
-        pass
+    # check ref_celltype, multiple ref_celltype adapted
+    if isinstance(ref_celltype, list):
+        missing_items = [item for item in ref_celltype if item not in BAF_adata.obs[cell_anno_key].values]
+        if missing_items:
+            raise ValueError(f"[XClone error] Items {missing_items} not found in the BAF_adata's annotation.")
     else:
-        raise ValueError(f"[XClone error] Item '{ref_celltype}' not found in the BAF_adata's annotation.")
+        if ref_celltype not in BAF_adata.obs[cell_anno_key].values:
+            raise ValueError(f"[XClone error] Item '{ref_celltype}' not found in the BAF_adata's annotation.")
     
     if exclude_XY:
         BAF_adata = xclone.pp.exclude_XY_adata(BAF_adata)
@@ -334,7 +337,11 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
         used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata, 
                             theo_states= guide_theo_states, specific_BAF = "theo_neutral_BAF")
     else:
-        ref_cell_num = (merge_Xdata.obs[cell_anno_key] == ref_celltype).sum()
+        # for multiple ref_celltype
+        if isinstance(ref_celltype, list):
+            ref_cell_num = merge_Xdata.obs[cell_anno_key].isin(ref_celltype).sum()
+        else:
+            ref_cell_num = (merge_Xdata.obs[cell_anno_key] == ref_celltype).sum()
         total_cell_num = merge_Xdata.obs.shape[0]
         ref_prop = ref_cell_num/total_cell_num
         ## todo: maybe combine the ref cell nums and prop 
@@ -431,7 +438,10 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
             used_specific_states = xclone.model.gene_specific_BAF(merge_Xdata_copy, 
                             theo_states= guide_theo_states, specific_BAF = "theo_neutral_BAF")
         else:
-            ref_cell_num = (merge_Xdata_copy.obs[cell_anno_key] == ref_celltype).sum()
+            if isinstance(ref_celltype, list):
+                ref_cell_num = merge_Xdata_copy.obs[cell_anno_key].isin(ref_celltype).sum()
+            else:
+                ref_cell_num = (merge_Xdata_copy.obs[cell_anno_key] == ref_celltype).sum()
             total_cell_num = merge_Xdata_copy.obs.shape[0]
             ref_prop = ref_cell_num/total_cell_num
             if  ref_prop <= 0.01:
