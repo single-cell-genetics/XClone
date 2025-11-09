@@ -61,7 +61,7 @@ def preprocess_adaptive_baseline(
     print(f"Generating adaptive baseline with k = {k}, pseudo_count = {pseudo_count}")
 
     tmp_adata = RDR_Xdata.copy()
-    Y = tmp_adata.layers['raw_expr'].A
+    Y = tmp_adata.layers['raw_expr'].toarray()
     Y_32 = Y.astype(np.float32)
 
     # Step 1: Normalize by library size
