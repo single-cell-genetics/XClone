@@ -183,7 +183,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
             RDR_final_file = RDR_file
         
         remove_marker_genes = True
-        KNN_connect_use_key = "connectivities_expr"
+        KNN_connect_use_key = "connectivities"
     else:
         remove_marker_genes = False
         get_BAF_KNN_connectivities = True
@@ -266,7 +266,6 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                                     KNN_npcs = KNN_npcs,
                                                     run_KNN = get_BAF_KNN_connectivities, 
                                                     copy=True)
-    KNN_connect_use_key = "connectivities"
 
     merge_Xdata = xclone.model.KNN_smooth(merge_Xdata, 
                                           run_KNN = False, 
