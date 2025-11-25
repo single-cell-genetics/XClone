@@ -227,7 +227,10 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                                     chr_lst = marker_genes,
                                                     update_uns = False,
                                                     uns_anno_key = None)
-        
+    
+    ## Managing Memory During Processing
+    del RDR_adata
+    gc.collect()
 
     ## BAF Phasing
     if HMM_brk in ["chr", "chr_arm"]:
@@ -257,19 +260,12 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     xclone.model.BAF_fillna(merge_Xdata, Xlayer = "BAF_phased", out_layer = "fill_BAF_phased")
 
     ## smoothing
-    if update_info_from_rdr:
-        merge_Xdata = xclone.model.get_KNN_connectivities_from_expr(merge_Xdata, RDR_adata)
-        
-        ## Managing Memory During Processing
-        del RDR_adata
-        gc.collect()
-    else:
-        # KNN_Xlayer = "fill_BAF_phased" # can also update the first `KNN_smooth` func.
-        merge_Xdata = xclone.model.extra_preprocess_BAF(merge_Xdata, Xlayer = KNN_Xlayer,
-                         KNN_neighbors = KNN_neighbors,
-                         KNN_npcs = KNN_npcs,
-                         run_KNN = get_BAF_KNN_connectivities, 
-                         copy=True)
+    # KNN_Xlayer = "fill_BAF_phased" # can also update the first `KNN_smooth` func.
+    merge_Xdata = xclone.model.extra_preprocess_BAF(merge_Xdata, Xlayer = KNN_Xlayer,
+                                                    KNN_neighbors = KNN_neighbors,
+                                                    KNN_npcs = KNN_npcs,
+                                                    run_KNN = get_BAF_KNN_connectivities, 
+                                                    copy=True)
 
     merge_Xdata = xclone.model.KNN_smooth(merge_Xdata, 
                                           run_KNN = False, 
