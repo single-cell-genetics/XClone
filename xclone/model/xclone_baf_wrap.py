@@ -227,10 +227,11 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
                                                     chr_lst = marker_genes,
                                                     update_uns = False,
                                                     uns_anno_key = None)
-    
+
     ## Managing Memory During Processing
-    del RDR_adata
-    gc.collect()
+    if update_info_from_rdr:
+        del RDR_adata
+        gc.collect()
 
     ## BAF Phasing
     if HMM_brk in ["chr", "chr_arm"]:
