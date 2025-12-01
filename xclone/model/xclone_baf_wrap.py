@@ -183,6 +183,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
             RDR_final_file = RDR_file
         
         remove_marker_genes = True
+        get_BAF_KNN_connectivities = True
         KNN_connect_use_key = "connectivities"
     else:
         remove_marker_genes = False
@@ -230,8 +231,9 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
 
     ## Managing Memory During Processing
     if update_info_from_rdr:
+        if update_info_from_rdr:
         del RDR_adata
-        gc.collect()
+            gc.collect()
 
     ## BAF Phasing
     if HMM_brk in ["chr", "chr_arm"]:
