@@ -10,8 +10,17 @@ from scipy.special import logsumexp, digamma, betaln, binom
 
 from .base_utils import normalize, loglik_amplify
 
+def _safe_sum(x, axis=0):
+    """Sum that works for both numpy arrays and scipy sparse matrices"""
+    s = x.sum(axis=axis)
+    if hasattr(s, 'toarray'):
+        s = s.toarray()
+    if s.ndim == 1:
+        s = s.reshape(1, -1)   # make it (1, n_cells)
+    return s
 
-def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
+
+def Local_Phasing(AD, DP, tumor_cell_mask=None, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
                   init_mode='warm', verbose=False):
     """
     Phase the small blocks into a medium sized bin by assuming the allelic
@@ -20,6 +29,8 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
 
     # Note that AD DP should be in in Compressed Sparse Column format.
     # or other sparse format.
+
+    # updated 2025-11: use only non-reference cells to estimate theta.
     
     Parameters
     ----------
@@ -34,6 +45,13 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
     """
     N, M = AD.shape
     BD = DP - AD
+
+    # Default: use all cells (backward compatible)
+    if tumor_cell_mask is None:
+        tumor_cell_mask = np.ones(M, dtype=bool)
+
+    tumor_idx = np.where(tumor_cell_mask)[0]
+    has_tumor = len(tumor_idx) > 0
     
     ## Initialization matters!!!
     if init_mode == 'warm':
@@ -50,33 +68,51 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
         Z = np.random.rand(N, 2)
         Z[:, 1] = 1 - Z[:, 0]
     
+    # tumor_idx = tumor_cell_mask
+    tumor_idx = np.where(tumor_cell_mask)[0]   # integer → bulletproof
+    AD_tumor = AD[:, tumor_idx]
+    BD_tumor = BD[:, tumor_idx]
+    DP_tumor = DP[:, tumor_idx]
+
     # allele ratio parameters
     # thetas = np.array((AD.T * Z + BD.T * (1 - Z)) / (DP.T.sum(1)))
-    thetas = np.array((AD.T @ Z + BD.T @ (1 - Z)) / (DP.T.sum(1))) 
+    thetas = np.array((AD_tumor.T @ Z + BD_tumor.T @ (1 - Z)) / (DP_tumor.T.sum(1))) 
+    # (M_tumor, 1)
     # works for both sparse matrix and nunmpy array
     
     # thetas = np.zeros((M, 2))
     # thetas[:, 0:1] = (AD.T * Z[:, 0:1] + BD.T * Z[:, 1:2]) / (DP.sum(0).T)
     # thetas[:, 1:2] = 1 - thetas[:, 0:1]
+
+    # === Initial theta using ONLY tumor cells ===
+    thetas_full = np.full((M, 2), 0.5)
+    if has_tumor and AD_tumor.shape[1] > 0:
+        theta_tumor = np.array((AD_tumor.T @ Z + BD_tumor.T @ (1 - Z)) / (DP_tumor.T.sum(1))) 
+        thetas_full[tumor_idx] = theta_tumor
     
     # likelihood
-    _logLik_mat = (AD * np.log(thetas) + BD * np.log(1 - thetas))
+    _logLik_mat = (AD * np.log(thetas_full) + BD * np.log(1 - thetas_full))
     _logLik_new = np.sum(logsumexp(_logLik_mat, axis=1))
     
     for it in range(max_iter):
         _logLik_old = _logLik_new + 0.0
         
-        # E step: calculate the expecation
+        # E step: calculate the expectation
         Z = normalize(np.exp(loglik_amplify(np.array(_logLik_mat))))
         
-        # M step: maximise the likihood over thetas
-        thetas = np.array((AD.T * Z + BD.T * (1 - Z)) / (DP.T.sum(1)))
+        # Previous M step: maximize the likelihood over thetas
+        # thetas = np.array((AD.T * Z + BD.T * (1 - Z)) / (DP.T.sum(1)))
+
+        # M-step: re-estimate theta using ONLY tumor cells
+        thetas_full = np.full((M, 2), 0.5)
+        if AD_tumor.shape[1] > 0:
+            theta_tumor = np.array((AD_tumor.T @ Z + BD_tumor.T @ (1 - Z)) / (DP_tumor.T.sum(1))) 
+            thetas_full[tumor_idx] = theta_tumor
         
         # Likelihood
-        _logLik_mat = (AD * np.log(thetas) + BD * np.log(1 - thetas))
+        _logLik_mat = (AD * np.log(thetas_full) + BD * np.log(1 - thetas_full))
         _logLik_new = np.sum(logsumexp(_logLik_mat, axis=1))
-        
-        # print(it, _logLik_old, _logLik_new)
+
         # convergence
         if it >= min_iter and _logLik_new - _logLik_old < epsilon_conv:
             if verbose:
@@ -87,6 +123,7 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
             if verbose:
                 print("Warning: likelihood decreases in EM algorithm!")
                 print(it, _logLik_old, print(it, _logLik_new))
+    '''
     # if soft_phasing:
     ## soft phasing bins counts: `ad_sum`
     ad_sum = Z.T * AD + (1 - Z.T) * BD 
@@ -97,8 +134,26 @@ def Local_Phasing(AD, DP, min_iter=10, max_iter=1000, epsilon_conv=1e-2,
     ad_sum1 = Z_hard_assign.T * AD + (1 - Z_hard_assign.T) * BD 
     dp_sum = DP.sum(axis=0)
     return ad_sum, ad_sum1, dp_sum, Z, thetas, _logLik_new
-        
-    
+    '''
+    # Final hard phasing
+    is_flip = np.argmax(Z, axis=1)
+    Z_hard_assign = np.vstack((1- is_flip, is_flip)).T
+    AD_phased = Z_hard_assign.T * AD + (1 - Z_hard_assign.T) * BD 
+
+    # Soft and hard aggregated counts
+    ad_sum = Z.T @ AD + (1 - Z.T) @ BD            # soft (for smoothing)
+    ad_sum1 = AD_phased.astype(AD.dtype)         # hard
+    dp_sum = DP.sum(axis=0)
+
+    return (
+        ad_sum,           # [2, n_cells] soft counts
+        ad_sum1,          # [n_sites, n_cells] hard phased AD
+        dp_sum,           # [1, n_cells]
+        Z,                # [n_sites, 2]
+        thetas_full,      # [n_cells] final theta per cell
+        _logLik_new
+    )
+  
 '''
 def Global_Phasing(thetas, step_size=1, n_prefix=1):
     """
