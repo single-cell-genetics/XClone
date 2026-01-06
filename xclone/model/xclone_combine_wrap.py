@@ -7,10 +7,12 @@
 import os
 import xclone
 import numpy as np
+import pandas as pd
 from .._logging import get_logger
 from datetime import datetime, timezone
-
 import gc
+
+from xclone.model.clustering import tumor_classify, xclone_subclonal_analysis, refine_clones_bayesian
 
 def run_combine(RDR_Xdata,
                 BAF_merge_Xdata,
@@ -103,6 +105,11 @@ def run_combine(RDR_Xdata,
     copygain_correct_mode = config.copygain_correct_mode
     RDR_prior = config.RDR_prior
     WGD_detection = config.WGD_detection
+
+    ## tumor classification and clustering
+    tumor_classification = config.tumor_classification
+    tumor_classification_layer = config.tumor_classification_layer
+    clustering = config.clustering
     
     ## plot settings
     xclone_plot = config.xclone_plot
@@ -158,7 +165,8 @@ def run_combine(RDR_Xdata,
                         return_prob = False)
     
     del RDR_Xdata
-    del BAF_merge_Xdata
+    if not clustering:
+        del BAF_merge_Xdata
     gc.collect()
     
     
@@ -208,13 +216,40 @@ def run_combine(RDR_Xdata,
     
 
     combine_Xdata = xclone.model.CNV_prob_merge_for_plot(combine_Xdata, Xlayer = "corrected_prob")
+
+    ## tumor classification and clustering
+    if tumor_classification:
+        print("[XClone tumor classification performing]")
+        combine_Xdata = tumor_classify(combine_Xdata, tumor_classification_layer, out_data_dir)
+    if clustering:
+        print("[XClone clustering performing]")
+        combine_Xdata = xclone_subclonal_analysis(
+            combined_adata=combine_Xdata,
+            baf_adata=BAF_merge_Xdata,
+            method="combined",
+            out_dir=out_data_dir,
+            sample_name=dataset_name
+        )
+        combine_Xdata = refine_clones_bayesian(
+            adata=combine_Xdata,
+            initial_col="clone_id",
+            prob_layer="prob1_merge",
+            n_iter=15,
+            alpha=20.0,           # higher = smoother, less overfitting
+            min_cells=50,
+            out_dir=out_data_dir,
+            sample_name=dataset_name
+        )
+
+    del BAF_merge_Xdata
+    gc.collect()
+
     try:
         combine_Xdata.write(combine_final_file)
     except Exception as e:
         print("[XClone Warning]", e)
     else:
         print("[XClone hint] combine_final_file saved in %s." %(out_data_dir))
-    
 
     end_time = datetime.now(timezone.utc)
     time_passed = end_time - start_time
@@ -295,6 +330,7 @@ def run_combine_plot(combine_Xdata,
 
     fig_title = ""
     combine_res_base_fig = out_plot_dir + dataset_name + "_combine_base.png"
+    combine_res_refined_fig = out_plot_dir + dataset_name + "_combine_refined.png"
     combine_res_select_fig = out_plot_dir + dataset_name + "_combine_select.png"
 
     sub_logger = get_logger("Combine plot module")
@@ -310,7 +346,15 @@ def run_combine_plot(combine_Xdata,
         title = fig_title,
         save_file = True, out_file = combine_res_base_fig,
         **kwargs)
-    
+
+    # cluster refined plot
+    if "prob1_merge_refined" in combine_Xdata.layers:
+        xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "prob1_merge_refined", 
+            cell_anno_key = plot_cell_anno_key,  
+            title = fig_title,
+            save_file = True, out_file = combine_res_refined_fig,
+            **kwargs)
+        
     if customizedplotting:
     ## SELECT PLOT
         if merge_loh:

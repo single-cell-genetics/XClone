@@ -231,9 +231,8 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
 
     ## Managing Memory During Processing
     if update_info_from_rdr:
-        if update_info_from_rdr:
         del RDR_adata
-            gc.collect()
+        gc.collect()
 
     ## BAF Phasing
     if HMM_brk in ["chr", "chr_arm"]:

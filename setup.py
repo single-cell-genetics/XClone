@@ -20,7 +20,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 reqs = ['numpy>=1.18', 'pandas', 'scipy', 'matplotlib', 'anndata',
         'statsmodels', 'scanpy', 'h5py', 'palettable', 
-        'requests', 'importlib-metadata', 'squidpy']
+        'requests', 'importlib-metadata', 'squidpy', 'sklearn']
 
 # seaborn
 

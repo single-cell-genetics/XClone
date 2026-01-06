@@ -623,6 +623,10 @@ class Combine_General_config():
             Proportion value threshold for WGD detection.
         WGD_cell_prop_threshold : int
             Cell proportion threshold for WGD detection.
+        tumor_classification : bool
+            Flag to enable tumor classification.
+        tumor_clustering : bool
+            Flag to enable tumor clustering.
     """
 
     def __init__(self):
@@ -659,6 +663,11 @@ class Combine_General_config():
         self.WGD_detect_genome_level = "chr_arm"
         self.WGD_prop_value_threshold = 0.9
         self.WGD_cell_prop_threshold = 50
+
+        # tumor classification and clustering
+        self.tumor_classification = True
+        self.tumor_classification_layer = 'WMA_smoothed_log_ratio_ab_dynamic'
+        self.clustering = True
 
 class HMM_Configs():
     """
