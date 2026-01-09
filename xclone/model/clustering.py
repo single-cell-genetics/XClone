@@ -178,12 +178,11 @@ def xclone_subclonal_analysis(
     adata_out.layers["clone_level_cna"] = cell_cna_codes.astype("int8")
     adata_out.layers["clone_level_cna_prob_for_plot"] = cell_cna_prob
     adata_out.uns["clone_level_cna_states"] = state_names
-
+    '''
     # Save AnnData
     adata_out.write_h5ad(os.path.join(out_dir, f"{sample_name}.h5ad"))
 
     # TSVs
-    '''
     pd.DataFrame({"cell_barcode": adata_out.obs_names, "clone_id": clone_ids}) \
         .to_csv(os.path.join(out_dir, f"{sample_name}_cell_to_clone.tsv"), sep="\t", index=False)
 
@@ -216,6 +215,7 @@ def refine_clones_bayesian(
     n_iter: int = 15,
     alpha: float = 20.0,                       # Dirichlet prior strength
     min_cells: int = 50,
+    n_clones: Optional[int] = None,            # fixed number of clones
     out_dir: str = "refined_clones",
     sample_name: str = "sample"
 ) -> AnnData:
@@ -244,6 +244,41 @@ def refine_clones_bayesian(
     print(f"Starting Bayesian refinement with {len(unique_clones)} initial clones...")
 
     # Initial clone profiles: mean posterior probability per clone
+    temp_profiles = []
+    temp_sizes = []
+    temp_clone_names = []
+
+    for clone in unique_clones:
+        mask = initial_labels == clone
+        size = mask.sum()
+        if size < min_cells:
+            continue
+        profile = np.mean(prob[mask], axis=0) + 1e-6
+        profile = profile / profile.sum(axis=1, keepdims=True)
+        temp_profiles.append(profile)
+        temp_sizes.append(size)
+        temp_clone_names.append(clone)
+
+    if len(temp_profiles) < 2:
+        print("Not enough clones for refinement.")
+        return adata
+
+    # NEW: handle fixed n_clones
+    if n_clones is not None:
+        if n_clones > len(temp_profiles):
+            print(f"Warning: requested n_clones={n_clones} > available valid clones ({len(temp_profiles)}). Using all available.")
+            selected_idx = np.arange(len(temp_profiles))
+        else:
+            # select the n_clones largest initial clones by cell count
+            selected_idx = np.argsort(temp_sizes)[-n_clones:]
+        print(f"Using fixed n_clones = {n_clones} (selected largest initial clones)")
+    else:
+        selected_idx = np.arange(len(temp_profiles))
+        print(f"Using all {len(selected_idx)} valid initial clones (n_clones=None)")
+
+    clone_profiles = np.stack([temp_profiles[i] for i in selected_idx])
+    K = len(clone_profiles)
+    '''
     clone_profiles = []
     valid_clones = []
     for clone in unique_clones:
@@ -261,6 +296,7 @@ def refine_clones_bayesian(
 
     clone_profiles = np.stack(clone_profiles)  # (K, n_genes, 4), clone K's CNA profile
     K = len(clone_profiles)
+    '''
     n_cells = prob.shape[0]
 
     # Prior over clone proportions (Dirichlet)

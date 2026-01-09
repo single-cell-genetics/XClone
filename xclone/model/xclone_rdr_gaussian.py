@@ -61,11 +61,11 @@ def run_RDR(RDR_adata, verbose = True, config_file = None):
             RDR_Xdata = xclone.model.run_RDR_gaussian(RDR_adata, verbose=True)
             
             # Run RDR analysis with a custom configuration object
-            xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "RDR_gaussian")
+            xconfig = xclone.XCloneConfig(dataset_name = dataset_name, module = "RDR")
             xconfig.outdir = out_dir
             #... other specified parameters in `xconfig`
             xconfig.display()
-            RDR_Xdata = xclone.model.run_RDR_gaussian(RDR_adata, verbose=True, config_file=xconfig)
+            RDR_Xdata = xclone.model.run_RDR(RDR_adata, verbose=True, config_file=xconfig)
     
     """
     ## settings
@@ -76,7 +76,7 @@ def run_RDR(RDR_adata, verbose = True, config_file = None):
             f'Model configuration file not specified.\n'
             f'Default settings in XClone-RDR will be used.'
         )
-        config = XCloneConfig(module = "RDR_gaussian")
+        config = XCloneConfig(module = "RDR")
 
     else:
         config = config_file

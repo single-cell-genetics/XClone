@@ -110,6 +110,7 @@ def run_combine(RDR_Xdata,
     tumor_classification = config.tumor_classification
     tumor_classification_layer = config.tumor_classification_layer
     clustering = config.clustering
+    n_clones = config.n_clones
     
     ## plot settings
     xclone_plot = config.xclone_plot
@@ -227,6 +228,7 @@ def run_combine(RDR_Xdata,
             combined_adata=combine_Xdata,
             baf_adata=BAF_merge_Xdata,
             method="combined",
+            n_clones=n_clones,
             out_dir=out_data_dir,
             sample_name=dataset_name
         )
@@ -237,6 +239,7 @@ def run_combine(RDR_Xdata,
             n_iter=15,
             alpha=20.0,           # higher = smoother, less overfitting
             min_cells=50,
+            n_clones=n_clones,
             out_dir=out_data_dir,
             sample_name=dataset_name
         )

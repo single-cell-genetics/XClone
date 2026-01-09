@@ -429,7 +429,7 @@ class RDR_General_config():
         self.set_figtitle = True
 
         # adaptive baseline
-        self.ab_k_neighbors = 5
+        self.ab_k_neighbors = 10
         self.ab_pseudo_count = 1e-6
 
         # denoise
@@ -668,6 +668,7 @@ class Combine_General_config():
         self.tumor_classification = True
         self.tumor_classification_layer = 'WMA_smoothed_log_ratio_ab_dynamic'
         self.clustering = True
+        self.n_clones = None
 
 class HMM_Configs():
     """
