@@ -1,18 +1,83 @@
-"""Base pipeline for XClone combination module"""
+"""Base pipeline for XClone combination module."""
 
 # Author: Rongting Huang
 # Date: 2022-11-17
-# update: 2022-11-17
+# Update: 2026-01-12 by Jiamu James Qiao
 
-import os
-import xclone
-import numpy as np
-import pandas as pd
-from .._logging import get_logger
-from datetime import datetime, timezone
 import gc
+import os
+from datetime import datetime, timezone
 
-from xclone.model.clustering import tumor_classify, xclone_subclonal_analysis, refine_clones_bayesian
+import numpy as np
+import xclone
+from .._logging import get_logger
+from ._pipeline_utils import (  # type: ignore
+    configure_warnings,
+    load_config,
+    log_duration,
+    resolve_output_dirs,
+    write_adata_safe,
+)
+from xclone.model.clustering import (
+    refine_clones_bayesian,
+    tumor_classify,
+    xclone_subclonal_analysis,
+)
+
+
+def _select_baf_layer(BAF_merge_Xdata, baf_denoise: bool) -> str:
+    """Choose the appropriate BAF layer based on availability and config."""
+    if baf_denoise:
+        if "denoised_posterior_mtx" in BAF_merge_Xdata.layers:
+            return "denoised_posterior_mtx"
+        print("[XClone] warning: please provide denoised BAF posterior_mtx layer")
+    return "posterior_mtx"
+
+
+def _combine_probability_pipeline(
+    combine_Xdata,
+    rdr_denoise: bool,
+    copyloss_correct: bool,
+    copyloss_correct_mode: int,
+    copygain_correct: bool,
+    copygain_correct_mode,
+    RDR_prior: bool,
+):
+    """Run RDR denoising (optional) then combine RDR/BAF probabilities."""
+    rdr_layer = "posterior_mtx"
+    if rdr_denoise:
+        combine_Xdata = xclone.model.denoise_rdr_by_baf(
+            combine_Xdata,
+            RDR_layer="posterior_mtx",
+            BAF_layer="BAF_extend_post_prob",
+            out_RDR_layer="rdr_posterior_mtx_denoised",
+        )
+        rdr_layer = "rdr_posterior_mtx_denoised"
+
+    return xclone.model.CNV_prob_combination(
+        combine_Xdata,
+        RDR_layer=rdr_layer,
+        BAF_layer="BAF_extend_post_prob",
+        copyloss_correct=copyloss_correct,
+        copyloss_correct_mode=copyloss_correct_mode,
+        copygain_correct=copygain_correct,
+        copygain_correct_mode=copygain_correct_mode,
+        RDR_prior=RDR_prior,
+    )
+
+
+def _run_wgd_detection(combine_Xdata, config) -> None:
+    """Trigger WGD detection with config thresholds."""
+    print("[XClone WGD detection performing]")
+    xclone.model.WGD_warning(
+        combine_Xdata,
+        Xlayer="combine_base_prob",
+        genome_level=config.WGD_detect_genome_level,
+        prop_value_threshold=config.WGD_prop_value_threshold,
+        cell_prop_threshold=config.WGD_cell_prop_threshold,
+    )
+
+
 
 def run_combine(RDR_Xdata,
                 BAF_merge_Xdata,
@@ -71,211 +136,120 @@ def run_combine(RDR_Xdata,
             combine_Xdata = xclone.model.run_combine(RDR_Xdata, BAF_merge_Xdata, verbose=True, run_verbose=True, config_file=xconfig)
     
     """
-    ## settings
-    from .._config import XCloneConfig
-    
-    if config_file == None:
-        print (
-            f'Model configuration file not specified.\n'
-            f'Default settings in XClone-combine will be used.'
-        )
-        config = XCloneConfig(module = "Combine")
+    config = load_config("Combine", config_file)
+    configure_warnings(config.warninig_ignore)
 
-    else:
-        config = config_file
-    ## base settings
-    warninig_ignore = config.warninig_ignore
-    if warninig_ignore:
-        import warnings
-        warnings.filterwarnings('ignore')
-    ## general settings
-    out_dir = config.outdir
+    out_dir, out_data_dir, _ = resolve_output_dirs(config.outdir)
     dataset_name = config.dataset_name
-    
-    cell_anno_key = config.cell_anno_key
-    exclude_XY = config.exclude_XY
-    
-    ## RDR BAF settings
-    BAF_denoise = config.BAF_denoise
-    RDR_denoise = config.BAF_denoise
-    ## combine settings
-    copyloss_correct = config.copyloss_correct
-    copyloss_correct_mode = config.copyloss_correct_mode
-    copygain_correct= config.copygain_correct
-    copygain_correct_mode = config.copygain_correct_mode
-    RDR_prior = config.RDR_prior
-    WGD_detection = config.WGD_detection
-
-    ## tumor classification and clustering
-    tumor_classification = config.tumor_classification
-    tumor_classification_layer = config.tumor_classification_layer
-    clustering = config.clustering
-    n_clones = config.n_clones
-    
-    ## plot settings
-    xclone_plot = config.xclone_plot
-    plot_cell_anno_key = config.plot_cell_anno_key
-    merge_loss = config.merge_loss
-    merge_loh = config.merge_loh
-    customizedplotting = config.customizedplotting
-
-    # develop mode settings
-    develop_mode = config.develop_mode
-    
-    ## Result output prepare
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    
-    out_data_dir = str(out_dir) + "/data/"
-    xclone.al.dir_make(out_data_dir)
-
-    RDR_combine_corrected_file = out_data_dir + "combine_adata_corrected.h5ad"
-    combine_final_file = out_data_dir + "combined_final.h5ad"
-    
-    ##------------------------
     main_logger = get_logger("Main combine module")
     main_logger.info("XClone combine module Started")
     start_time = datetime.now(timezone.utc)
 
     if run_verbose:
         print("[XClone Combination module running]************************")
-    
-    if exclude_XY:
+
+    if config.exclude_XY:
         RDR_Xdata = xclone.pp.exclude_XY_adata(RDR_Xdata)
         BAF_merge_Xdata = xclone.pp.exclude_XY_adata(BAF_merge_Xdata)
+        print("[XClone warning] Combine module exclude chr XY analysis.")
 
-        print("[XClone warning] Combine module excelude chr XY analysis.")
+    BAF_use_Xlayer = _select_baf_layer(BAF_merge_Xdata, config.BAF_denoise)
 
-    # map BAF to RDR
-    if BAF_denoise:
-        if "denoised_posterior_mtx" in BAF_merge_Xdata.layers:
-            BAF_use_Xlayer = "denoised_posterior_mtx"
-        else:
-            print("[XClone] warning: please proveide denoised BAF posterior_mtx layer")
-            BAF_use_Xlayer = "posterior_mtx"
-    else:
-        BAF_use_Xlayer = "posterior_mtx"
-    
+    RDR_Xdata, BAF_merge_Xdata = xclone.pp.check_RDR_BAF_samecellnumber(
+        RDR_Xdata, BAF_merge_Xdata
+    )
+    combine_Xdata = xclone.model.bin_to_gene_mapping(
+        BAF_merge_Xdata,
+        RDR_Xdata,
+        Xlayer=BAF_use_Xlayer,
+        extend_layer="BAF_extend_post_prob",
+        return_prob=False,
+    )
 
-    RDR_Xdata, BAF_merge_Xdata = xclone.pp.check_RDR_BAF_samecellnumber(RDR_Xdata, BAF_merge_Xdata)
-    combine_Xdata = xclone.model.bin_to_gene_mapping(BAF_merge_Xdata,
-                        RDR_Xdata,
-                        Xlayer = BAF_use_Xlayer,
-                        extend_layer = "BAF_extend_post_prob",
-                        return_prob = False)
-    
     del RDR_Xdata
-    if not clustering:
+    if not config.clustering:
         del BAF_merge_Xdata
     gc.collect()
-    
-    
-    if RDR_denoise:
-        combine_Xdata = xclone.model.denoise_rdr_by_baf(combine_Xdata,
-                                                        RDR_layer = "posterior_mtx",
-                                                        BAF_layer = "BAF_extend_post_prob",
-                                                        out_RDR_layer = "rdr_posterior_mtx_denoised")
-        
-        combine_Xdata = xclone.model.CNV_prob_combination(combine_Xdata,
-                         RDR_layer = "rdr_posterior_mtx_denoised",
-                         BAF_layer = "BAF_extend_post_prob",
-                         copyloss_correct = copyloss_correct,
-                         copyloss_correct_mode = copyloss_correct_mode,
-                         copygain_correct = copygain_correct,
-                         copygain_correct_mode = copygain_correct_mode,
-                         RDR_prior = RDR_prior)
-        
-    else:
 
-        combine_Xdata = xclone.model.CNV_prob_combination(combine_Xdata,
-                            RDR_layer = "posterior_mtx",
-                            BAF_layer = "BAF_extend_post_prob",
-                            copyloss_correct = copyloss_correct,
-                            copyloss_correct_mode = copyloss_correct_mode,
-                            copygain_correct = copygain_correct,
-                            copygain_correct_mode = copygain_correct_mode,
-                            RDR_prior = RDR_prior)
-    
-    if WGD_detection:
-        print("[XClone WGD detection performing]")
-        prop_value_threshold = config.WGD_prop_value_threshold
-        cell_prop_threshold = config.WGD_cell_prop_threshold
-        genome_level = config.WGD_detect_genome_level
-        xclone.model.WGD_warning(combine_Xdata, 
-                                 Xlayer = "combine_base_prob", 
-                                 genome_level = genome_level, 
-                                 prop_value_threshold = prop_value_threshold,
-                                 cell_prop_threshold = cell_prop_threshold)
-    if develop_mode:
-        try:
-            combine_Xdata.write(RDR_combine_corrected_file)
-        except Exception as e:
-            print("[XClone Warning]", e)
-        else:
-            print("[XClone hint] combine_corrected_file saved in %s." %(out_data_dir))
-    
+    combine_Xdata = _combine_probability_pipeline(
+        combine_Xdata,
+        rdr_denoise=config.RDR_denoise,
+        copyloss_correct=config.copyloss_correct,
+        copyloss_correct_mode=config.copyloss_correct_mode,
+        copygain_correct=config.copygain_correct,
+        copygain_correct_mode=config.copygain_correct_mode,
+        RDR_prior=config.RDR_prior,
+    )
 
-    combine_Xdata = xclone.model.CNV_prob_merge_for_plot(combine_Xdata, Xlayer = "corrected_prob")
+    if config.WGD_detection:
+        _run_wgd_detection(combine_Xdata, config)
 
-    ## tumor classification and clustering
-    if tumor_classification:
+    if config.develop_mode:
+        corrected_path = os.path.join(out_data_dir, "combine_adata_corrected.h5ad")
+        write_adata_safe(combine_Xdata, corrected_path, "combine_corrected_file")
+
+    combine_Xdata = xclone.model.CNV_prob_merge_for_plot(
+        combine_Xdata, Xlayer="corrected_prob"
+    )
+
+    if config.tumor_classification:
         print("[XClone tumor classification performing]")
-        combine_Xdata = tumor_classify(combine_Xdata, tumor_classification_layer, out_data_dir)
-    if clustering:
+        combine_Xdata = tumor_classify(
+            combine_Xdata, config.tumor_classification_layer, out_data_dir
+        )
+
+    if config.clustering:
         print("[XClone clustering performing]")
         combine_Xdata = xclone_subclonal_analysis(
             combined_adata=combine_Xdata,
             baf_adata=BAF_merge_Xdata,
             method="combined",
-            n_clones=n_clones,
+            n_clones=config.n_clones,
             out_dir=out_data_dir,
-            sample_name=dataset_name
+            sample_name=dataset_name,
         )
         combine_Xdata = refine_clones_bayesian(
             adata=combine_Xdata,
             initial_col="clone_id",
             prob_layer="prob1_merge",
             n_iter=15,
-            alpha=20.0,           # higher = smoother, less overfitting
+            alpha=20.0,  # higher = smoother, less overfitting
             min_cells=50,
-            n_clones=n_clones,
+            n_clones=config.n_clones,
             out_dir=out_data_dir,
-            sample_name=dataset_name
+            sample_name=dataset_name,
         )
 
     del BAF_merge_Xdata
     gc.collect()
 
-    try:
-        combine_Xdata.write(combine_final_file)
-    except Exception as e:
-        print("[XClone Warning]", e)
-    else:
-        print("[XClone hint] combine_final_file saved in %s." %(out_data_dir))
+    final_file = os.path.join(out_data_dir, "combined_final.h5ad")
+    write_adata_safe(combine_Xdata, final_file, "combine_final_file")
 
-    end_time = datetime.now(timezone.utc)
-    time_passed = end_time - start_time
-    main_logger.info("XClone combine module finished (%d seconds)" % (time_passed.total_seconds()))
+    log_duration(main_logger, start_time, "XClone combine module")
 
-    if xclone_plot:
-        set_figtitle = config.set_figtitle
+    if config.xclone_plot:
+        plot_cell_anno_key = config.plot_cell_anno_key or config.cell_anno_key
         if run_verbose:
             print("[XClone plotting]")
-        if plot_cell_anno_key is None:
-            plot_cell_anno_key = cell_anno_key
-        run_combine_plot(combine_Xdata, dataset_name, 
-                         plot_cell_anno_key, 
-                         merge_loss, merge_loh, 
-                         set_figtitle,
-                         out_dir,
-                         customizedplotting)
-        if develop_mode:
-            if RDR_denoise:
-                rdr_denoise_plot(combine_Xdata, dataset_name, 
-                            plot_cell_anno_key, 
-                            set_figtitle,
-                            out_dir)
+        run_combine_plot(
+            combine_Xdata,
+            dataset_name,
+            plot_cell_anno_key,
+            config.merge_loss,
+            config.merge_loh,
+            config.set_figtitle,
+            out_dir,
+            config.customizedplotting,
+        )
+        if config.develop_mode and config.RDR_denoise:
+            rdr_denoise_plot(
+                combine_Xdata,
+                dataset_name,
+                plot_cell_anno_key,
+                config.set_figtitle,
+                out_dir,
+            )
 
     return combine_Xdata
 
@@ -288,28 +262,22 @@ def rdr_denoise_plot(combine_Xdata,
     """
     plotting RDR_Denoised.
     """
-    ## Result output prepare
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    
-    out_plot_dir = str(out_dir) + "/plot/"
-    xclone.al.dir_make(out_plot_dir)
+    _, _, out_plot_dir = resolve_output_dirs(out_dir)
 
-    rdr_final_denoise_fig = out_plot_dir + dataset_name + "_RDR_CNV_denoise.png"
-    if set_figtitle:
-        fig_title = dataset_name + " RDR_CNV_denoise"
+    rdr_final_denoise_fig = os.path.join(out_plot_dir, f"{dataset_name}_RDR_CNV_denoise.png")
+    fig_title = f"{dataset_name} RDR_CNV_denoise" if set_figtitle else ""
 
-
-    xclone.pl.CNV_visualization(combine_Xdata, 
-                                Xlayer = "rdr_posterior_mtx_denoised",
-                                states_weight = np.array([1,2,3]), 
-                                weights = True, 
-                                cell_anno_key = plot_cell_anno_key, 
-                                title = fig_title,
-                                save_file = True, 
-                                out_file = rdr_final_denoise_fig,
-                                **kwargs)
+    xclone.pl.CNV_visualization(
+        combine_Xdata,
+        Xlayer="rdr_posterior_mtx_denoised",
+        states_weight=np.array([1, 2, 3]),
+        weights=True,
+        cell_anno_key=plot_cell_anno_key,
+        title=fig_title,
+        save_file=True,
+        out_file=rdr_final_denoise_fig,
+        **kwargs,
+    )
 
 def run_combine_plot(combine_Xdata,
             dataset_name,
@@ -322,19 +290,12 @@ def run_combine_plot(combine_Xdata,
             **kwargs):
     """
     """
-
-    ## Result output prepare
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    
-    out_plot_dir = str(out_dir) + "/plot/"
-    xclone.al.dir_make(out_plot_dir)
+    _, _, out_plot_dir = resolve_output_dirs(out_dir)
 
     fig_title = ""
-    combine_res_base_fig = out_plot_dir + dataset_name + "_combine_base.png"
-    combine_res_refined_fig = out_plot_dir + dataset_name + "_combine_refined.png"
-    combine_res_select_fig = out_plot_dir + dataset_name + "_combine_select.png"
+    combine_res_base_fig = os.path.join(out_plot_dir, f"{dataset_name}_combine_base.png")
+    combine_res_refined_fig = os.path.join(out_plot_dir, f"{dataset_name}_combine_refined.png")
+    combine_res_select_fig = os.path.join(out_plot_dir, f"{dataset_name}_combine_select.png")
 
     sub_logger = get_logger("Combine plot module")
     sub_logger.info("Combine plot module started")

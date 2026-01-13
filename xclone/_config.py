@@ -439,7 +439,7 @@ class RDR_General_config():
         self.c_k = np.array([0.5, 1, 1.5])
 
         # low rank
-        self.low_rank = True
+        self.low_rank = False
         self.low_rank_n_components = 10
 
 

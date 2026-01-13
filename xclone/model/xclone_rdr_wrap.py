@@ -1,17 +1,23 @@
-"""Base pipeline for XClone RDR module"""
+"""Base pipeline for XClone RDR module."""
 
 # Author: Rongting Huang
 # Date: 2022-03-19
 # update: 2022-11-17
 
-
+import gc
 import os
-import xclone
-import numpy as np
-from .._logging import get_logger
 from datetime import datetime, timezone
 
-import gc
+import numpy as np
+import xclone
+from .._logging import get_logger
+from ._pipeline_utils import (  # type: ignore
+    configure_warnings,
+    load_config,
+    log_duration,
+    resolve_output_dirs,
+    write_adata_safe,
+)
 
 
 def preview_RDR(RDR_adata,
@@ -26,7 +32,7 @@ def preview_RDR(RDR_adata,
     return None
 
 
-def run_RDR_prev(RDR_adata, verbose = True, run_verbose = True, config_file = None):
+def run_RDR_prev(RDR_adata, verbose=True, run_verbose=True, config_file=None):
     """
     Run the RDR (Read Depth Ratio) analysis on the provided annotated data.
 
@@ -77,37 +83,21 @@ def run_RDR_prev(RDR_adata, verbose = True, run_verbose = True, config_file = No
             RDR_Xdata = xclone.model.run_RDR(RDR_adata, verbose=True, run_verbose=True, config_file=xconfig)
     
     """
-    ## settings
-    from .._config import XCloneConfig
-    
-    if config_file == None:
-        print (
-            f'Model configuration file not specified.\n'
-            f'Default settings in XClone-RDR will be used.'
-        )
-        config = XCloneConfig(module = "RDR")
+    config = load_config("RDR", config_file)
+    configure_warnings(config.warninig_ignore)
 
-    else:
-        config = config_file
-    # base settings
-    warninig_ignore = config.warninig_ignore
-    if warninig_ignore:
-        import warnings
-        warnings.filterwarnings('ignore')
-    # general settings
     dataset_name = config.dataset_name
-    out_dir = config.outdir
-    
+    out_dir, out_data_dir, _ = resolve_output_dirs(config.outdir)
+
     cell_anno_key = config.cell_anno_key
     ref_celltype = config.ref_celltype
-    exclude_XY = config.exclude_XY
 
     # HMM settings
     start_prob = config.start_prob
     trans_t = config.trans_t
     trans_prob = config.trans_prob
     HMM_brk = config.HMM_brk
-    ## optimize 
+    ## optimize
     max_iter = config.max_iter
     min_iter = config.min_iter
 
@@ -137,19 +127,12 @@ def run_RDR_prev(RDR_adata, verbose = True, run_verbose = True, config_file = No
     # develop mode settings
     develop_mode = config.develop_mode
 
-    ## Result output prepare
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    out_data_dir = str(out_dir) + "/data/"
-    xclone.al.dir_make(out_data_dir)
-    
     ### output before CNV calling
-    RDR_base_file = out_data_dir + "RDR_base_adata.h5ad"
-    RDR_bulk_file = out_data_dir + "RDR_bulk_adata.h5ad"
+    RDR_base_file = os.path.join(out_data_dir, "RDR_base_adata.h5ad")
+    RDR_bulk_file = os.path.join(out_data_dir, "RDR_bulk_adata.h5ad")
     ### output after CNV calling
-    RDR_final_file = out_data_dir + "RDR_adata_KNN_HMM_post.h5ad"
-    
+    RDR_final_file = os.path.join(out_data_dir, "RDR_adata_KNN_HMM_post.h5ad")
+
     ##------------------------
     main_logger = get_logger("Main RDR module")
     main_logger.info(dataset_name)
@@ -158,10 +141,10 @@ def run_RDR_prev(RDR_adata, verbose = True, run_verbose = True, config_file = No
 
     if run_verbose:
         print("[XClone RDR module running]************************")
-    
-    if exclude_XY:
+
+    if config.exclude_XY:
         RDR_adata = xclone.pp.exclude_XY_adata(RDR_adata)
-        print("[XClone warning] RDR module excelude chr XY analysis.")
+        print("[XClone warning] RDR module exclude chr XY analysis.")
     ## RDR data preprocessing
     RDR_adata = xclone.pp.check_RDR(RDR_adata, 
     cell_anno_key = cell_anno_key, 
@@ -270,13 +253,8 @@ def run_RDR_prev(RDR_adata, verbose = True, run_verbose = True, config_file = No
     
     ## output before CNV calling, save data with fitted libratio and dispersion.
     if develop_mode:
-        try:
-            RDR_adata.write(RDR_base_file)
-            RDR_adata_bulk.write(RDR_bulk_file)
-        except Exception as e:
-            print("[XClone Warning]", e)
-        else:
-            print("[XClone hint] RDR_base_file and bulk_file saved in %s." %(out_data_dir))
+        write_adata_safe(RDR_adata, RDR_base_file, "RDR_base_file")
+        write_adata_safe(RDR_adata_bulk, RDR_bulk_file, "RDR_bulk_file")
 
     del RDR_adata_bulk
     gc.collect()
@@ -341,22 +319,13 @@ def run_RDR_prev(RDR_adata, verbose = True, run_verbose = True, config_file = No
                     verbose = True)
     
     ## output after CNV calling, save data with CNV posterior.
-    try:
-        if develop_mode:
-            pass
-        else:
-            layers_to_keep = ['raw_expr', 'RDR_smooth','posterior_mtx', 'posterior_mtx_log']
-            RDR_adata = xclone.pp.keep_layers(RDR_adata, layers_to_keep)
+    if not develop_mode:
+        layers_to_keep = ['raw_expr', 'RDR_smooth','posterior_mtx', 'posterior_mtx_log']
+        RDR_adata = xclone.pp.keep_layers(RDR_adata, layers_to_keep)
 
-        RDR_adata.write(RDR_final_file)
-    except Exception as e:
-        print("[XClone Warning]", e)
-    else:
-        print("[XClone hint] RDR_final_file saved in %s." %(out_data_dir))
+    write_adata_safe(RDR_adata, RDR_final_file, "RDR_final_file")
 
-    end_time = datetime.now(timezone.utc)
-    time_passed = end_time - start_time
-    main_logger.info("XClone RDR module finished (%d seconds)" % (time_passed.total_seconds()))
+    log_duration(main_logger, start_time, "XClone RDR module")
     
     if xclone_plot:
         rdr_plot_vmin = config.rdr_plot_vmin
@@ -390,18 +359,12 @@ def run_RDR_plot(RDR_adata,
             **kwargs):
     """
     """
-    ## Result output prepare
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    
-    out_plot_dir = str(out_dir) + "/plot/"
-    xclone.al.dir_make(out_plot_dir)
+    _, _, out_plot_dir = resolve_output_dirs(out_dir)
 
     # default:XClone
     fig_title = ""
-    rdr_smooth_fig = out_plot_dir + dataset_name + "_RDR_smooth.png"
-    rdr_final_fig = out_plot_dir + dataset_name + "_RDR_CNV.png"
+    rdr_smooth_fig = os.path.join(out_plot_dir, f"{dataset_name}_RDR_smooth.png")
+    rdr_final_fig = os.path.join(out_plot_dir, f"{dataset_name}_RDR_CNV.png")
 
     sub_logger = get_logger("RDR plot module")
     sub_logger.info("RDR plot module started")
@@ -447,18 +410,12 @@ def run_RDR_complex_plot(RDR_adata,
             **kwargs):
     """
     """
-    ## Result output prepare
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    
-    out_plot_dir = str(out_dir) + "/plot/"
-    xclone.al.dir_make(out_plot_dir)
+    _, _, out_plot_dir = resolve_output_dirs(out_dir)
 
     # default:XClone
     fig_title = ""
-    rdr_smooth_fig = out_plot_dir + dataset_name + "_RDR_smooth.png"
-    rdr_final_fig = out_plot_dir + dataset_name + "_RDR_CNV.png"
+    rdr_smooth_fig = os.path.join(out_plot_dir, f"{dataset_name}_RDR_smooth.png")
+    rdr_final_fig = os.path.join(out_plot_dir, f"{dataset_name}_RDR_CNV.png")
 
     sub_logger = get_logger("RDR plot module")
     sub_logger.info("RDR plot module started")
@@ -511,18 +468,13 @@ def plot_processed_RDR(RDR_Xdata,
     """
     RDR raw ratio and smoothing plots.
     """
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    
-    out_plot_dir = str(out_dir) + "/plot/"
-    xclone.al.dir_make(out_plot_dir)
+    _, _, out_plot_dir = resolve_output_dirs(out_dir)
 
     fig_title = ""
-    
-    rdr_fig1 = out_plot_dir + dataset_name + "_RDR_raw_ratio.png"
-    rdr_fig2 = out_plot_dir + dataset_name + "_RDR_WMA.png"
-    rdr_fig3 = out_plot_dir + dataset_name + "_RDR_WMA_KNN.png"
+
+    rdr_fig1 = os.path.join(out_plot_dir, f"{dataset_name}_RDR_raw_ratio.png")
+    rdr_fig2 = os.path.join(out_plot_dir, f"{dataset_name}_RDR_WMA.png")
+    rdr_fig3 = os.path.join(out_plot_dir, f"{dataset_name}_RDR_WMA_KNN.png")
     
     if set_figtitle:
         fig_title = dataset_name + " RDR raw ratio"

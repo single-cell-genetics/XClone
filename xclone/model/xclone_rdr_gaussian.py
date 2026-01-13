@@ -1,21 +1,25 @@
-"""Base pipeline for XClone RDR module"""
+"""Base pipeline for XClone RDR module."""
 
 # Author: Jiamu James Qiao, adapted from xclone_rdr_wrap.py
 # Date: 2025-06-10
-# update: 
-
-
-import os
-import xclone
-import numpy as np
-from .._logging import get_logger
-from datetime import datetime, timezone
-
-from .smoothing import make_WMA_connectivity
+# Update: 2026-01-12
 
 import gc
+import os
+from datetime import datetime, timezone
 
-def run_RDR(RDR_adata, verbose = True, config_file = None):
+import numpy as np
+import xclone
+from .._logging import get_logger
+from ._pipeline_utils import (  # type: ignore
+    configure_warnings,
+    load_config,
+    log_duration,
+    resolve_output_dirs,
+    write_adata_safe,
+)
+
+def run_RDR(RDR_adata, verbose=True, config_file=None):
     """
     Run the RDR (Read Depth Ratio) analysis on the provided annotated data.
 
@@ -68,27 +72,13 @@ def run_RDR(RDR_adata, verbose = True, config_file = None):
             RDR_Xdata = xclone.model.run_RDR(RDR_adata, verbose=True, config_file=xconfig)
     
     """
-    ## settings
-    from .._config import XCloneConfig
-    
-    if config_file == None:
-        print (
-            f'Model configuration file not specified.\n'
-            f'Default settings in XClone-RDR will be used.'
-        )
-        config = XCloneConfig(module = "RDR")
+    config = load_config("RDR", config_file)
+    configure_warnings(config.warninig_ignore)
 
-    else:
-        config = config_file
-    # base settings
-    warninig_ignore = config.warninig_ignore
-    if warninig_ignore:
-        import warnings
-        warnings.filterwarnings('ignore')
     # general settings
     dataset_name = config.dataset_name
-    out_dir = config.outdir
-    
+    out_dir, out_data_dir, _ = resolve_output_dirs(config.outdir)
+
     cell_anno_key = config.cell_anno_key
     ref_celltype = config.ref_celltype
     exclude_XY = config.exclude_XY
@@ -143,15 +133,8 @@ def run_RDR(RDR_adata, verbose = True, config_file = None):
     low_rank_n_components = config.low_rank_n_components
 
 
-    ## Result output prepare
-    if out_dir is None:
-        cwd = os.getcwd()
-        out_dir = cwd + "/XCLONE_OUT/"
-    out_data_dir = str(out_dir) + "/data/"
-    xclone.al.dir_make(out_data_dir)
-    
     ### output after CNV calling
-    RDR_final_file = out_data_dir + "RDR_adata_KNN_HMM_post.h5ad"
+    RDR_final_file = os.path.join(out_data_dir, "RDR_adata_KNN_HMM_post.h5ad")
     
     ##------------------------
     main_logger = get_logger("Main RDR module")
@@ -292,22 +275,13 @@ def run_RDR(RDR_adata, verbose = True, config_file = None):
     RDR_adata.layers['posterior_mtx'] = RDR_adata.layers[layer_name]
     
     ## output after CNV calling, save data with CNV posterior.
-    try:
-        if develop_mode:
-            pass
-        else:
-            # layers_to_keep = ['raw_expr', 'log_ratio_ab', 'post_HMM_prob_2_gauss', 'post_HMM_prob_2_gauss_lowrank']
-            # RDR_adata = xclone.pp.keep_layers(RDR_adata, layers_to_keep)
-            pass
-        RDR_adata.write(RDR_final_file)
-    except Exception as e:
-        print("[XClone Warning]", e)
-    else:
-        print("[XClone hint] RDR_final_file saved in %s." %(out_data_dir))
+    if not develop_mode:
+        # layers_to_keep = ['raw_expr', 'log_ratio_ab', 'post_HMM_prob_2_gauss', 'post_HMM_prob_2_gauss_lowrank']
+        # RDR_adata = xclone.pp.keep_layers(RDR_adata, layers_to_keep)
+        pass
+    write_adata_safe(RDR_adata, RDR_final_file, "RDR_final_file")
 
-    end_time = datetime.now(timezone.utc)
-    time_passed = end_time - start_time
-    main_logger.info("XClone RDR module finished (%d seconds)" % (time_passed.total_seconds()))
+    log_duration(main_logger, start_time, "XClone RDR module")
     
     if xclone_plot:
         rdr_plot_vmin = config.rdr_plot_vmin
