@@ -5,6 +5,13 @@ Release History
    :depth: 1
    :local:
 
+Version 0.4.1
+-------------
+- [BAF] Improve BAF local phasing
+- [Combine] Add normal and tumor cell classification output
+- [Combine] Add clone level CNA state output
+- [Fix bug] Fix some minor bugs
+
 Version 0.4.0
 -------------
 - [RDR] Support multiple reference cell types

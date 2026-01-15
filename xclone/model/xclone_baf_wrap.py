@@ -40,16 +40,54 @@ def _validate_ref_celltype(adata, cell_anno_key: str, ref_celltype) -> None:
 
 
 def _setup_rdr_integration(
-    config, out_data_dir: str
-) -> Tuple[Optional[str], bool, bool, str]:
-    """Setup RDR integration parameters and return RDR file path and flags."""
-    if config.update_info_from_rdr:
+    config, out_data_dir: str, merge_Xdata=None, RDR_adata=None
+) -> Tuple[Optional[str], bool, bool, str, Optional[any]]:
+    """Setup RDR integration parameters and handle KNN connectivities.
+    
+    Determines RDR file path and, if merge_Xdata and RDR_adata are provided, checks for 
+    connectivities in RDR_adata.obsp and updates merge_Xdata with expression-based KNN 
+    connectivities if available.
+    
+    Parameters
+    ----------
+    config : Config object
+        Configuration object with RDR settings
+    out_data_dir : str
+        Output data directory path
+    merge_Xdata : Optional[AnnData]
+        BAF merge data (optional, used for connectivity setup)
+    RDR_adata : Optional[AnnData]
+        RDR annotated data (optional, used for connectivity setup)
+    
+    Returns
+    -------
+    Tuple containing:
+        - RDR file path (or None)
+        - remove_marker_genes flag
+        - get_BAF_KNN_connectivities flag
+        - KNN_connect_use_key (updated if connectivities found)
+        - merge_Xdata (optionally updated with expression-based connectivities)
+    """
+    rdr_file = None
+    remove_marker_genes = False
+    knn_key = "connectivities"
+    
+    if config.update_info_from_rdr or config.RDR_file is not None:
+        # Determine RDR file path
         if config.RDR_file is None:
             rdr_file = os.path.join(out_data_dir, "RDR_adata_KNN_HMM_post.h5ad")
         else:
             rdr_file = config.RDR_file
-        return rdr_file, True, True, "connectivities"
-    return None, False, True, "connectivities"
+        
+        remove_marker_genes = True
+        
+        # Check for connectivities in RDR_adata if both data objects are provided
+        if merge_Xdata is not None and RDR_adata is not None:
+            if "connectivities" in RDR_adata.obsp:
+                knn_key = "connectivities_expr"
+                merge_Xdata = xclone.model.get_KNN_connectivities_from_expr(merge_Xdata, RDR_adata)
+    
+    return rdr_file, remove_marker_genes, True, knn_key, merge_Xdata
 
 
 def _perform_baf_phasing(
@@ -493,22 +531,6 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
     BAF_merge_base_file = os.path.join(out_data_dir, "BAF_merge_base_Xdata.h5ad")
     ### output after CNV calling
     BAF_final_file = os.path.join(out_data_dir, "BAF_merge_Xdata_KNN_HMM_post.h5ad")
-    
-    if update_info_from_rdr:
-        ### RDR file for BAF module (load preprocessed dataset)
-        ### use RDR connectivities, marker genes, etc.
-        if RDR_file is None:
-            RDR_final_file = os.path.join(out_data_dir, "RDR_adata_KNN_HMM_post.h5ad")
-        else:
-            RDR_final_file = RDR_file
-        
-        remove_marker_genes = True
-        get_BAF_KNN_connectivities = True
-        KNN_connect_use_key = "connectivities"
-    else:
-        remove_marker_genes = False
-        get_BAF_KNN_connectivities = True
-        KNN_connect_use_key = "connectivities"
         
 
     ##------------------------
@@ -526,11 +548,16 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
         print("[XClone warning] BAF module exclude chr XY analysis.")
     BAF_adata = xclone.pp.check_BAF(BAF_adata, cell_anno_key=cell_anno_key, verbose=verbose)
 
+    # Load RDR data if RDR integration is enabled
     RDR_adata = None
-    if update_info_from_rdr:
-        RDR_adata = an.read_h5ad(RDR_final_file)
-        BAF_adata = BAF_adata[BAF_adata.obs.index.isin(RDR_adata.obs.index), :]
-        xclone.pp.check_RDR_BAF_cellorder(RDR_adata, BAF_adata)
+    remove_marker_genes = False
+    if config.update_info_from_rdr:
+        # Get RDR file path from _setup_rdr_integration
+        rdr_file, remove_marker_genes, _, _, _ = _setup_rdr_integration(config, out_data_dir)
+        if rdr_file is not None:
+            RDR_adata = an.read_h5ad(rdr_file)
+            BAF_adata = BAF_adata[BAF_adata.obs.index.isin(RDR_adata.obs.index), :]
+            xclone.pp.check_RDR_BAF_cellorder(RDR_adata, BAF_adata)
 
     if remove_marker_genes and RDR_adata is not None:
         marker_genes = RDR_adata.uns["rank_marker_genes"]
@@ -542,10 +569,6 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
             update_uns=False,
             uns_anno_key=None,
         )
-    ## clean up memory
-    if RDR_adata is not None:
-        del RDR_adata
-        gc.collect()
 
     BAF_adata, merge_Xdata = _perform_baf_phasing(
         BAF_adata,
@@ -556,6 +579,15 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
         HMM_brk=HMM_brk,
         extreme_count_cap=extreme_count_cap,
     )
+
+    # Setup RDR integration and handle KNN connectivities
+    rdr_file, remove_marker_genes, get_BAF_KNN_connectivities, KNN_connect_use_key, merge_Xdata = _setup_rdr_integration(
+        config, out_data_dir, merge_Xdata, RDR_adata
+    )
+    ## clean up memory
+    if RDR_adata is not None:
+        del RDR_adata
+        gc.collect()
 
     merge_Xdata = _perform_baf_smoothing(
         merge_Xdata,
