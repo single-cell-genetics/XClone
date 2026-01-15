@@ -289,6 +289,7 @@ def run_combine_plot(combine_Xdata,
             customizedplotting = False,
             **kwargs):
     """
+    Plots for Combine module.
     """
     _, _, out_plot_dir = resolve_output_dirs(out_dir)
 
@@ -313,8 +314,9 @@ def run_combine_plot(combine_Xdata,
 
     # cluster refined plot
     if "prob1_merge_refined" in combine_Xdata.layers:
-        xclone.pl.Combine_CNV_visualization(combine_Xdata, Xlayer = "prob1_merge_refined", 
-            cell_anno_key = plot_cell_anno_key,  
+        xclone.pl.Complex_Combine_CNV_visualization(combine_Xdata, Xlayer = "prob1_merge_refined", 
+            cell_anno_key = [plot_cell_anno_key, "clone_id_refined"],
+            clusters_display_name = [plot_cell_anno_key, "Refined Clone"],
             title = fig_title,
             save_file = True, out_file = combine_res_refined_fig,
             **kwargs)
@@ -380,9 +382,3 @@ def run_combine_plot(combine_Xdata,
     time_passed = end_time - start_time
     sub_logger.info("Combine plot module finished (%d seconds)" % (time_passed.total_seconds()))
     return None
-
-def plot_Combine_module():
-    """
-    all plots for Combine module.
-    """
-    pass

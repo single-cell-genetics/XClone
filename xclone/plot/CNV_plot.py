@@ -620,6 +620,7 @@ def Complex_Combine_CNV_visualization(Xdata,
                                       color_map_name = None,
                                       colorbar_ticks = None,
                                       colorbar_label = None,
+                                      out_file = 'XClone_Complex_Combine_CNV_visualization.pdf',
                                       **kwargs):
     """
     Adapted from `Combine_CNV_visualization` to visualize multiple annotations.
@@ -643,6 +644,8 @@ def Complex_Combine_CNV_visualization(Xdata,
             The positions of the ticks on the colorbar. Default is None, which uses [0, 1, 2, 3].
         colorbar_label : list of str, optional
             The labels for the ticks on the colorbar. Default is None, which uses ["copy loss", "loh", "copy neutral", "copy gain"].
+        out_file : str, optional
+            The output file path for saving the visualization. Default is 'XClone_Complex_Combine_CNV_visualization.pdf'.
         **kwargs : dict
             Additional keyword arguments passed to the `XXheatmap` function.
 
@@ -702,6 +705,7 @@ def Complex_Combine_CNV_visualization(Xdata,
     colorbar_ticks = colorbar_ticks,
     colorbar_label = colorbar_label, 
     cmap = color_map,
+    out_file = out_file,
     **kwargs)
 
     del res_cnv_ad

@@ -278,10 +278,12 @@ def multi_lut_set(Xdata, cell_anno_key, clusters_display_name, sns_palette_lst):
     for anno_key, anno_display_name, sns_palette in zip(cell_anno_key,clusters_display_name, sns_palette_lst):
         idx = cell_anno_key.index(anno_key)
         _clusters  = Xdata.obs[anno_key]
-        # # _clusters = Xdata.obs[anno_key].reset_index(drop=True)
-        # print(_clusters.unique())
-        # isna_level = _clusters.index.isna()
-        # print(isna_level.sum())
+        # Reset index if it's a MultiIndex to avoid pandas compatibility issues with isna
+        if isinstance(_clusters.index, pd.MultiIndex):
+            _clusters = _clusters.reset_index(drop=True)
+        # Convert categorical to string to avoid MultiIndex category issues
+        if pd.api.types.is_categorical_dtype(_clusters):
+            _clusters = _clusters.astype(str)
         _clusters.name = anno_display_name ## not display the name for cell clusters eg. random cluster
         ## color setting-Lookup Table(lut) for color mapping
         cell_palette = cycle(sns.color_palette(sns_palette, len(set(_clusters))))
