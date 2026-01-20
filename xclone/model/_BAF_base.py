@@ -27,13 +27,14 @@ def select_chr_region(Xdata, region_loc, region_key="chr"):
 
 ## Functions for phasing
 ### local phasing
-def process_bin(idx, AD, DP):
+def process_bin(idx, AD, DP, tumor_cell_mask = None):
     """
     Func:
     bin: default for 100 genes
+    update 2025-11: add tumor_cell_mask to use only non-ref cells for phasing.
     """ 
     ## Z: allele flipping probability
-    ad_sum, ad_sum1, dp_sum, Z, thetas, _logLik_new = Local_Phasing(AD, DP)
+    ad_sum, ad_sum1, dp_sum, Z, thetas, _logLik_new = Local_Phasing(AD, DP, tumor_cell_mask = tumor_cell_mask)
     is_flip = np.argmax(Z, axis =1)
     
     ## important *
@@ -53,10 +54,15 @@ def process_bin(idx, AD, DP):
     RV_bin['logLik'] = _logLik_new
     return RV_bin
 
-def process_region(AD_region, DP_region, phasing_len = 100, nproc=1, last_bin_min = 30):
+def process_region(AD_region, DP_region, 
+                   phasing_len = 100, 
+                   nproc=1, 
+                   last_bin_min = 30, 
+                   tumor_cell_mask = None):
     """
     Func:
     region: default chr_based. 
+    update 2025-11: add tumor_cell_mask to use only non-ref cells for phasing.
     """
     n_bins = int(AD_region.shape[0] / phasing_len)
     last_bin_len = AD_region.shape[0] % phasing_len
@@ -73,13 +79,19 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1, last_bin_mi
         for ib in range(n_bins):
             if merge_last_bin and ib == n_bins - 1:
                 idx = range(ib * phasing_len, AD_region.shape[0])
+                bin_idx = n_bins - 1
             else:
                 idx = range(ib * phasing_len, (ib + 1) * phasing_len)
-            result.append(pool.apply_async(process_bin, (ib, AD_region[idx, :], DP_region[idx, :]), callback=None))
+                bin_idx = ib
+            # result.append(pool.apply_async(process_bin, (ib, AD_region[idx, :], DP_region[idx, :]), tumor_cell_mask, callback=None))
+            args_tuple = (bin_idx, AD_region[idx, :], DP_region[idx, :], tumor_cell_mask)
+            result.append(pool.apply_async(process_bin, args_tuple))
 
         if not merge_last_bin and last_bin_len > 0:
             idx = range(-last_bin_len, 0)
-            result.append(pool.apply_async(process_bin, (n_bins, AD_region[idx, :], DP_region[idx, :]), callback=None))
+            # result.append(pool.apply_async(process_bin, (n_bins, AD_region[idx, :], DP_region[idx, :]), tumor_cell_mask, callback=None))
+            args_tuple = (n_bins, AD_region[idx, :], DP_region[idx, :], tumor_cell_mask)
+            result.append(pool.apply_async(process_bin, args_tuple))
 
         pool.close()
         pool.join()
@@ -92,12 +104,12 @@ def process_region(AD_region, DP_region, phasing_len = 100, nproc=1, last_bin_mi
                 idx = range(ib * phasing_len, AD_region.shape[0])
             else:
                 idx = range(ib * phasing_len, (ib + 1) * phasing_len)
-            RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :])
+            RV_bin = process_bin(ib, AD_region[idx, :], DP_region[idx, :], tumor_cell_mask)
             result.append(RV_bin)
 
         if not merge_last_bin and last_bin_len > 0:
             idx = range(-last_bin_len, 0)
-            RV_bin = process_bin(n_bins, AD_region[idx, :], DP_region[idx, :])
+            RV_bin = process_bin(n_bins, AD_region[idx, :], DP_region[idx, :], tumor_cell_mask)
             result.append(RV_bin)
       
     
@@ -144,18 +156,35 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
                       bin_nproc=1, 
                       feature_mode = "GENE", # feature_mode ="BLOCK"
                       var_add = None,
+                      ref_celltype=None,
                       verbose = False):
     """
     Func:
     phasing_len: default for 100 genes.
 
+    update 2025-11: add ref_celltype to use only non-ref cells for phasing.
+
     """
     from scipy import sparse
     start_t = datetime.datetime.now()
 
+    # Determine tumor cell mask
+    if ref_celltype is not None:
+        if isinstance(ref_celltype, str):
+            ref_celltype = [ref_celltype]
+        ref_mask = Xdata.obs['cell_type'].isin(ref_celltype).values
+        tumor_cell_mask = ~ref_mask
+        if tumor_cell_mask.sum() == 0:
+            print("[XClone Warning] No tumor cells found based on ref_celltype. Falling back to all cells.")
+            tumor_cell_mask = np.ones(Xdata.n_obs, dtype=bool)
+    else:
+        tumor_cell_mask = None  # legacy mode: use all cells
+
     if chr_lst is None:
         chr_lst = Xdata.var[region_key].drop_duplicates(keep="first")
 
+    '''
+    # disabled multiprocessing for region level due to memory issue
     if region_nproc > 1:
         result = []
         pool = multiprocessing.Pool(processes = region_nproc)
@@ -163,18 +192,22 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
             tmp_Xdata = select_chr_region(Xdata, chr_, region_key)
             AD_region = tmp_Xdata.layers["AD"].T
             DP_region = tmp_Xdata.layers["DP"].T
-            result.append(pool.apply_async(process_region,(AD_region, DP_region, phasing_len, bin_nproc), callback = None))
+            result.append(pool.apply_async(process_region,(AD_region, DP_region, phasing_len, bin_nproc, tumor_cell_mask), callback = None))
         pool.close()
         pool.join()
         result = [res.get() for res in result]
     else:
-        result = []
-        for chr_ in chr_lst:
-            tmp_Xdata = select_chr_region(Xdata, chr_, region_key)
-            AD_region = tmp_Xdata.layers["AD"].T
-            DP_region = tmp_Xdata.layers["DP"].T
-            RV_region = process_region(AD_region, DP_region, phasing_len = phasing_len, nproc=bin_nproc)
-            result.append(RV_region)
+    '''
+    result = []
+    for chr_ in chr_lst:
+        tmp_Xdata = select_chr_region(Xdata, chr_, region_key)
+        AD_region = tmp_Xdata.layers["AD"].T
+        DP_region = tmp_Xdata.layers["DP"].T
+        RV_region = process_region(AD_region, DP_region, 
+                                    phasing_len = phasing_len, 
+                                    nproc=bin_nproc, 
+                                    tumor_cell_mask = tumor_cell_mask)
+        result.append(RV_region)
 
     ## process the data from the list to a dataset
     for i , RV_region in zip(range(len(result)), result):

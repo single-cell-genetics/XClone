@@ -429,7 +429,7 @@ class RDR_General_config():
         self.set_figtitle = True
 
         # adaptive baseline
-        self.ab_k_neighbors = 5
+        self.ab_k_neighbors = 10
         self.ab_pseudo_count = 1e-6
 
         # denoise
@@ -439,7 +439,7 @@ class RDR_General_config():
         self.c_k = np.array([0.5, 1, 1.5])
 
         # low rank
-        self.low_rank = True
+        self.low_rank = False
         self.low_rank_n_components = 10
 
 
@@ -623,6 +623,10 @@ class Combine_General_config():
             Proportion value threshold for WGD detection.
         WGD_cell_prop_threshold : int
             Cell proportion threshold for WGD detection.
+        tumor_classification : bool
+            Flag to enable tumor classification.
+        tumor_clustering : bool
+            Flag to enable tumor clustering.
     """
 
     def __init__(self):
@@ -659,6 +663,12 @@ class Combine_General_config():
         self.WGD_detect_genome_level = "chr_arm"
         self.WGD_prop_value_threshold = 0.9
         self.WGD_cell_prop_threshold = 50
+
+        # tumor classification and clustering
+        self.tumor_classification = True
+        self.tumor_classification_layer = 'WMA_smoothed_log_ratio_ab_dynamic'
+        self.clustering = True
+        self.n_clones = None
 
 class HMM_Configs():
     """
