@@ -218,7 +218,8 @@ def refine_clones_bayesian(
     alpha: float = 20.0,                       # Dirichlet prior strength
     min_cells: int = 50,
     n_clones: Optional[int] = None,            # fixed number of clones
-    dominance_delta: float = 0.15,             # tie-breaker threshold when neutral is top-1
+    dominance_delta: float = 0.2,             # tie-breaker threshold when neutral is top-1
+    neutral_threshold: float = 0.8,            # if neutral prob > this, ignore tie-break
     out_dir: str = "refined_clones",
     sample_name: str = "sample"
 ) -> AnnData:
@@ -357,13 +358,19 @@ def refine_clones_bayesian(
     # - If top-1 state is not neutral (state=2), keep it.
     # - If top-1 is neutral, but one of the other states is *significantly* higher than
     #   the other two non-neutral states, pick that state instead; otherwise keep neutral.
+    # - If neutral probability > neutral_threshold, ignore tie-break and keep neutral.
     #
     # States: 0=copy_loss, 1=loh, 2=copy_neutral, 3=copy_gain
     top_state = np.argmax(cell_cna_prob, axis=2)  # (n_cells, n_genes)
     state_refined = top_state.copy()
 
     neutral_mask = top_state == 2
-    if np.any(neutral_mask):
+    neutral_probs = cell_cna_prob[:, :, 2]  # (n_cells, n_genes)
+    
+    # Only apply tie-break if neutral prob is below threshold
+    tie_break_mask = neutral_mask & (neutral_probs <= neutral_threshold)
+    
+    if np.any(tie_break_mask):
         other_probs = cell_cna_prob[:, :, [0, 1, 3]]  # (n_cells, n_genes, 3)
         other_sorted = np.sort(other_probs, axis=2)
         other_max = other_sorted[:, :, 2]
@@ -371,7 +378,7 @@ def refine_clones_bayesian(
 
         # "Significantly higher than the other two" == dominant gap vs 2nd best non-neutral.
         dominant_other = (other_max - other_second) >= dominance_delta
-        take_other = neutral_mask & dominant_other
+        take_other = tie_break_mask & dominant_other
 
         if np.any(take_other):
             other_argmax = np.argmax(other_probs, axis=2)  # 0..2
