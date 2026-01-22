@@ -164,21 +164,23 @@ def xclone_subclonal_analysis(
     dominant_idx = np.argmax(clone_consensus_prob, axis=2)  # (final_k, n_genes)
     dominant_states = np.array(state_names)[dominant_idx]   # string array
 
+    '''
     # 6. Cell-level layers
     cell_cna_codes = dominant_idx[labels]                    # (n_cells, n_genes)
     cell_cna_prob = np.zeros((n_cells, n_genes, 4), dtype=np.float32)
     for s in range(4):
         cell_cna_prob[:, :, s] = (cell_cna_codes == s)
-
+    '''
     # 7. Save results
     adata_out = combined_adata.copy()
     adata_out.obs["clone_id"] = clone_ids
-
+    
+    '''
     # Layers
     adata_out.layers["clone_level_cna"] = cell_cna_codes.astype("int8")
     adata_out.layers["clone_level_cna_prob_for_plot"] = cell_cna_prob
     adata_out.uns["clone_level_cna_states"] = state_names
-    '''
+
     # Save AnnData
     adata_out.write_h5ad(os.path.join(out_dir, f"{sample_name}.h5ad"))
 
@@ -216,6 +218,8 @@ def refine_clones_bayesian(
     alpha: float = 20.0,                       # Dirichlet prior strength
     min_cells: int = 50,
     n_clones: Optional[int] = None,            # fixed number of clones
+    dominance_delta: float = 0.3,             # tie-breaker threshold when neutral is top-1
+    neutral_threshold: float = 0.7,            # if neutral prob > this, ignore tie-break
     out_dir: str = "refined_clones",
     sample_name: str = "sample"
 ) -> AnnData:
@@ -350,8 +354,57 @@ def refine_clones_bayesian(
     cell_cna_prob /= cell_cna_prob.sum(axis=2, keepdims=True)
     cell_cna_prob = np.nan_to_num(cell_cna_prob, nan=0.25)
 
-    adata.layers["prob1_merge_refined"] = cell_cna_prob.astype("float32")
-    adata.layers["state_merge_refined"] = np.argmax(cell_cna_prob, axis=2).astype("int8")
+    # State calling with "neutral tie-break" rule:
+    # - If top-1 state is not neutral (state=2), keep it.
+    # - If top-1 is neutral, but one of the other states is *significantly* higher than
+    #   the other two non-neutral states, pick that state instead; otherwise keep neutral.
+    # - If neutral probability > neutral_threshold, ignore tie-break and keep neutral.
+    #
+    # States: 0=copy_loss, 1=loh, 2=copy_neutral, 3=copy_gain
+    top_state = np.argmax(cell_cna_prob, axis=2)  # (n_cells, n_genes)
+    state_refined = top_state.copy()
+
+    neutral_mask = top_state == 2
+    neutral_probs = cell_cna_prob[:, :, 2]  # (n_cells, n_genes)
+    
+    # Only apply tie-break if neutral prob is below threshold
+    tie_break_mask = neutral_mask & (neutral_probs <= neutral_threshold)
+    
+    if np.any(tie_break_mask):
+        other_probs = cell_cna_prob[:, :, [0, 1, 3]]  # (n_cells, n_genes, 3)
+        other_sorted = np.sort(other_probs, axis=2)
+        other_max = other_sorted[:, :, 2]
+        other_second = other_sorted[:, :, 1]
+
+        # "Significantly higher than the other two" == dominant gap vs 2nd best non-neutral.
+        dominant_other = (other_max - other_second) >= dominance_delta
+        take_other = tie_break_mask & dominant_other
+
+        if np.any(take_other):
+            other_argmax = np.argmax(other_probs, axis=2)  # 0..2
+            other_state_map = np.array([0, 1, 3], dtype=top_state.dtype)
+            state_refined[take_other] = other_state_map[other_argmax[take_other]]
+
+    # Probability adjustment rule:
+    # - If final state is non-neutral: set neutral prob to 0 and keep other state probs
+    #   (then renormalize across non-neutral states to keep a valid distribution).
+    # - If final state is neutral: keep all probabilities.
+    prob_refined = cell_cna_prob.copy()
+    non_neutral_mask = state_refined != 2
+    if np.any(non_neutral_mask):
+        prob_refined[:, :, 2][non_neutral_mask] = 0.0
+        denom = prob_refined.sum(axis=2, keepdims=True)
+        # Renormalize only where denom > 0; otherwise keep original (should be rare).
+        safe = denom > 0
+        safe_2d = safe.squeeze(-1)  # (n_cells, n_genes)
+        denom_2d = denom.squeeze(-1)  # (n_cells, n_genes)
+        # Ensure denominator has shape (N, 1) for broadcasting with (N, 4)
+        prob_refined[safe_2d] = (
+            prob_refined[safe_2d] / denom_2d[safe_2d][:, np.newaxis]
+        )
+
+    adata.layers["prob1_merge_refined"] = prob_refined.astype("float32")
+    adata.layers["state_merge_refined"] = state_refined.astype("int8")
 
     print(f"\nRefinement complete! {K} high-quality clones.")
     print(f"XClone-compatible layers added:")

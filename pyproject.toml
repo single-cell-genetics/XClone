@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xclone"
-version = "0.4.0"
+version = "0.4.1"
 description = "XClone: Inference of clonal Copy Number Alterations in single cells"
 authors = ["Rongting Huang <rthuang@connect.hku.hk>"]
 readme = "README.rst"
@@ -19,6 +19,7 @@ palettable = "^3.3.3"
 requests = "^2.32.3"
 importlib-metadata = "^7.1.0"
 squidpy = "^1.5.0"
+scikit-learn = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
