@@ -389,8 +389,11 @@ def refine_clones_bayesian(
         denom = prob_refined.sum(axis=2, keepdims=True)
         # Renormalize only where denom > 0; otherwise keep original (should be rare).
         safe = denom > 0
-        prob_refined[safe.squeeze(-1)] = (
-            prob_refined[safe.squeeze(-1)] / denom[safe]
+        safe_2d = safe.squeeze(-1)  # (n_cells, n_genes)
+        denom_2d = denom.squeeze(-1)  # (n_cells, n_genes)
+        # Ensure denominator has shape (N, 1) for broadcasting with (N, 4)
+        prob_refined[safe_2d] = (
+            prob_refined[safe_2d] / denom_2d[safe_2d][:, np.newaxis]
         )
 
     adata.layers["prob1_merge_refined"] = prob_refined.astype("float32")
