@@ -5,6 +5,7 @@
 # Date: 2025-06-10
 # update: 
 
+import os
 import numpy as np
 import anndata as an
 from sklearn.neighbors import KDTree
@@ -74,9 +75,22 @@ def preprocess_adaptive_baseline(
     # Step 3: Log transformation
     log_normalized = np.log(normalized)
 
-    if verbose:
-        print('log_normalized:')
-        print(log_normalized)
+    # Check for NaN or Inf values and handle them
+    has_nan_or_inf = np.isnan(log_normalized).any(axis=1) | np.isinf(log_normalized).any(axis=1)
+    if has_nan_or_inf.any():
+        n_invalid = has_nan_or_inf.sum()
+        if verbose:
+            print(f"Warning: Found {n_invalid} cells with NaN/Inf values. These will be filtered out.")
+        # Option A: Replace NaN/Inf with a very negative value (less robust)
+        # log_normalized = np.where(np.isnan(log_normalized) | np.isinf(log_normalized), 
+        #                         np.log(pseudo_count), log_normalized)
+
+        # Option B: Filter out invalid cells (more robust)
+        valid_cells_mask = ~has_nan_or_inf
+        log_normalized = log_normalized[valid_cells_mask, :]
+        tmp_adata = tmp_adata[valid_cells_mask, :].copy()
+        if verbose:
+            print(f"Filtered out {n_invalid} cells with NaN/Inf values.")
 
     # Identify normal cells
     if isinstance(ref_celltype, list):
