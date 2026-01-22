@@ -218,8 +218,8 @@ def refine_clones_bayesian(
     alpha: float = 20.0,                       # Dirichlet prior strength
     min_cells: int = 50,
     n_clones: Optional[int] = None,            # fixed number of clones
-    dominance_delta: float = 0.2,             # tie-breaker threshold when neutral is top-1
-    neutral_threshold: float = 0.8,            # if neutral prob > this, ignore tie-break
+    dominance_delta: float = 0.3,             # tie-breaker threshold when neutral is top-1
+    neutral_threshold: float = 0.7,            # if neutral prob > this, ignore tie-break
     out_dir: str = "refined_clones",
     sample_name: str = "sample"
 ) -> AnnData:
