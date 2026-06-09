@@ -19,9 +19,7 @@ from ._pipeline_utils import (  # type: ignore
     write_adata_safe,
 )
 from xclone.model.clustering import (
-    refine_clones_bayesian,
     tumor_classify,
-    xclone_subclonal_analysis,
 )
 
 
@@ -199,25 +197,15 @@ def run_combine(RDR_Xdata,
         )
 
     if config.clustering:
+        from xclone.model.clustering_vb import run_post_combine_clustering
+
         print("[XClone clustering performing]")
-        combine_Xdata = xclone_subclonal_analysis(
-            combined_adata=combine_Xdata,
-            baf_adata=BAF_merge_Xdata,
-            method="combined",
-            n_clones=config.n_clones,
-            out_dir=out_data_dir,
-            sample_name=dataset_name,
-        )
-        combine_Xdata = refine_clones_bayesian(
-            adata=combine_Xdata,
-            initial_col="clone_id",
-            prob_layer="prob1_merge",
-            n_iter=15,
-            alpha=20.0,  # higher = smoother, less overfitting
-            min_cells=50,
-            n_clones=config.n_clones,
-            out_dir=out_data_dir,
-            sample_name=dataset_name,
+        combine_Xdata = run_post_combine_clustering(
+            combine_Xdata,
+            BAF_merge_Xdata,
+            config,
+            out_data_dir,
+            dataset_name,
         )
 
     del BAF_merge_Xdata
