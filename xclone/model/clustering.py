@@ -340,16 +340,23 @@ def refine_clones_bayesian(
 
     # Final assignment
     final_assign = np.argmax(responsibilities, axis=1)
-    final_clone_ids = [f"C{i+1:02d}" for i in final_assign]  # C01, C02, ...
+    clone_ids_refined = [f"C{i+1:02d}" for i in range(K)]
+    final_clone_ids = [clone_ids_refined[i] for i in final_assign]  # C01, C02, ...
 
     # Add results to AnnData
     adata.obs["clone_id_refined"] = pd.Categorical(final_clone_ids)
     adata.obs["clone_posterior_max"] = responsibilities.max(axis=1)
     adata.obsm["X_clone_posteriors"] = responsibilities.astype("float32")
 
-    # XClone-compatible CNA probability reconstruction
-    cell_cna_prob = responsibilities[:, :, None, None] * clone_profiles[None, :, :, :]
-    cell_cna_prob = cell_cna_prob.sum(axis=1)
+    # Persist clone-level CNA probability profiles for downstream plotting/export.
+    # Shape: (n_clones, n_genes, 4)
+    adata.uns["clone_gene_prob"] = clone_profiles.astype("float32")
+    adata.uns["clone_gene_state"] = np.argmax(clone_profiles, axis=2).astype("int8")
+    adata.uns["clone_ids_refined"] = clone_ids_refined
+
+    # For refined heatmap, use clone-level consensus profile assigned by final hard clone.
+    # This mirrors the "clone-level average CNA profile" behavior.
+    cell_cna_prob = clone_profiles[final_assign]
     cell_cna_prob = np.nan_to_num(cell_cna_prob)
     cell_cna_prob /= cell_cna_prob.sum(axis=2, keepdims=True)
     cell_cna_prob = np.nan_to_num(cell_cna_prob, nan=0.25)
@@ -430,11 +437,7 @@ def refine_clones_bayesian(
     state_map = {0: "copy_loss", 1: "loh", 2: "copy_neutral", 3: "copy_gain"}
     state_names = np.vectorize(state_map.get)(dominant_states)
 
-    clone_gene_df = pd.DataFrame(
-        state_names,
-        index=[f"C{i+1:02d}" for i in range(K)],
-        columns=gene_names
-    )
+    clone_gene_df = pd.DataFrame(state_names, index=clone_ids_refined, columns=gene_names)
     clone_gene_df = clone_gene_df.reset_index().rename(columns={"index": "clone_id"})
     clone_gene_df.to_csv(os.path.join(out_dir, f"{sample_name}_refined_clone_gene_cna.tsv"), sep="\t", index=False)
 

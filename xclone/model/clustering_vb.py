@@ -36,6 +36,21 @@ def _assign_clone_id(ID_prob: np.ndarray, prefix: str = "clone") -> np.ndarray:
     return np.array([f"{prefix}_{i:02d}" for i in labels])
 
 
+def _compute_clone_gene_prob(
+    prob_layer: np.ndarray,
+    labels: np.ndarray,
+    n_clones: int,
+) -> np.ndarray:
+    """Compute clone-level average CNA probability: (K, n_genes, n_states)."""
+    n_genes, n_states = prob_layer.shape[1], prob_layer.shape[2]
+    clone_gene_prob = np.zeros((n_clones, n_genes, n_states), dtype=np.float32)
+    for cid in range(n_clones):
+        mask = labels == cid
+        if mask.any():
+            clone_gene_prob[cid] = np.mean(prob_layer[mask], axis=0)
+    return clone_gene_prob
+
+
 def _write_vb_posteriors(adata: AnnData, ID_prob: np.ndarray, out_dir: str, sample_name: str):
     os.makedirs(out_dir, exist_ok=True)
     k = ID_prob.shape[1]
@@ -149,11 +164,19 @@ def xclone_vb_clustering(
         raise ValueError(method)
 
     adata_out = combined_adata.copy()
+    labels = ID_prob.argmax(axis=1)
     adata_out.obs["clone_id"] = _assign_clone_id(ID_prob)
     adata_out.obs["clone_posterior_max"] = ID_prob.max(axis=1)
     adata_out.obsm["X_clone_posteriors_vb"] = ID_prob.astype("float32")
     adata_out.uns["xclone_clustering_method"] = method
     adata_out.uns["xclone_clustering_n_clones"] = k
+    if "prob1_merge" in adata_out.layers:
+        prob_layer = to_dense(adata_out.layers["prob1_merge"])
+        if prob_layer.ndim == 3 and prob_layer.shape[2] == 4:
+            clone_gene_prob = _compute_clone_gene_prob(prob_layer, labels, k)
+            adata_out.uns["clone_gene_prob"] = clone_gene_prob
+            adata_out.uns["clone_gene_state"] = np.argmax(clone_gene_prob, axis=2).astype("int8")
+            adata_out.uns["clone_ids"] = [f"clone_{i:02d}" for i in range(k)]
 
     _write_vb_posteriors(adata_out, ID_prob, out_dir, sample_name)
     print(f"[XClone VB] ELBO last = {elbo_last:.2f}")
