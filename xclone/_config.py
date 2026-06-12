@@ -437,6 +437,7 @@ class RDR_General_config():
 
         # GMM
         self.c_k = np.array([0.5, 1, 1.5])
+        self.rdr_nproc = 1
 
         # low rank
         self.low_rank = False
@@ -940,10 +941,28 @@ class XCloneConfig():
             _vector_friendly : bool, optional
                 Flag for vector-friendly plotting (default is False).
         """
+        supported_modules = {"RDR", "BAF", "Combine", "RDR_prev"}
+        if isinstance(set_smartseq, str):
+            if set_smartseq in supported_modules:
+                raise TypeError(
+                    "Second positional argument maps to 'set_smartseq' (bool). "
+                    "Use keyword form: XCloneConfig(dataset_name, module='...')."
+                )
+            raise TypeError("set_smartseq must be bool.")
+        if isinstance(set_spatial, str):
+            if set_spatial in supported_modules:
+                raise TypeError(
+                    "Third positional argument maps to 'set_spatial' (bool). "
+                    "Use keyword form: XCloneConfig(dataset_name, module='...')."
+                )
+            raise TypeError("set_spatial must be bool.")
+        _type_check(set_smartseq, "set_smartseq", bool)
+        _type_check(set_spatial, "set_spatial", bool)
+
         self.dataset_name = dataset_name
         self.set_smartseq = set_smartseq
         self.set_spatial = set_spatial
-        if module in ["RDR", "BAF", "Combine", "RDR_prev"]:
+        if module in supported_modules:
             pass
         else:
             print(module)

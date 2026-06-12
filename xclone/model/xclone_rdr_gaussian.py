@@ -127,6 +127,7 @@ def run_RDR(RDR_adata, verbose=True, config_file=None):
 
     ## GMM settings
     c_k = config.c_k
+    rdr_nproc = config.rdr_nproc
 
     ## low rank settings
     low_rank = config.low_rank
@@ -205,6 +206,7 @@ def run_RDR(RDR_adata, verbose=True, config_file=None):
                                                           ref_celltype=ref_celltype,
                                                           k=ab_k_neighbors, 
                                                           pseudo_count=ab_pseudo_count, 
+                                                          n_jobs=rdr_nproc,
                                                           verbose=False, 
                                                           plot=False)
 
@@ -234,7 +236,8 @@ def run_RDR(RDR_adata, verbose=True, config_file=None):
                                                                         layer=layer_name,
                                                                         cell_anno_key=cell_anno_key,
                                                                         ref_celltype=ref_celltype,
-                                                                        c_k=c_k)
+                                                                        c_k=c_k,
+                                                                        n_jobs=rdr_nproc)
     if verbose:
         print("[XClone RDR module] GMM probabilities calculated.")
         print("[XClone RDR module] Layer '%s' contains the GMM probabilities." % layer_name)
