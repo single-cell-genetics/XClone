@@ -170,6 +170,7 @@ def xclone_vb_clustering(
     adata_out.obsm["X_clone_posteriors_vb"] = ID_prob.astype("float32")
     adata_out.uns["xclone_clustering_method"] = method
     adata_out.uns["xclone_clustering_n_clones"] = k
+    clone_gene_prob = None
     if "prob1_merge" in adata_out.layers:
         prob_layer = to_dense(adata_out.layers["prob1_merge"])
         if prob_layer.ndim == 3 and prob_layer.shape[2] == 4:
@@ -196,6 +197,15 @@ def xclone_vb_clustering(
             out_dir=out_dir,
             sample_name=sample_name,
         )
+    elif clone_gene_prob is not None:
+        # Keep combine plotting behavior consistent: always provide a clone-level
+        # per-cell layer even when EM refinement is disabled.
+        adata_out.obs["clone_id_refined"] = adata_out.obs["clone_id"].astype("category")
+        adata_out.layers["prob1_merge_refined"] = clone_gene_prob[labels].astype("float32")
+        adata_out.layers["state_merge_refined"] = np.argmax(
+            adata_out.layers["prob1_merge_refined"], axis=2
+        ).astype("int8")
+        print("[XClone VB] EM refinement disabled; exported clone-level refined heatmap layers.")
 
     return adata_out
 
