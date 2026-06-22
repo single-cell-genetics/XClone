@@ -156,6 +156,7 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
                       bin_nproc=1, 
                       feature_mode = "GENE", # feature_mode ="BLOCK"
                       var_add = None,
+                      cell_anno_key = "cell_type",
                       ref_celltype=None,
                       verbose = False):
     """
@@ -172,7 +173,11 @@ def BAF_Local_phasing(Xdata, chr_lst = None,
     if ref_celltype is not None:
         if isinstance(ref_celltype, str):
             ref_celltype = [ref_celltype]
-        ref_mask = Xdata.obs['cell_type'].isin(ref_celltype).values
+        if cell_anno_key not in Xdata.obs:
+            raise KeyError(
+                f"Annotation key '{cell_anno_key}' not found in Xdata.obs for BAF_Local_phasing."
+            )
+        ref_mask = Xdata.obs[cell_anno_key].isin(ref_celltype).values
         tumor_cell_mask = ~ref_mask
         if tumor_cell_mask.sum() == 0:
             print("[XClone Warning] No tumor cells found based on ref_celltype. Falling back to all cells.")

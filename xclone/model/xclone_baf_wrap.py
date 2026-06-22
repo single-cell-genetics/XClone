@@ -92,6 +92,7 @@ def _setup_rdr_integration(
 
 def _perform_baf_phasing(
     BAF_adata,
+    cell_anno_key: str,
     phasing_region_key: str,
     phasing_len: int,
     bin_nproc: int,
@@ -109,6 +110,7 @@ def _perform_baf_phasing(
         bin_nproc=bin_nproc,
         feature_mode=feature_mode,
         var_add=BAF_var_add,
+        cell_anno_key=cell_anno_key,
         ref_celltype=ref_celltype,
     )
 
@@ -574,6 +576,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
 
     BAF_adata, merge_Xdata = _perform_baf_phasing(
         BAF_adata,
+        cell_anno_key=cell_anno_key,
         phasing_region_key=phasing_region_key,
         phasing_len=phasing_len,
         bin_nproc=bin_nproc,
