@@ -279,6 +279,28 @@ def run_combine_plot(combine_Xdata,
     """
     Plots for Combine module.
     """
+    def _to_dense(arr):
+        if hasattr(arr, "toarray"):
+            return arr.toarray()
+        return np.asarray(arr)
+
+    def _clone_average_layer(xdata, source_layer, clone_key):
+        """Average a per-cell probability layer within each clone."""
+        if source_layer not in xdata.layers or clone_key not in xdata.obs:
+            return None
+        values = _to_dense(xdata.layers[source_layer]).astype(np.float32, copy=False)
+        clone_ids = np.asarray(xdata.obs[clone_key].astype(str))
+        invalid = {"nan", "None", "<NA>"}
+        valid_mask = ~np.isin(clone_ids, list(invalid))
+        if not np.any(valid_mask):
+            return None
+
+        averaged = values.copy()
+        for cid in np.unique(clone_ids[valid_mask]):
+            mask = clone_ids == cid
+            averaged[mask] = values[mask].mean(axis=0, keepdims=True)
+        return averaged
+
     def _select_plot_cfg(_merge_loss, _merge_loh):
         if _merge_loh:
             if _merge_loss:
@@ -334,6 +356,12 @@ def run_combine_plot(combine_Xdata,
             refined_xlayer, refined_cmap, refined_states_num, refined_ticks, refined_labels = _select_plot_cfg(
                 merge_loss, merge_loh
             )
+            # For clustered refined heatmap, enforce clone-level profiles also in allele-split mode.
+            # `plot_prob_merge*` layers are cell-level by default, so average them within clone.
+            clone_avg_layer = _clone_average_layer(combine_Xdata, refined_xlayer, "clone_id_refined")
+            if clone_avg_layer is not None:
+                refined_xlayer = f"{refined_xlayer}_clone_refined"
+                combine_Xdata.layers[refined_xlayer] = clone_avg_layer
 
         xclone.pl.Complex_Combine_CNV_visualization(combine_Xdata, Xlayer = refined_xlayer, 
             cell_anno_key = [plot_cell_anno_key, "clone_id_refined"],
