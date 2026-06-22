@@ -678,7 +678,9 @@ class Combine_General_config():
         self.vb_n_init = 50
         self.vb_min_iter = 30
         self.vb_random_seed = 0
-        self.vb_run_refinement = True
+        # Default: VB methods return direct VB clusters unless explicitly requested.
+        # `knn_em` uses its own refinement path regardless of this flag.
+        self.vb_run_refinement = False
 
 class HMM_Configs():
     """
