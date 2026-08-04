@@ -5,6 +5,10 @@ Release History
    :depth: 1
    :local:
 
+Version 0.4.2
+-------------
+- [combine] Add VB mixture models for clustering
+
 Version 0.4.1
 -------------
 - [BAF] Improve BAF local phasing
