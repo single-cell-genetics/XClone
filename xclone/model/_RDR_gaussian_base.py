@@ -8,8 +8,7 @@
 import os
 import numpy as np
 import anndata as an
-from sklearn.neighbors import KDTree
-from joblib import Parallel, delayed
+from scipy import sparse
 from scipy.ndimage import gaussian_filter1d, median_filter
 from sklearn.decomposition import PCA
 from sklearn.neighbors import NearestNeighbors
@@ -26,6 +25,8 @@ def preprocess_adaptive_baseline(
     ref_celltype='normal',
     k=5,
     pseudo_count=1e-8,
+    pca_components=50,
+    n_jobs=1,
     verbose=False,
     plot=False
 ):
@@ -59,21 +60,39 @@ def preprocess_adaptive_baseline(
     """
     # from sklearn.neighbors import KDTree
 
-    print(f"Generating adaptive baseline with k = {k}, pseudo_count = {pseudo_count}")
+    logger = get_logger("RDR adaptive baseline")
+    timer_start = datetime.now(timezone.utc)
+    logger.info("Generating adaptive baseline with k=%s, pseudo_count=%s", k, pseudo_count)
 
     tmp_adata = RDR_Xdata.copy()
-    Y = tmp_adata.layers['raw_expr'].toarray()
-    Y_32 = Y.astype(np.float32)
+    raw_expr = tmp_adata.layers['raw_expr']
+    if sparse.issparse(raw_expr):
+        raw_expr = raw_expr.tocsr()
+        library_sizes = np.asarray(raw_expr.sum(axis=1)).ravel().astype(np.float32)
+        library_sizes = np.maximum(library_sizes, np.finfo(np.float32).eps)
+        normalized = raw_expr.multiply((1.0 / library_sizes)[:, None]).astype(np.float32).toarray()
+    else:
+        Y_32 = np.asarray(raw_expr, dtype=np.float32)
+        library_sizes = np.sum(Y_32, axis=1, keepdims=True)
+        library_sizes = np.maximum(library_sizes, np.finfo(np.float32).eps)
+        normalized = Y_32 / library_sizes
+    step_end = datetime.now(timezone.utc)
+    logger.info(
+        "Adaptive baseline input prepared: n_cells=%s, n_genes=%s, elapsed=%.2fs",
+        normalized.shape[0],
+        normalized.shape[1],
+        (step_end - timer_start).total_seconds(),
+    )
 
-    # Step 1: Normalize by library size
-    library_sizes = np.sum(Y_32, axis=1, keepdims=True)
-    normalized = Y_32 / library_sizes
-
-    # Step 2: Add pseudocount
+    # Step 1: Add pseudocount
     normalized = normalized + pseudo_count
 
-    # Step 3: Log transformation
+    # Step 2: Log transformation
     log_normalized = np.log(normalized)
+    logger.info(
+        "Adaptive baseline log transform complete, elapsed=%.2fs",
+        (datetime.now(timezone.utc) - timer_start).total_seconds(),
+    )
 
     # Check for NaN or Inf values and handle them
     has_nan_or_inf = np.isnan(log_normalized).any(axis=1) | np.isinf(log_normalized).any(axis=1)
@@ -105,24 +124,64 @@ def preprocess_adaptive_baseline(
     all_cells = log_normalized
 
     # test if number of normal cells is less than k
+    if normal_cells.shape[0] == 0:
+        raise ValueError(
+            f"No reference cells found for ref_celltype={ref_celltype} using cell_anno_key='{cell_anno_key}'."
+        )
     if normal_cells.shape[0] < k:
         # If not enough normal cells, use all available normal cells
         k = normal_cells.shape[0]
         print(f"Warning: Only {normal_cells.shape[0]} normal cells available, using k={k} for adaptive baseline.")
 
+    logger.info(
+        "Adaptive baseline neighbor search: n_normal=%s, n_query=%s, k=%s",
+        normal_cells.shape[0],
+        all_cells.shape[0],
+        k,
+    )
 
-    # Build KDTree and query k nearest normal cells for each cell
-    kdtree = KDTree(normal_cells)
-    distances, indices = kdtree.query(all_cells, k=k)
+    # Build low-dimensional embedding for nearest-neighbor search.
+    n_genes = normal_cells.shape[1]
+    n_normal = normal_cells.shape[0]
+    n_components = int(min(max(1, pca_components), n_genes, n_normal))
+    if n_components < n_genes:
+        pca = PCA(n_components=n_components, svd_solver='randomized', random_state=0)
+        normal_embed = pca.fit_transform(normal_cells)
+        all_embed = pca.transform(all_cells)
+    else:
+        normal_embed = normal_cells
+        all_embed = all_cells
+    logger.info(
+        "Adaptive baseline embedding ready: n_components=%s, elapsed=%.2fs",
+        n_components,
+        (datetime.now(timezone.utc) - timer_start).total_seconds(),
+    )
 
-    # Calculate adaptive baseline for each cell
-    adaptive_baseline = np.zeros_like(all_cells)
-    for i, neighbor_indices in enumerate(indices):
-        nearest_neighbors = normal_cells[neighbor_indices, :]
-        # Scale mean by library size ratio
-        adaptive_baseline[i, :] = nearest_neighbors.mean(axis=0) * (
-            np.sum(all_cells[i, :]) / (np.sum(nearest_neighbors, axis=1, keepdims=True)).mean()
-        )
+    # Query k nearest normal cells for each cell.
+    nn_model = NearestNeighbors(n_neighbors=k, algorithm='auto', n_jobs=n_jobs)
+    nn_model.fit(normal_embed)
+    _, indices = nn_model.kneighbors(all_embed, return_distance=True)
+    logger.info(
+        "Adaptive baseline nearest-neighbor query complete, elapsed=%.2fs",
+        (datetime.now(timezone.utc) - timer_start).total_seconds(),
+    )
+
+    # Calculate adaptive baseline for each cell (vectorized).
+    nearest_neighbors = normal_cells[indices, :]
+    adaptive_baseline = nearest_neighbors.mean(axis=1)
+    query_cell_sums = np.sum(all_cells, axis=1)
+    neighbor_sums = np.sum(nearest_neighbors, axis=2).mean(axis=1)
+    scaling = np.divide(
+        query_cell_sums,
+        neighbor_sums,
+        out=np.ones_like(query_cell_sums, dtype=all_cells.dtype),
+        where=neighbor_sums != 0,
+    )
+    adaptive_baseline = adaptive_baseline * scaling[:, None]
+    logger.info(
+        "Adaptive baseline matrix computed, elapsed=%.2fs",
+        (datetime.now(timezone.utc) - timer_start).total_seconds(),
+    )
 
     log_ratio_ab = all_cells - adaptive_baseline
 
@@ -133,6 +192,10 @@ def preprocess_adaptive_baseline(
         print(log_ratio_ab)
 
     tmp_adata.layers['log_ratio_ab'] = log_ratio_ab
+    logger.info(
+        "Adaptive baseline finished: total_elapsed=%.2fs",
+        (datetime.now(timezone.utc) - timer_start).total_seconds(),
+    )
 
     if plot:
         # plot log ratio
@@ -279,7 +342,8 @@ def compute_gaussian_probabilities(
     layer='WMA_smoothed_log_ratio_ab',
     cell_anno_key='spot_anno',
     ref_celltype='normal',
-    c_k=np.array([0.5, 1, 1.5])
+    c_k=np.array([0.5, 1, 1.5]),
+    n_jobs=1
 ):
     """
     Computes Gaussian log-likelihoods and probabilities for each cell and gene across 3 states,
@@ -297,6 +361,11 @@ def compute_gaussian_probabilities(
     """
     # Copy AnnData
     tmp_adata = RDR_Xdata.copy()
+    if n_jobs != 1:
+        print(
+            "[XClone RDR module] compute_gaussian_probabilities uses a vectorized backend; "
+            "n_jobs is ignored and no joblib worker pool is spawned."
+        )
 
     # Step 1: Identify reference cells
     if isinstance(ref_celltype, list):
@@ -335,22 +404,23 @@ def compute_gaussian_probabilities(
     #     all_data = all_data.toarray()
     n_cells, n_genes = all_data.shape
 
-    # Function to calculate log-likelihood for a single cell
-    def calculate_log_likelihood(cell_data, c_k, mean, gene_variance):
-        log_likelihoods = np.zeros((len(mean), len(c_k)))  # (n_genes, 3 states)
-        for k, c in enumerate(c_k):
-            state_mean = np.log(c) + mean
-            log_likelihoods[:, k] = -0.5 * np.log(2 * np.pi * gene_variance) - ((cell_data - state_mean) ** 2 / (2 * gene_variance))
-        return log_likelihoods
+    # Vectorized computation for all cells and states
+    # Shapes:
+    #   all_data: (n_cells, n_genes)
+    #   state_mean: (n_genes, n_states)
+    #   output log_likelihoods_all_cells: (n_cells, n_genes, n_states)
+    all_data = np.asarray(all_data, dtype=np.float32)
+    mean = np.asarray(mean, dtype=np.float32)
+    gene_variance = np.asarray(gene_variance, dtype=np.float32)
+    c_k = np.asarray(c_k, dtype=np.float32)
 
-    # Parallel computation for all cells
-    log_likelihoods_all_cells = Parallel(n_jobs=-1)(
-        delayed(calculate_log_likelihood)(all_data[cell_idx, :], c_k, mean, gene_variance)
-        for cell_idx in range(n_cells)
+    state_mean = mean[:, None] + np.log(c_k)[None, :]
+    log_norm_const = -0.5 * np.log(2 * np.pi * gene_variance)[:, None]
+    var_term = (2 * gene_variance)[:, None]
+    log_likelihoods_all_cells = (
+        log_norm_const[None, :, :]
+        - ((all_data[:, :, None] - state_mean[None, :, :]) ** 2 / var_term[None, :, :])
     )
-
-    # Convert results to a 3D array (n_cells, n_genes, 3 states)
-    log_likelihoods_all_cells = np.array(log_likelihoods_all_cells)
     tmp_adata.layers['gaussian_loglike'] = log_likelihoods_all_cells
 
     # Calculate likelihoods
@@ -358,7 +428,9 @@ def compute_gaussian_probabilities(
     tmp_adata.layers['gaussian_likelihood'] = gaussian_likelihood
 
     # Normalize to get probabilities
-    state_probabilities = gaussian_likelihood / gaussian_likelihood.sum(axis=2, keepdims=True)
+    likelihood_sum = gaussian_likelihood.sum(axis=2, keepdims=True)
+    likelihood_sum = np.maximum(likelihood_sum, np.finfo(gaussian_likelihood.dtype).tiny)
+    state_probabilities = gaussian_likelihood / likelihood_sum
     tmp_adata.layers['gaussian_probabilities'] = state_probabilities
 
     layer_name = 'gaussian_probabilities'

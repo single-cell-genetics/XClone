@@ -216,8 +216,8 @@ class XCloneGeneral_config():
         """
         self.cell_anno_key = "cell_type"
         self.ref_celltype = "N"
-        self.exclude_XY = False
-        self.remove_guide_XY = False
+        self.exclude_XY = True
+        self.remove_guide_XY = True
         # KNN smoothing
         self.KNN_neighbors = 10
         self.KNN_npcs = 40
@@ -437,6 +437,7 @@ class RDR_General_config():
 
         # GMM
         self.c_k = np.array([0.5, 1, 1.5])
+        self.rdr_nproc = 1
 
         # low rank
         self.low_rank = False
@@ -669,6 +670,17 @@ class Combine_General_config():
         self.tumor_classification_layer = 'WMA_smoothed_log_ratio_ab_dynamic'
         self.clustering = True
         self.n_clones = None
+        # VB subclonal clustering (replaces Ward+hierarchical when not knn_em)
+        self.clustering_method = "joint"  # knn_em | rdr | baf | joint
+        self.vb_rdr_layer = "WMA_smoothed_log_ratio_ab_dynamic"
+        self.vb_baf_ad_layer = "ad_bin_phased_rev"
+        self.vb_baf_dp_layer = "dp_bin"
+        self.vb_n_init = 50
+        self.vb_min_iter = 30
+        self.vb_random_seed = 0
+        # Default: VB methods return direct VB clusters unless explicitly requested.
+        # `knn_em` uses its own refinement path regardless of this flag.
+        self.vb_run_refinement = False
 
 class HMM_Configs():
     """
@@ -852,7 +864,7 @@ class Spatial_Config():
             # self.spatail_imputation = True
             self.smart_transform = False
             self.spatial_transform = True
-            self.filter_ref_ave = 0.5
+            self.filter_ref_ave = 1.8 # default 0.5
             self.min_gene_keep_num = 1500
             ## HMM related
             # self.start_prob = np.array([0.1, 0.8, 0.1])
@@ -931,10 +943,28 @@ class XCloneConfig():
             _vector_friendly : bool, optional
                 Flag for vector-friendly plotting (default is False).
         """
+        supported_modules = {"RDR", "BAF", "Combine", "RDR_prev"}
+        if isinstance(set_smartseq, str):
+            if set_smartseq in supported_modules:
+                raise TypeError(
+                    "Second positional argument maps to 'set_smartseq' (bool). "
+                    "Use keyword form: XCloneConfig(dataset_name, module='...')."
+                )
+            raise TypeError("set_smartseq must be bool.")
+        if isinstance(set_spatial, str):
+            if set_spatial in supported_modules:
+                raise TypeError(
+                    "Third positional argument maps to 'set_spatial' (bool). "
+                    "Use keyword form: XCloneConfig(dataset_name, module='...')."
+                )
+            raise TypeError("set_spatial must be bool.")
+        _type_check(set_smartseq, "set_smartseq", bool)
+        _type_check(set_spatial, "set_spatial", bool)
+
         self.dataset_name = dataset_name
         self.set_smartseq = set_smartseq
         self.set_spatial = set_spatial
-        if module in ["RDR", "BAF", "Combine", "RDR_prev"]:
+        if module in supported_modules:
             pass
         else:
             print(module)

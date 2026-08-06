@@ -160,7 +160,7 @@ def check_cell_celltype(rr_ad_cell_anno, rr_ad_celltype_anno):
     else:
         return False, df
 
-def extend_chr_index(rr_ad_cell, rr_ad_celltype, select_chr_index):
+def extend_chr_index(rr_ad_cell, rr_ad_celltype, select_chr_index, cell_anno_key="cell_type"):
     """
     First version:(might be deprecated)
     for ordered rr_ad_cell
@@ -176,15 +176,15 @@ def extend_chr_index(rr_ad_cell, rr_ad_celltype, select_chr_index):
     ------
 
     """
-    rr_ad_cell_anno = rr_ad_cell.obs["cell_type"].drop_duplicates().reset_index(drop=True)
-    rr_ad_celltype_anno = rr_ad_celltype.obs["cell_type"]
+    rr_ad_cell_anno = rr_ad_cell.obs[cell_anno_key].drop_duplicates().reset_index(drop=True)
+    rr_ad_celltype_anno = rr_ad_celltype.obs[cell_anno_key]
 
     res, cell_celltype_anno_df = check_cell_celltype(rr_ad_cell_anno, rr_ad_celltype_anno)
     if res == False:
         raise ValueError("cell based data should be reordered by the celltype based Xdata! Pls check!")
     
 
-    cell_counts = rr_ad_cell.obs.groupby("cell_type").count().values[:,0]
+    cell_counts = rr_ad_cell.obs.groupby(cell_anno_key).count().values[:,0]
 
 
     for idx_ in range(len(cell_counts)):

@@ -140,3 +140,7 @@ dmypy.json
 poetry.lock
 poetry.toml
 # pyproject.toml
+
+# local experiments
+/notebooks/
+/tests/

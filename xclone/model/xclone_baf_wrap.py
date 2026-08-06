@@ -92,12 +92,14 @@ def _setup_rdr_integration(
 
 def _perform_baf_phasing(
     BAF_adata,
+    cell_anno_key: str,
     phasing_region_key: str,
     phasing_len: int,
     bin_nproc: int,
     feature_mode: str,
     HMM_brk: str,
     extreme_count_cap: bool,
+    ref_celltype=None,
 ) -> Tuple:
     """Perform BAF local and global phasing."""
     BAF_var_add = None if HMM_brk in ["chr", "chr_arm"] else HMM_brk
@@ -108,6 +110,8 @@ def _perform_baf_phasing(
         bin_nproc=bin_nproc,
         feature_mode=feature_mode,
         var_add=BAF_var_add,
+        cell_anno_key=cell_anno_key,
+        ref_celltype=ref_celltype,
     )
 
     BAF_adata, merge_Xdata = xclone.model.BAF_Global_phasing(BAF_adata, merge_Xdata)
@@ -572,12 +576,14 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
 
     BAF_adata, merge_Xdata = _perform_baf_phasing(
         BAF_adata,
+        cell_anno_key=cell_anno_key,
         phasing_region_key=phasing_region_key,
         phasing_len=phasing_len,
         bin_nproc=bin_nproc,
         feature_mode=feature_mode,
         HMM_brk=HMM_brk,
         extreme_count_cap=extreme_count_cap,
+        ref_celltype=ref_celltype,
     )
 
     # Setup RDR integration and handle KNN connectivities
@@ -680,6 +686,7 @@ def run_BAF(BAF_adata, verbose = True, run_verbose = True, config_file = None):
         )
     if not develop_mode:
         layers_to_keep = [
+            'ad_bin_phased_rev', 'dp_bin',
             'BAF', 'BAF_phased', 'fill_BAF_phased', 'BAF_phased_KNN', 'BAF_phased_KNN_WMA',
             'BAF_phased_WMA', 'posterior_mtx', 'posterior_mtx_log', 'add_posterior_mtx',
             'denoised_add_posterior_mtx', 'denoised_posterior_mtx'
