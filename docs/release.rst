@@ -6,6 +6,10 @@ Release History
    :local:
 
 
+Version 0.3.10
+--------------
+- [Fix bug] BAF module using RDR information.
+
 Version 0.3.9
 -------------
 - [preprocessing] Add RDR-ONLY read function.

@@ -6,6 +6,7 @@
 
 
 import os
+import traceback
 import xclone
 import numpy as np
 from .._logging import get_logger
@@ -340,7 +341,15 @@ def run_RDR(RDR_adata, verbose = True, run_verbose = True, config_file = None):
 
         RDR_adata.write(RDR_final_file)
     except Exception as e:
-        print("[XClone Warning]", e)
+        # Do NOT swallow write errors: a caught exception here previously left a
+        # partial / corrupt h5ad on disk (missing layers & uns) that looked valid.
+        print("[XClone ERROR] Failed to save RDR_final_file: %s" % e)
+        traceback.print_exc()
+        # remove the half-written file so it can't be mistaken for a good result
+        if os.path.exists(RDR_final_file):
+            os.remove(RDR_final_file)
+            print("[XClone ERROR] Removed incomplete file: %s" % RDR_final_file)
+        raise
     else:
         print("[XClone hint] RDR_final_file saved in %s." %(out_data_dir))
 
